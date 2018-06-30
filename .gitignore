@@ -1,0 +1,5 @@
+/composer.phar
+/config.json
+/cron/logs/*
+/cron/locks/*
+/vendor
