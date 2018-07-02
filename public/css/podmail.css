@@ -1,0 +1,23 @@
+a {
+    text-decoration: none;
+}
+
+.unread {
+    font-weight: bold;
+}
+
+.subject-row {
+    cursor: pointer;
+}
+
+.from {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    display: inline-block;
+    margin-right: 1em;
+}
+
+hr {
+        margin: 5px;
+}

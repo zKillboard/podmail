@@ -1,0 +1,14 @@
+<hr/>
+<a href='#' id='showlisting'>Back...</a> Reply Forward
+<hr/>
+From: {{ mail.from_name }}<br/>
+To: 
+{% set first = true %}
+{% for recip in mail.recipients %}
+    {% if first == false %}, {% endif %}
+    {{ recip.recipient_name }}
+{% endfor %}
+<hr/>
+Subject: {{ mail.subject }}
+<hr/>
+{{ mail.body|raw }}

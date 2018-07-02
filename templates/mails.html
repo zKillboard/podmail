@@ -1,0 +1,7 @@
+{% for mail in mails %}
+    <hr/>
+    <a class="subjectrow" id="mail-{{ mail.mail_id }}" href="/mail/{{ mail.mail_id }}"><div class="{{ (mail.is_read == 1 ) ? '' : 'unread' }}"><span class="from">{{ mail.from_name }}</span> {{ mail.subject }}</div></a>
+{% endfor %}
+{% if mails|length == 0 %}
+<i>No mails to display...</i>
+{% endif %}

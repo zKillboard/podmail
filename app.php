@@ -16,12 +16,17 @@ $char_id = (int) $segment->get('char_id');
 // Prepare Slim & Twig
 $app = new \Slim\App(['settings' => ['displayErrorDetails' => true]]);
 $twig = new \Slim\Views\Twig('templates/', ['cache' => false]);
+$twig->getEnvironment()->addGlobal('character_id', $char_id);
+$twig->getEnvironment()->addGlobal('character_name', Info::getInfoField($config['db'], 'character_id', $char_id, 'name'));
 $app->view = $twig;
 addRoute($app, '/', 'index.php', $config, $char_id);
 addRoute($app, '/about', 'about.php', $config, $char_id);
 addRoute($app, '/ccp-login', 'ccp-login.php', $config, $char_id);
 addRoute($app, '/ccp-callback', 'ccp-callback.php', $config, $char_id);
 addRoute($app, '/delta', 'delta.php', $config, $char_id);
+addRoute($app, '/folder/{id}', 'folder_id.php', $config, $char_id);
+addRoute($app, '/folders', 'folders.php', $config, $char_id);
+addRoute($app, '/mail/{id}', 'mail_id.php', $config, $char_id);
 addRoute($app, '/logout', 'logout.php', $config, $char_id);
 $app->run();
 

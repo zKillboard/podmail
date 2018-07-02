@@ -4,6 +4,11 @@ namespace podmail;
 
 class SSO
 {
+    public static function cleanup($db)
+    {
+        $db->delete('access_tokens', ['expires' => ['$lte' => time()]]);
+    }
+
     public static function getAccessToken(array $config, int $char_id, string $refresh_token, \cvweiss\Guzzler $guzzler, string $success, string $fail, array $params = [])
     {
         $params['char_id'] = $char_id;
@@ -13,7 +18,8 @@ class SSO
 
         // Do we have a cached version?
         $db = $config['db'];
-        $db->delete('access_tokens', ['expires' => ['$lte' => time()]]);
+        self::cleanup($db);
+
         $row = $db->queryDoc('access_tokens', ['character_id' => $char_id, 'refresh_token' => $refresh_token]);
         if (isset($row['access_token'])) {
             $raw = json_encode(['access_token' => $row['access_token']]);

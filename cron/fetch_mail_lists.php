@@ -1,53 +1,54 @@
 <?php
+exit();
 
 namespace podmail;
 
 require_once '../init.php';
 
-$guzzler = Util::getGuzzler($config);
+$guzzler = Util::getGuzzler($config, 1);
 $db = $config['db'];
 
-$db->update('mails', ['fetched' => ['$exists' => false]], ['$set' => ['fetched' => false]], ['multi' => true]);
-$db->update('mails', ['fetched' => null], ['$set' => ['fetched' => false]], ['multi' => true]);
-
-$count = 0;
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $unFetched = $db->query('mails', ['fetched' => false], ['sort' => ['mail_id' => -1], 'limit' => 10]);
-    foreach ($unFetched as $mail) {
-        $params = ['mail_id' => $mail['mail_id']];
-        $db->update('mails', $mail, ['$set' => ['fetched' => null]]);
-        $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $mail['owner']]);
+    $unFetched = $db->query('information', ['type' => 'mailing_list_id', 'update' => true]);
+    foreach ($unFetched as $list) {
+        $params = ['mailing_list_id' => $list['id']];
+        $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $list['character_id']]);
 
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail', $params);
-        $count++;
+        break;
     } 
     if (sizeof($unFetched) == 0) {
         $guzzler->tick();
         sleep(1);
-    }
+    } else $guzzler->finish();
 }
-if ($count > 0) echo "Fetched $count mails\n";
 $guzzler->finish();
 
 function success(&$guzzler, $params, $content)
 {
     $json = json_decode($content, true);
     $access_token = $json['access_token'];
-    $mail_id = $params['mail_id'];
+    $list_id = $params['mailing_list_id'];
 
     $params['access_token'] = $access_token;
     $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token"];
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
-    $url = "$esi/v1/characters/$char_id/mail/$mail_id/";
+    $url = "$esi/v1/characters/$char_id/mail/lists/";
     $guzzler->call($url, '\podmail\mailSuccess', '\podmail\fail', $params, $headers);
 }
 
 function mailSuccess(&$guzzler, $params, $content)
 {
-    $mail = json_decode($content, true);
-    $params['config']['db']->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]]);
+    $db = $params['config']['db'];
+    $lists = json_decode($content, true);
+    foreach ($lists as $list) {
+        $id = $list['mailing_list_id'];
+        $name = $list['name'];
+        echo "List $id => $name\n";
+        $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
+    }
 }
 
 

@@ -20,6 +20,13 @@ class Db
         return false;
     }
 
+    public function count(string $coll, array $filter = [], array $options = [])
+    {   
+        $command = new \MongoDB\Driver\Command(['count' => $coll, 'query' => $filter]);
+        $result = $this->manager->executeCommand($this->namespace, $command);
+        foreach ($result as $row) return $row->n;
+    }
+
     public function queryDoc(string $coll, array $filter = [], array $options = [])
     {
         $cursor = $this->query($coll, $filter, $options);
