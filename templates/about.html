@@ -1,5 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<a href='/ccp-login'>Just login already...</a>
+<hr/>
+<h4>PodMail - an ESI EveMail client (beta)</h4>
+<hr/>
+<img src='/images/podmail-example.png'>
+<img src='/images/podmail.png' class='float-right' style='margin-bottom: 2em; height=200px;'>
+<div class="clear"></div>
+<hr/>
+<div class='col-6'>
+<p>Easy access to your in game evemails and notifications. PodMail will keep your evemails synced up in game and out, allowing you to mark mails as read, unread, and of course delete them.</p>
+<p>To Do:
+</p>
+<ul>
+<li>Compose EveMails</li>
+<li>Reply / Forward EveMails</li>
+<li>Mass delete and mass marking read/unread</li>
+</ul>
+<p>Check it out!<br/><a href='/ccp-login'><img src='https://podmail.zzeve.com/images/ssologin.png'></a></p>
+<p>Scopes Requested</p>
+<ul>
+<li>esi-mail.read_mail.v1</li>
+<li>esi-mail.send_mail.v1</li>
+<li>esi-mail.organize_mail.v1</li>
+<li>esi-characters.read_notifications.v1</li>
+</ul>
+<p>Brought to you by Squizz Caphinator. <a href='https://github.com/zKillboard/podmail' target='_blank'>GitHub</a></p>
+</div>
 {% endblock %}
