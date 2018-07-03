@@ -92,7 +92,6 @@ class Info
                 switch ($key) {
                     case "_id":
                     case "mail_id":
-                    case "timestamp":
                     case "owner":
                     case "fetched":
                     case "unixtime":
@@ -104,6 +103,9 @@ class Info
                         break;    
                     case "recipient_id":
                         $element['recipient_name'] = self::getInfoField($db, 'character_id', $value, 'name');
+                        break;
+                    case 'timestamp':
+                        $element['dttm'] = date('Y-m-d H:i', $element['unixtime']);
                         break;
                     default: 
                         //echo "Unknown key: $key => $value"; die();

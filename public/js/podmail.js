@@ -34,6 +34,7 @@ function folderLoaded()
     console.log('Applying changes to folder ' + currentFolder);
     $(".folder-link").css("font-weight", "");
     $(".folder-" + currentFolder).css("font-weight", "bold");
+    
     $(".subjectrow").click(function() { mailClick(this); return false; } );
     $("#folders").html($("#pre-folders").html());
     $(".folder-link").click(function (e) { loadFolderClick($(this).attr('folder')); return false; });
@@ -49,6 +50,8 @@ function mailClick(o)
 {
     console.log(o.href);
     $("#mail").load(o.href, mailLoaded);
+
+    //$.ajax('/action/mail/' + id + '/is_read/true', {method: 'post'});
 }
 
 function mailLoaded()
@@ -56,7 +59,20 @@ function mailLoaded()
     $("#listing").hide();
     $("#mail").show();
     $("#showlisting").click(function() { showListing(); return false; });
+    $('#delete_btn').click(function() { deleteMail(this); return false; });
     console.log('loaded mail');
+}
+
+function deleteMail(btn) 
+{
+    mail_id = $(btn).attr('mail_id');
+    $("#mail-" + mail_id).addClass('strike');
+    $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
+}
+
+function mailDeleted()
+{
+    showListing();
 }
 
 function showListing()
@@ -69,7 +85,11 @@ function checkDelta()
 {
     setTimeout('checkDelta();', deltaCount * 1000);
     $.ajax('/delta', {success: processDelta});
-    console.log('delta check');
+}
+
+function forceDelta()
+{
+    processDelta('1');
 }
 
 function processDelta(text)

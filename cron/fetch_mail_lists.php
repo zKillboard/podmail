@@ -1,5 +1,4 @@
 <?php
-exit();
 
 namespace podmail;
 
@@ -9,27 +8,21 @@ $guzzler = Util::getGuzzler($config, 1);
 $db = $config['db'];
 
 $minute = date('Hi');
-while ($minute == date('Hi')) {
-    $unFetched = $db->query('information', ['type' => 'mailing_list_id', 'update' => true]);
-    foreach ($unFetched as $list) {
-        $params = ['mailing_list_id' => $list['id']];
-        $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $list['character_id']]);
+//while ($minute == date('Hi')) {
+    $unFetched = $db->queryDoc('information', ['type' => 'mailing_list_id', 'update' => true]);
+    $candidates = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1'], ['sort' => ['_id' => -1], 'limit' => 20]);
 
+    foreach ($candidates as $row) {
+        $params = ['row' => $row];
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail', $params);
-        break;
     } 
-    if (sizeof($unFetched) == 0) {
-        $guzzler->tick();
-        sleep(1);
-    } else $guzzler->finish();
-}
+//}
 $guzzler->finish();
 
 function success(&$guzzler, $params, $content)
 {
     $json = json_decode($content, true);
     $access_token = $json['access_token'];
-    $list_id = $params['mailing_list_id'];
 
     $params['access_token'] = $access_token;
     $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token"];
@@ -46,8 +39,13 @@ function mailSuccess(&$guzzler, $params, $content)
     foreach ($lists as $list) {
         $id = $list['mailing_list_id'];
         $name = $list['name'];
-        echo "List $id => $name\n";
-        $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
+        $cname = Info::getInfoField('mailing_list_id', $id, 'name');
+        if ($name != $cname) {
+            echo "List $id => $name\n";
+            $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
+            $db->update('delta', [], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]]);
+
+        }
     }
 }
 

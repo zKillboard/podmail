@@ -25,6 +25,7 @@ class Db
         $command = new \MongoDB\Driver\Command(['count' => $coll, 'query' => $filter]);
         $result = $this->manager->executeCommand($this->namespace, $command);
         foreach ($result as $row) return $row->n;
+        return 0;
     }
 
     public function queryDoc(string $coll, array $filter = [], array $options = [])
@@ -46,20 +47,20 @@ class Db
     {
         $bulk = new \MongoDB\Driver\BulkWrite();
         $bulk->insert($data);
-        return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk);
+        return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getInsertedCount();
     }
 
     public function update(string $coll, array $filter = [], array $values, array $options = [])
     {
         $bulk = new \MongoDB\Driver\BulkWrite();
         $bulk->update($filter, $values, $options);
-        return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk);
+        return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getUpsertedCount();
     }
 
     public function delete(string $coll, array $filter = [])
     {
         $bulk = new \MongoDB\Driver\BulkWrite();
         $bulk->delete($filter);
-        return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk);
+        return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getDeletedCount();
     }
 }

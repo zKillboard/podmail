@@ -1,9 +1,21 @@
+body {
+    overflow-y: scroll;
+}
+
 a {
     text-decoration: none;
 }
 
+hr {
+    margin: 5px;
+}  
+
 .unread {
     font-weight: bold;
+}
+
+.noweight {
+    font-weight: normal;
 }
 
 .subject-row {
@@ -18,6 +30,6 @@ a {
     margin-right: 1em;
 }
 
-hr {
-        margin: 5px;
+.strike, .strike span {
+    text-decoration: line-through;
 }

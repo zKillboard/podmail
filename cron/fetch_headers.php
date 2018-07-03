@@ -11,16 +11,18 @@ $minute = date('Hi');
 while ($minute == date('Hi')) {
     $db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastChecked' => ['$exists' => false]], ['$set' => ['lastChecked' => 0]]);
     $scopes = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastChecked' => ['$lte' => (time() - 900)]]);
+    //$scopes = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1']);
     foreach ($scopes as $row) {
         $config['row'] = $row;
         echo "Fetching headers for " . $row['character_id'] . "\n";
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail');
-        $db->update('scopes', $row, ['$set' => ['lastChecked' => (time() - 840)]]); // Push ahead just in case of error
+        $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); // Push ahead just in case of error
     }
     if (sizeof($scopes) == 0) {
         $guzzler->tick();
         sleep(1);
     }
+    break;
 }
 $guzzler->finish();
 
@@ -48,10 +50,12 @@ function doNextCall($params, $access_token, &$guzzler)
 function mailSuccess(&$guzzler, $params, $content)
 {
     $count = 0;
+    $current_mail_id = 0;
+    $previous_mail_id = (int) @$params['current_mail_id'];
     $char_id = $params['char_id'];
     $db = $params['config']['db'];
     $json = json_decode($content, true);
-    $last_mail_id = null;
+    $set_delta = false;
     foreach ($json as $mail) {
         if (!isset($mail['is_read'])) $mail['is_read'] = false;
         if ($db->exists("mails", ['mail_id' => $mail['mail_id']]) == false) {
@@ -66,24 +70,34 @@ function mailSuccess(&$guzzler, $params, $content)
                 if ($recipient['recipient_type'] == "mailing_list") $mail['labels'][] = $recipient['recipient_id'];
             }
             $db->insert("mails", $mail);
-            $db->update('delta', ['character_id' => $char_id], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]]);
+            $set_delta = true;
             $count++;
         } else {
             $cmail = $db->queryDoc('mails', ['mail_id' => $mail['mail_id']]);
             if ($cmail['is_read'] != $mail['is_read']) {
                 $db->update('mails', $cmail, ['$set' => ['is_read' => $mail['is_read']]]);
-                $db->update('delta', ['character_id' => $char_id], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]]);
+                $set_delta = true;
                 echo "changing read on " . $mail['mail_id'] . "\n";
             }
         }
-        $last_mail_id = $mail['mail_id'];
+        $prev_mail_id = $current_mail_id;
+        $current_mail_id = $mail['mail_id'];
+        if ($prev_mail_id != 0) {
+            // Look for and remove deleted mails
+            $c = $db->delete('mails', ['owner' => $char_id, 'mail_id' => ['$gt' => $current_mail_id, '$lt' => $prev_mail_id]]);
+            if ($c > 0) {
+                $set_delta = true;
+                echo "$char_id Removed $c mails\n";
+            }
+        }
     }
 
     if (sizeof($json) >= 50) {
-        $params['last_mail_id'] = $last_mail_id;
+        $params['last_mail_id'] = $current_mail_id;
         doNextCall($params, $params['access_token'], $guzzler);
     }
     if ($count > 0) echo $char_id . " Added $count mails\n";
+    if ($set_delta) Util::setDelta($db, $char_id);
 }
 
 

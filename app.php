@@ -21,6 +21,7 @@ $twig->getEnvironment()->addGlobal('character_name', Info::getInfoField($config[
 $app->view = $twig;
 addRoute($app, '/', 'index.php', $config, $char_id);
 addRoute($app, '/about', 'about.php', $config, $char_id);
+addRoute($app, '/action/{type}/{id}/{action}/{value}', 'action.php', $config, $char_id, 'post');
 addRoute($app, '/ccp-login', 'ccp-login.php', $config, $char_id);
 addRoute($app, '/ccp-callback', 'ccp-callback.php', $config, $char_id);
 addRoute($app, '/delta', 'delta.php', $config, $char_id);

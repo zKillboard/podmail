@@ -1,5 +1,5 @@
 {% for folder in folders %}
 <hr/>
-<a href="/folder/{{ folder.id }}" id="folder-{{ folder.id }}" folder="{{ folder.id }}" class="folder-link folder-{{ folder.id }}">{{ folder.name }} {% if folder.unread > 0 %}({{ folder.unread }}){% endif %}</a>
+<a href="/folder/{{ folder.id }}" id="folder-{{ folder.id }}" folder="{{ folder.id }}" class="folder-link folder-{{ folder.id }}">{{ folder.name }} <span class='float-right'>{% if folder.unread > 0 %}<span class='unread'>{{ folder.unread }}</span> / {% endif %}{% if folder.count > 0 %}<span class='noweight'>{{ folder.count }}</span>{% endif %}</span></a>
 {% endfor %}
 <hr/>
