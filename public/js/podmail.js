@@ -72,11 +72,21 @@ function mailClick(o)
 
 function mailLoaded()
 {
+    $("#showlisting").click(function() { showListing(); return false; });
+    $('#unread_btn').click(function() { markMailUnread(this); });
+    $('#delete_btn').confirm({title:'Deleting an EveMail', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { deleteMail($('#delete_btn'));  } }, noop:{text:'Dismiss', action: function() {} }}});
+    $("#unread").hide();
     $("#listing").hide();
     $("#mail").show();
-    $("#showlisting").click(function() { showListing(); return false; });
-    $('#delete_btn').confirm({title:'Deleting an EveMail', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { deleteMail($('#delete_btn'));  } }, noop:{text:'Dismiss', action: function() {} }}});
     console.log('loaded mail');
+}
+
+function markMailUnread(btn)
+{
+    mail_id = $(btn).attr('mail_id');
+    $("#mail-" + mail_id).addClass('unread');
+    $("#unread").show();
+    $.ajax('/action/mail/' + mail_id + '/is_read/false', {method: 'post'});
 }
 
 function deleteMail(btn) 

@@ -1,17 +1,23 @@
 <hr/>
 <a href='#' id='showlisting'>Back...</a>
+<button class="btn btn-sm btn-primary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit">Mark Unread</button>
 {% if mail.is_notifcation != true %}
 Reply Forward
-<button class="btn btn-primary" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit">Delete</button>
+<button class="btn btn-primary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit">Delete</button>
 {% endif %}
 <hr/>
+<span class="float-right">
+{{ mail.dttm }}<br/>
+<span id="unread" class="float-right">Unread</span>
+</span>
+<span>
 From: {{ mail.from_name }}<br/>
 To: 
 {% set first = true %}
 {% for recip in mail.recipients %}{% if first == false %}, {% endif %}{{ recip.recipient_name }}{% set first = false %}{% endfor %}<br/>
-{{ mail.dttm }}
+</span>
 <hr/>
-Subject: {{ mail.subject }}
+Subject: {{ mail.subject|raw }}
 <hr/>
 {{ mail.body|raw }}
 <hr/>
