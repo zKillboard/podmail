@@ -24,7 +24,7 @@ $lists = $db->query('information', ['type' => 'mailing_list_id'], ['mailing_list
 foreach ($lists as $list) {
     $list_id = $list['id'];
     $count = $db->count('mails', ['owner' => $char_id, 'labels' => $list_id]);
-    $unread = $db->count('mails', ['owner' => $char_id, 'labels' => $list_id, 'is_read' => true]);
+    $read = $db->count('mails', ['owner' => $char_id, 'labels' => $list_id, 'is_read' => true]);
     if ($count > 0) {
         $list['count'] = $count;
         $list['read'] = $read;

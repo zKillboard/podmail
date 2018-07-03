@@ -47,7 +47,7 @@ function success(&$guzzler, $params, $content)
 function mailSuccess(&$guzzler, $params, $content)
 {
     $mail = json_decode($content, true);
-    $params['config']['db']->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]]);
+    $params['config']['db']->update('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]]);
 }
 
 

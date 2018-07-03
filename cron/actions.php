@@ -46,10 +46,13 @@ function postSuccess($guzzler, $params, $content)
     switch ($row['action']) {
         case 'setread':
             $is_read = $row['is_read'] == true;
-            $db->update('mails', ['mail_id' => $mail_id], ['$set' => ['is_read' => $is_read]]);
+            $db->update('mails', ['owner' => $char_id, 'mail_id' => $mail_id], ['$set' => ['is_read' => $is_read]]);
+            echo "$char_id is_read $mail_id " . ($is_read ? "true" : "false") . "\n";
             break;
         case 'delete':
-            $db->delete('mails', ['mail_id' => $mail_id]);
+            $db->delete('mails', ['owner' => $char_id, 'mail_id' => $mail_id]);
+            echo "$char_id deleted $mail_id\n";
+            break;
     }
     $db->delete('actions', $row);
     Util::setDelta($db, $char_id);
