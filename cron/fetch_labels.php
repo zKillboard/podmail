@@ -14,7 +14,7 @@ while ($minute == date('Hi')) {
         $params = ['label_id' => $label['id']];
         $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $label['character_id']]);
 
-        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail', $params);
+        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
         break;
     } 
     if (sizeof($unFetched) == 0) {
@@ -35,7 +35,7 @@ function success(&$guzzler, $params, $content)
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v3/characters/$char_id/mail/labels/";
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\fail', $params, $headers);
+    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
 function mailSuccess(&$guzzler, $params, $content)
@@ -47,15 +47,5 @@ function mailSuccess(&$guzzler, $params, $content)
         $name = $label['name'];
         echo "Label $label_id => $name\n";
         $db->update('information', ['type' => 'label_id', 'id' => $label_id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
-    }
-}
-
-
-function fail(&$guzzler, $params, $ex)
-{
-    echo $ex->getCode() . " " . $ex->getMessage() . "\n";
-    if ($ex->getcode() == 420) {
-        $guzzler->finish();
-        exit();
     }
 }

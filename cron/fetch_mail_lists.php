@@ -14,7 +14,7 @@ $minute = date('Hi');
 
     foreach ($candidates as $row) {
         $params = ['row' => $row];
-        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail', $params);
+        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
     } 
 //}
 $guzzler->finish();
@@ -29,7 +29,7 @@ function success(&$guzzler, $params, $content)
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v1/characters/$char_id/mail/lists/";
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\fail', $params, $headers);
+    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
 function mailSuccess(&$guzzler, $params, $content)
@@ -46,15 +46,5 @@ function mailSuccess(&$guzzler, $params, $content)
             $db->update('delta', [], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]]);
 
         }
-    }
-}
-
-
-function fail(&$guzzler, $params, $ex)
-{
-    echo $ex->getCode() . " " . $ex->getMessage() . "\n";
-    if ($ex->getcode() == 420) {
-        $guzzler->finish();
-        exit();
     }
 }

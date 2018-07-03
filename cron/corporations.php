@@ -15,21 +15,12 @@ while ($minute == date('Hi')) {
         $corp_id = $row['id'];
         $params['row'] = $row;
         $params['config'] = $config;
-        $guzzler->call("$esi/v4/corporations/$corp_id/", '\podmail\success', '\podmail\fail', $params);
+        $guzzler->call("$esi/v4/corporations/$corp_id/", '\podmail\success', '\podmail\ESI::fail', $params);
     }
     if (sizeof($toUpdate)) $guzzler->finish();
     sleep(1);
 }
 $guzzler->finish();
-
-function fail($guzzler, $params, $ex)
-{
-    echo $ex->getCode() . " " . $ex->getMessage() . "\n";
-    if ($ex->getcode() == 420) {
-        $guzzler->finish();
-        exit();
-    }
-}
 
 function success($guzzler, $params, $content)
 {

@@ -20,7 +20,7 @@ while ($minute == date('Hi')) {
     foreach ($scopes as $row) {
         $config['row'] = $row;
         echo "Fetching notifications for " . $row['character_id'] . "\n";
-        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail');
+        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
         $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); 
     }
     if (sizeof($scopes) == 0) {
@@ -49,7 +49,7 @@ function doNextCall($params, $access_token, &$guzzler)
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v2/characters/$char_id/notifications/";
     if (isset($params['last_mail_id'])) $url .= "?last_mail_id=" . $params['last_mail_id'];
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\fail', $params, $headers);
+    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
 function mailSuccess(&$guzzler, $params, $content)
@@ -83,14 +83,4 @@ function mailSuccess(&$guzzler, $params, $content)
         }
     }
     if ($set_delta) Util::setDelta($db, $char_id);
-}
-
-
-function fail(&$guzzler, $params, $ex)
-{
-    echo $ex->getCode() . ' ' . $ex->getMessage() . "\n";
-    if ($ex->getcode() == 420) {
-        $guzzler->finish();
-        exit();
-    }
 }

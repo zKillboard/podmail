@@ -4,19 +4,20 @@ namespace podmail;
 
 require_once '../init.php';
 
-$guzzler = Util::getGuzzler($config);
+$guzzler = Util::getGuzzler($config, 25);
 $db = $config['db'];
 
-$db->update('scopes', ['scope' => 'esi-mail.read_mail.v1'], ['$set' => ['lastChecked' => 0]], ['multi' => true]);
+//$db->update('scopes', ['scope' => 'esi-mail.read_mail.v1'], ['$set' => ['lastChecked' => 0]], ['multi' => true]);
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $scopes = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastChecked' => 0]);
+    $scopes = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastChecked' => ['$lt' => (time() - 60)]]);
     foreach ($scopes as $row) {
         $config['row'] = $row;
+        $config['iterate'] = $row['lastChecked'] == 0 || date('i') == 0;
         $db->update('mails', ['owner' => $row['character_id']], ['$set' => ['purge' => true]], ['multi' => true]);
-        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail');
         $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); // Push ahead just in case of error
+        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
     }
     if (sizeof($scopes) == 0) {
         $guzzler->tick();
@@ -43,7 +44,9 @@ function doNextCall($params, $access_token, &$guzzler)
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v1/characters/$char_id/mail/";
     if (isset($params['last_mail_id'])) $url .= "?last_mail_id=" . $params['last_mail_id'];
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\fail', $params, $headers);
+    $params['iterate'] = $params['config']['iterate'];
+    echo "$url\n";
+    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
 function mailSuccess(&$guzzler, $params, $content)
@@ -84,24 +87,15 @@ function mailSuccess(&$guzzler, $params, $content)
         $tcount++;
     }
 
-    if (sizeof($json) >= 50 && $tcount < 1500) {
+    if (sizeof($json) >= 50 && $tcount < 1500 && ($count >= 30 || $params['iterate'] == true)) {
         $params['tcount'] = $tcount;
         $params['last_mail_id'] = $current_mail_id;
         doNextCall($params, $params['access_token'], $guzzler);
-    } else {
+    } else if ($params['iterate'] == true) {
         $purge = $db->delete('mails', ['owner' => $char_id, 'purge' => true]);
         if ($purge > 0) $set_delta = true;
+        $db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id], ['$set' => ['iterated' => true]]);
     }
     if ($count > 0) echo $char_id . " Added $count mails\n";
     if ($set_delta) Util::setDelta($db, $char_id);
-}
-
-
-function fail(&$guzzler, $params, $ex)
-{
-    echo $ex->getCode() . " " . $ex->getMessage() . "\n";
-    if ($ex->getcode() == 420) {
-        $guzzler->finish();
-        exit();
-    }
 }

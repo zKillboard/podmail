@@ -20,3 +20,9 @@ foreach ($configValues as $key=>$value) $config[$key] = $value;
 
 // Preapre the database
 $config['db'] = new Db($config);
+
+// Preprae Redis
+$redis = new \Redis();
+$redis->pconnect($config['redis']['server'], $config['redis']['port']);
+$redis->clearLastError();
+$config['redis'] = $redis;

@@ -1,6 +1,10 @@
 <hr/>
 {% if mails|length == 0 %}
-<i>No mails to display...</i>
+    {% if iterated == falsee %}
+        <i>Please wait a moment, your evemails are being loaded...</i>
+    {% else %}
+        <i>No mails to display...</i>
+    {% endif %}
 {% else %}
 <div class="float-right">
 <a href='' id='prevpage'>&lt;</a> Page {{ page }} / {{ max }} <a href='' id='nextpage' max='{{ max }}'>&gt;</a>

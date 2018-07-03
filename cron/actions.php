@@ -13,15 +13,11 @@ while ($minute == date('Hi')) {
     if ($row != null ) {
         $sso = $db->queryDoc('scopes', ['character_id' => $row['character_id'], 'scope' => 'esi-mail.organize_mail.v1']);
         $config['row'] = $row;
-        SSO::getAccessToken($config, $row['character_id'], $sso['refresh_token'], $guzzler, '\podmail\success', '\podmail\fail');
+        SSO::getAccessToken($config, $row['character_id'], $sso['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
         $guzzler->finish();
     } else usleep(100000);
 }
 $guzzler->finish();
-
-function fail($guzzler, $params, $ex) {
-    echo $ex->getCode() . " " . $ex->getMessage() . "\n";
-}
 
 function success(&$guzzler, $params, $content) {
     $json = json_decode($content, true);
@@ -33,7 +29,7 @@ function success(&$guzzler, $params, $content) {
     $url = $row['url'];
     $body = @$row['body'];
     $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token"];
-    $guzzler->call($url, '\podmail\postSuccess', '\podmail\fail', $params, $headers, $row['type'], $body);
+    $guzzler->call($url, '\podmail\postSuccess', '\podmail\ESI::fail', $params, $headers, $row['type'], $body);
 }
 
 function postSuccess($guzzler, $params, $content)

@@ -12,6 +12,12 @@ $mails =  $db->query('mails', $filter, ['sort' => ['mail_id' => -1], 'limit' => 
 $count = $db->count('mails', $filter);
 $max = ceil($count / 25);
 
+$iterated = false;
+if ($count == 0) {
+    $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
+    $iterated = (bool) @$row['iterated'];
+}
+
 Info::addInfo($db, $mails);
 
-return $app->view->render($response, 'mails.html', ['mails' => $mails, '$id' => $id, 'count' => $count, 'page' => (1 + $page), 'max' => $max]);
+return $app->view->render($response, 'mails.html', ['mails' => $mails, '$id' => $id, 'count' => $count, 'page' => (1 + $page), 'max' => $max, 'iterated' => $iterated]);
