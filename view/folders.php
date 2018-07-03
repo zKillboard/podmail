@@ -6,9 +6,13 @@ $labels = $db->query('information', ['type' => 'label_id'], ['label_id' => 1]);
 $folders = [];
 foreach ($labels as $label) {
     $label_id = $label['id'];
-    $count = $db->count('mails', ['owner' => $char_id, 'labels' => $label_id]);
+    $filter = ['owner' => $char_id];
+    if ($label_id != 0) $filter['labels'] = $label_id;
+    else $filter['labels'] = ['$ne' => 999];
+    $count = $db->count('mails', $filter);
     if ($label_id < 8 || $count > 0) {
-        $read = $db->count('mails', ['owner' => $char_id, 'labels' => $label_id, 'is_read' => true]);
+        $filter['is_read'] = true;
+        $read = $db->count('mails', $filter);
         $label['count'] = $count;
         $label['read'] = $read;
         $label['unread'] = $count - $read;

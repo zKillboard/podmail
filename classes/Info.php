@@ -100,11 +100,20 @@ class Info
                         break;
                     case "from":
                         $name = self::getInfoField($db, 'character_id', $value, 'name');
+                        if ($name == "") $name = self::getInfoField($db, 'corporation_id', $value, 'name');
+                        if ($name == "") $name = self::getInfoField($db, 'alliance_id', $value, 'name');
+                        if ($name == "") $name = self::getInfoField($db, 'mailing_list_id', $value, 'name');
+
                         if ($name == null) $name = self::getInfoField($db, 'corporation_id', $value, 'name');
                         $element['from_name'] = $name;
                         break;    
                     case "recipient_id":
-                        $element['recipient_name'] = self::getInfoField($db, 'character_id', $value, 'name');
+                        $name = self::getInfoField($db, 'character_id', $value, 'name');
+                        if ($name == "") $name = self::getInfoField($db, 'corporation_id', $value, 'name');
+                        if ($name == "") $name = self::getInfoField($db, 'alliance_id', $value, 'name');
+                        if ($name == "") $name = self::getInfoField($db, 'mailing_list_id', $value, 'name');
+
+                        $element['recipient_name'] = $name;
                         break;
                     case 'timestamp':
                         $element['dttm'] = date('Y-m-d H:i', $element['unixtime']);

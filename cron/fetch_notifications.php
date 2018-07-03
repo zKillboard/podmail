@@ -4,6 +4,8 @@ namespace podmail;
 
 require_once '../init.php';
 
+if (time() % 600 !== 0) exit();
+
 $guzzler = Util::getGuzzler($config);
 $db = $config['db'];
 

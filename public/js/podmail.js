@@ -1,4 +1,4 @@
-var currentFolder = 1;
+var currentFolder = 0;
 var click = false;
 var deltaCount = 1;
 $( document ).ready(function() {

@@ -33,6 +33,7 @@ $guzzler->finish();
 
 function fail($guzzler, $params, $ex)
 {
+    echo $ex->getCode() . " " . $ex->getMessage() . "\n";
     if ($ex->getcode() == 420) {
         $guzzler->finish();
         exit();
