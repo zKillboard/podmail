@@ -1,7 +1,19 @@
-{% for mail in mails %}
-    <hr/>
-    <a class="subjectrow" id="mail-{{ mail.mail_id }}" href="/mail/{{ mail.mail_id }}"><div class="{{ (mail.is_read == 1 ) ? '' : 'unread' }} {{ mail.deleted == 1 ? 'strike' : '' }}"><span class="from">{{ mail.from_name }}</span><span class='subject'>{{ mail.subject|raw }}</span></div></a>
-{% endfor %}
+<hr/>
 {% if mails|length == 0 %}
 <i>No mails to display...</i>
+{% else %}
+<div class="float-right">
+<a href='' id='prevpage'>&lt;</a> Page {{ page }} / {{ max }} <a href='' id='nextpage' max='{{ max }}'>&gt;</a>
+</div>
+<br/>
+{% for mail in mails %}
+    <hr/>
+    <a class="subjectrow" id="mail-{{ mail.mail_id }}" href="/mail/{{ mail.mail_id }}">
+        <div class="{{ (mail.is_read == 1 ) ? '' : 'unread' }} {{ mail.deleted == 1 ? 'strike' : '' }}">
+            <span class="from">{{ mail.from_name }}</span>
+            <span class='subject'>{{ mail.subject|raw }}</span>
+            <span class='float-right'>{{ mail.dttm }}</span>
+        </div>
+    </a>
+{% endfor %}
 {% endif %}

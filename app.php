@@ -25,7 +25,7 @@ addRoute($app, '/action/{type}/{id}/{action}/{value}', 'action.php', $config, $c
 addRoute($app, '/ccp-login', 'ccp-login.php', $config, $char_id);
 addRoute($app, '/ccp-callback', 'ccp-callback.php', $config, $char_id);
 addRoute($app, '/delta', 'delta.php', $config, $char_id);
-addRoute($app, '/folder/{id}', 'folder_id.php', $config, $char_id);
+addRoute($app, '/folder/{id}[/{page}]', 'folder_id.php', $config, $char_id);
 addRoute($app, '/folders', 'folders.php', $config, $char_id);
 addRoute($app, '/mail/{id}', 'mail_id.php', $config, $char_id);
 addRoute($app, '/logout', 'logout.php', $config, $char_id);

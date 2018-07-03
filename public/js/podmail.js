@@ -1,4 +1,5 @@
 var currentFolder = 0;
+var currentPage = 0;
 var click = false;
 var deltaCount = 1;
 $( document ).ready(function() {
@@ -12,21 +13,30 @@ function loadFolders() {
 
 function loadedFolders()
 {
-    loadFolder(currentFolder);
+    console.log(currentFolder + ' - ' + currentPage);
+    loadFolder(currentFolder, currentPage);
 }
 
 function loadFolderClick(id)
 {
     click = true;
+    currentPage = 0;
     loadFolder(id);
 }
 
-function loadFolder(id)
+function loadFolder(id, page)
 {
-    var url = "/folder/" + id;
+    var url = "/folder/" + id + '/' + page;
     console.log("Loading folder " + id);
     currentFolder = id;
-    $("#listing").load("/folder/" + id, folderLoaded);
+    $("#listing").load(url, folderLoaded);
+}
+
+function loadPage(id, page)
+{
+    currentFolder = id;
+    currentPage = page;
+    $("#listing").load("/folder/" + id + '/' + page, folderLoaded);
 }
 
 function folderLoaded()
@@ -43,6 +53,12 @@ function folderLoaded()
         $("#listing").show();
         click = false;
     }
+
+    if (currentPage > 0) $('#prevpage').click(function() { loadPage(currentFolder, (currentPage - 1)); return false; });
+    else $('#prevpage').removeAttr('href');
+    if (currentPage < ($('#nextpage').attr('max') - 1)) $('#nextpage').click(function() { loadPage(currentFolder, (currentPage + 1)); return false; });
+    else $('#nextpage').removeAttr('href');
+
     console.log('loaded folder ' + currentFolder);
 }
 
