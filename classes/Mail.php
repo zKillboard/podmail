@@ -20,6 +20,7 @@ class Mail
         $db = $config['db'];
         $mail = $db->queryDoc('mails', ['owner' => $char_id, 'mail_id' => $mail_id]);
         if ($mail != null) {
+            if (@$mail['is_notification'] == true) return;
             $db->update('mails', $mail, ['$set' => ['deleted' => true]]);
             $db->insert('actions', ['mail_id' => $mail_id, 'character_id' => $char_id, 'action' => 'delete', 'status' => 'pending', 'type' => 'delete', 'url' => "$esi/v1/characters/$char_id/mail/$mail_id/"]);
         }

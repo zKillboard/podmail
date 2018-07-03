@@ -28,6 +28,14 @@ hr {
     max-width: 150px;
     display: inline-block;
     margin-right: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.subject {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .strike, .strike span {

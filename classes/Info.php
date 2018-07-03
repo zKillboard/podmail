@@ -90,16 +90,18 @@ class Info
             if (is_array($value)) $element[$key] = self::addInfo($db, $value);
             elseif ($value != 0) {
                 switch ($key) {
-                    case "_id":
-                    case "mail_id":
-                    case "owner":
-                    case "fetched":
-                    case "unixtime":
-                    case "is_read":
-                    case "subject":
+                    case '_id':
+                    case 'mail_id':
+                    case 'owner':
+                    case 'fetched':
+                    case 'unixtime':
+                    case 'is_read':
+                    case 'subject':
                         break;
                     case "from":
-                        $element['from_name'] = self::getInfoField($db, 'character_id', $value, 'name');
+                        $name = self::getInfoField($db, 'character_id', $value, 'name');
+                        if ($name == null) $name = self::getInfoField($db, 'corporation_id', $value, 'name');
+                        $element['from_name'] = $name;
                         break;    
                     case "recipient_id":
                         $element['recipient_name'] = self::getInfoField($db, 'character_id', $value, 'name');
