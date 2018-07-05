@@ -4,22 +4,19 @@ namespace podmail;
 
 require_once '../init.php';
 
-if (time() % 600 !== 0) exit();
-
 $guzzler = Util::getGuzzler($config);
 $db = $config['db'];
 
-if (!$db->exists('information', ['type' => 'label_id', 'id' => 999])) {
-    $db->insert('information', ['type' => 'label_id', 'id' => 999, 'name' => 'Notifications']);
+if (!$db->exists('information', ['type' => 'label_id', 'id' => 999999999])) {
+    $db->insert('information', ['type' => 'label_id', 'id' => 999999999, 'name' => 'Notifications']);
 }
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $db->update('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastChecked' => ['$exists' => false]], ['$set' => ['lastChecked' => 0]]);
-    $scopes = $db->query('scopes', ['scope' => 'esi-characters.read_notifications.v1'], ['lastChecked' => ['$lte' => (time() - 900)]]);
+    $db->update('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastChecked' => ['$exists' => false]], ['$set' => ['lastChecked' => 0]], ['multi' => true]);
+    $scopes = $db->query('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastChecked' => ['$lte' => (time() - 900)]]);
     foreach ($scopes as $row) {
         $config['row'] = $row;
-        echo "Fetching notifications for " . $row['character_id'] . "\n";
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
         $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); 
     }
@@ -65,9 +62,9 @@ function mailSuccess(&$guzzler, $params, $content)
             if ($notif['sender_type'] == 'corporation') Info::addCorp($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'alliance') Info::addAlliance($db, $notif['sender_id']);
 
-
+            if (!isset($notif['is_read'])) $notif['is_read'] = false;
             $notif['is_notifcation'] = true;
-            $notif['labels'] = [999];
+            $notif['labels'] = [999999999];
             $notif['mail_id'] = $notif['notification_id'];
             $notif['owner'] = $char_id;
             $notif['fetched'] = true;

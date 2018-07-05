@@ -28,6 +28,6 @@ function success($guzzler, $params, $content)
     $row = $params['row'];
     if (@$row['name'] != @$alliance['name']) {
         $db = $params['config']['db'];
-        $db->update('information', $row, ['$set' => ['name' => $alliance['name'], 'lastUpdated' => time()]]);
+        $db->update('information', $row, ['$set' => ['name' => $alliance['name'], 'search' => strtolower($alliance['name']), 'lastUpdated' => time()]]);
     }
 }

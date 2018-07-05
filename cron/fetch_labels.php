@@ -7,6 +7,11 @@ require_once '../init.php';
 $guzzler = Util::getGuzzler($config, 1);
 $db = $config['db'];
 
+if (!$db->exists('information', ['type' => 'label_id', 'id' => 0])) {
+    $db->insert('information', ['type' => 'label_id', 'id' => 0, 'name' => 'All Mails']);
+    $db->update('delta', [], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]], ['multi' => true]);
+}
+
 $minute = date('Hi');
 while ($minute == date('Hi')) {
     $unFetched = $db->query('information', ['type' => 'label_id', 'update' => true]);

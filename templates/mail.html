@@ -1,24 +1,25 @@
 <hr/>
-<a href='#' id='showlisting'>Back...</a>
+<a href='#' id='showlisting'>Back</a>&nbsp;&nbsp;
 <button class="btn btn-sm btn-primary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit">Mark Unread</button>
 {% if mail.is_notifcation != true %}
-Reply Forward
+<button class="btn btn-sm btn-primary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit">Reply</button>
+<button class="btn btn-sm btn-primary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit">Forward</button>
 <button class="btn btn-primary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit">Delete</button>
 {% endif %}
 <hr/>
 <span class="float-right">
-{{ mail.dttm }}<br/>
+<span id="mail-dttm">{{ mail.dttm }}</span><br/>
 <span id="unread" class="float-right">Unread</span>
 </span>
 <span>
-From: {{ mail.from_name }}<br/>
+From: <span id='mail-from'>{{ mail.from_name }}</span><br/>
 To: 
 {% set first = true %}
-{% for recip in mail.recipients %}{% if first == false %}, {% endif %}{{ recip.recipient_name }}{% set first = false %}{% endfor %}<br/>
+<span id='mail-to'>{% for recip in mail.recipients %}{% if first == false %}, {% endif %}{{ recip.recipient_name }}{% set first = false %}{% endfor %}</span><br/>
 </span>
 <hr/>
-Subject: {{ mail.subject|raw }}
+Subject: <span id='mail-subject'>{{ mail.subject|raw }}</span>
 <hr/>
-{{ mail.body|raw }}
+<span id='mail-body'>{{ mail.body|raw }}</span>
 <hr/>
 <small>mail_id:{{ mail.mail_id }}</small>

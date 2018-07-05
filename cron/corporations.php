@@ -28,6 +28,6 @@ function success($guzzler, $params, $content)
     $row = $params['row'];
     if (@$row['name'] != @$corporation['name']) {
         $db = $params['config']['db'];
-        $db->update('information', $row, ['$set' => ['name' => $corporation['name'], 'lastUpdated' => time()]]);
+        $db->update('information', $row, ['$set' => ['name' => $corporation['name'], 'search' => strtolower($corporation['name']), 'lastUpdated' => time()]]);
     }
 }

@@ -8,7 +8,7 @@ foreach ($labels as $label) {
     $label_id = $label['id'];
     $filter = ['owner' => $char_id];
     if ($label_id != 0) $filter['labels'] = $label_id;
-    else $filter['labels'] = ['$ne' => 999];
+    else $filter['labels'] = ['$ne' => 999999999];
     $count = $db->count('mails', $filter);
     if ($label_id < 8 || $count > 0) {
         $filter['is_read'] = true;
@@ -16,7 +16,7 @@ foreach ($labels as $label) {
         $label['count'] = $count;
         $label['read'] = $read;
         $label['unread'] = $count - $read;
-        $folders[] = $label;
+        $folders[$label_id] = $label;
     }
 }
 
@@ -29,8 +29,9 @@ foreach ($lists as $list) {
         $list['count'] = $count;
         $list['read'] = $read;
         $list['unread'] = $count - $read;
-        $folders[] = $list;
+        $folders[$list_id] = $list;
     }
 }
+ksort($folders);
 
 return $app->view->render($response, 'folders.html', ['folders' => $folders]);

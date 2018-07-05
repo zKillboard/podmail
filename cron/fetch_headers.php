@@ -15,7 +15,7 @@ while ($minute == date('Hi')) {
     foreach ($scopes as $row) {
         $config['row'] = $row;
         $config['iterate'] = $row['lastChecked'] == 0 || date('i') == 0;
-        $db->update('mails', ['owner' => $row['character_id']], ['$set' => ['purge' => true]], ['multi' => true]);
+        $db->update('mails', ['owner' => $row['character_id'], 'labels' => ['$ne' => 999999999]], ['$set' => ['purge' => true]], ['multi' => true]);
         $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); // Push ahead just in case of error
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
     }
@@ -45,7 +45,6 @@ function doNextCall($params, $access_token, &$guzzler)
     $url = "$esi/v1/characters/$char_id/mail/";
     if (isset($params['last_mail_id'])) $url .= "?last_mail_id=" . $params['last_mail_id'];
     $params['iterate'] = $params['config']['iterate'];
-    echo "$url\n";
     $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
@@ -87,7 +86,7 @@ function mailSuccess(&$guzzler, $params, $content)
         $tcount++;
     }
 
-    if (sizeof($json) >= 50 && $tcount < 1500 && ($count >= 30 || $params['iterate'] == true)) {
+    if (sizeof($json) >= 50 && $tcount < 1500 && ($count <= 30 || $params['iterate'] == true)) {
         $params['tcount'] = $tcount;
         $params['last_mail_id'] = $current_mail_id;
         doNextCall($params, $params['access_token'], $guzzler);

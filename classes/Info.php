@@ -116,7 +116,7 @@ class Info
                         $element['recipient_name'] = $name;
                         break;
                     case 'timestamp':
-                        $element['dttm'] = date('Y-m-d H:i', $element['unixtime']);
+                        $element['dttm'] = date('Y.m.d H:i', $element['unixtime']);
                         break;
                     default: 
                         //echo "Unknown key: $key => $value"; die();

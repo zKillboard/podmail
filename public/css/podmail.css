@@ -41,3 +41,7 @@ hr {
 .strike, .strike span {
     text-decoration: line-through;
 }
+
+.hidden {
+    display: none;
+}

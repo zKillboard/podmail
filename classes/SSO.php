@@ -41,8 +41,19 @@ class SSO
         $params['success']($guzzler, $params, $content);
     }
 
-    public static function fail(&$guzzler, $params, $exception)
+    public static function fail(&$guzzler, $params, $ex)
     {
-        echo "SSO: " . $ex->getCode() . " " . $ex->getMessage() . "\n";
+        $json = json_decode($params['content'], true);
+        $db = $params['config']['db'];
+        if (@$json['error_description'] == 'The refresh token is expired.') {
+            $char_id = $params['char_id'];
+            $db->delete('scopes', ['character_id' => $char_id]);
+            $db->delete('access_tokens', ['character_id' => $char_id]);
+            $db->delete('mails', ['owner' => $char_id]);
+            $db->delete('deltas', ['character_id' => $char_id]);
+            echo "Purged $char_id for not having a valid refresh_token\n";
+        } else {
+            echo "SSO: " . $ex->getCode() . " " . $ex->getMessage() . "\n";
+        }
     }
 }

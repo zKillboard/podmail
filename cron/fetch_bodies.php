@@ -41,11 +41,13 @@ function success(&$guzzler, $params, $content)
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v1/characters/$char_id/mail/$mail_id/";
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
+    $guzzler->call($url, '\podmail\body_success', '\podmail\ESI::fail', $params, $headers);
 }
 
-function mailSuccess(&$guzzler, $params, $content)
+function body_success(&$guzzler, $params, $content)
 {
     $mail = json_decode($content, true);
-    $params['config']['db']->update('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]]);
+    $db = $params['config']['db'];
+    $db->update('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]]);
+    Util::sendDelta($db, $params['char_id']);
 }

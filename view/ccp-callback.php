@@ -42,4 +42,5 @@ Info::addChar($config['db'], $char_id, $char_name);
 Info::addScopes($config['db'], $char_id, $scopes, $refresh_token);
 
 $config['session']->set('char_id', $char_id);
+$config['true_session']->regenerateId();
 return $response->withStatus(302)->withRedirect('/');

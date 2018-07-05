@@ -9,7 +9,7 @@ $db = $config['db'];
 
 $minute = date('Hi');
 //while ($minute == date('Hi')) {
-    $unFetched = $db->queryDoc('information', ['type' => 'mailing_list_id', 'update' => true]);
+    $unFetched = $db->query('information', ['type' => 'mailing_list_id', 'update' => true]);
     $candidates = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1'], ['sort' => ['_id' => -1], 'limit' => 20]);
 
     foreach ($candidates as $row) {
@@ -37,14 +37,13 @@ function mailSuccess(&$guzzler, $params, $content)
     $db = $params['config']['db'];
     $lists = json_decode($content, true);
     foreach ($lists as $list) {
-        $id = $list['mailing_list_id'];
+        $id = (int) $list['mailing_list_id'];
         $name = $list['name'];
-        $cname = Info::getInfoField('mailing_list_id', $id, 'name');
-        if ($name != $cname) {
-            echo "List $id => $name\n";
-            $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
-            $db->update('delta', [], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]]);
+        $cdoc = $db->queryDoc('information', ['type' => 'mailing_list_id', 'id' => $id]);
+        if (!isset($cdoc['update'])) continue;
 
-        }
+        echo "List $id => $name\n";
+        $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
+        $db->update('delta', [], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]], ['multi' => true]);
     }
 }

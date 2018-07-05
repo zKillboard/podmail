@@ -10,7 +10,7 @@ $guzzler = Util::getGuzzler($config);
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['limit' => 100]);
+    $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['sort' => ['lastUpdated' => 1], 'limit' => 10]);
     foreach ($toUpdate as $row) {
         $char_id = $row['id'];
 
@@ -37,6 +37,6 @@ function success($guzzler, $params, $content)
     $row = $params['row'];
     if (@$row['name'] != @$character['name']) {
         $db = $params['config']['db'];
-        $db->update('information', $row, ['$set' => ['name' => $character['name'], 'lastUpdated' => time()]]);
+        $db->update('information', $row, ['$set' => ['name' => $character['name'], 'search' => strtolower($character['name']),  'lastUpdated' => time()]]);
     }
 }
