@@ -11,6 +11,8 @@ $mail['body'] = str_replace(" size=\"", " syze=\"", $mail['body']);
 $mail['body'] = str_replace(" color=\"", " cilor=\"", $mail['body']);
 $mail['body'] = str_replace("\n", '<br/>', $mail['body']);
 $mail['body'] = str_replace("href=\"killReport:", "target='_blank' href=\"https://zkillboard.com/kill/", $mail['body']);
+$mail['body'] = str_replace("href=\"http", "target='_blank' href=\"http", $mail['body']);
+$mail['body'] = str_replace("href='http", "target='_blank' href='http", $mail['body']);
 
 Info::addInfo($db, $mail);
 Mail::setReadStatus($config, $char_id, $mail_id, true);
