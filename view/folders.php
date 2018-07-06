@@ -8,16 +8,19 @@ $folders = [];
 foreach ($labels as $label) {
     $label_id = $label['label_id'];
     $filter = ['owner' => $char_id, 'fetched' => true];
-    if ($label_id != 0) $filter['labels'] = $label_id;
+    if ($label_id == 999999998) $filter['labels'] = [];
+    else if ($label_id != 0) $filter['labels'] = $label_id;
     else $filter['labels'] = ['$ne' => 999999999];
     $count = $db->count('mails', $filter);
 
-        $filter['is_read'] = true;
-        $read = $db->count('mails', $filter);
-        $label['count'] = $count;
-        $label['read'] = $read;
-        $label['unread'] = $count - $read;
-        $folders[$label_id] = $label;
+    if ($count == 0 && $label_id == 999999998) continue;
+
+    $filter['is_read'] = true;
+    $read = $db->count('mails', $filter);
+    $label['count'] = $count;
+    $label['read'] = $read;
+    $label['unread'] = $count - $read;
+    $folders[$label_id] = $label;
 }
 
 $lists = $db->query('information', ['type' => 'mailing_list_id'], ['mailing_list_id' => 1]);
