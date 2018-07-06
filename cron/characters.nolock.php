@@ -8,6 +8,7 @@ $db = $config['db'];
 $esi = $config['ccp']['esi'];
 $guzzler = Util::getGuzzler($config);
 
+$chars = [];
 $minute = date('Hi');
 while ($minute == date('Hi')) {
     $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['sort' => ['lastUpdated' => 1], 'limit' => 10]);
@@ -20,23 +21,26 @@ while ($minute == date('Hi')) {
             $db->delete('information', $row);
             continue;
         }
-
+        if (in_array($char_id, $chars)) { echo ("dupe $char_id\n"); continue; }
+        $chars[] = $char_id;
 
         $params['row'] = $row;
         $params['config'] = $config;
         $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\ESI::fail', $params);
     }
-    if (sizeof($toUpdate)) $guzzler->finish();
-    sleep(1);
+    $guzzler->finish();
+    if (sizeof($toUpdate) == 0) {
+        $guzzler->tick();
+        sleep(1);
+    }
 }
 $guzzler->finish();
 
 function success($guzzler, $params, $content)
 {
+    $db = $params['config']['db'];
     $character = json_decode($content, true);
     $row = $params['row'];
-    if (@$row['name'] != @$character['name']) {
-        $db = $params['config']['db'];
-        $db->update('information', $row, ['$set' => ['name' => $character['name'], 'search' => strtolower($character['name']),  'lastUpdated' => time()]]);
-    }
+    $db->update('information', $row, ['$set' => ['name' => $character['name'], 'search' => strtolower($character['name']), 'lastUpdated' => time()]]);
+    Info::addCorp($db, $character['corporation_id']);
 }

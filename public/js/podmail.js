@@ -14,7 +14,6 @@ function loadFolders() {
 
 function loadedFolders()
 {
-    console.log(currentFolder + ' - ' + currentPage);
     loadFolder(currentFolder, currentPage);
 }
 
@@ -28,7 +27,6 @@ function loadFolderClick(id)
 function loadFolder(id, page)
 {
     var url = "/folder/" + id + '/' + page;
-    console.log("Loading folder " + id);
     currentFolder = id;
     $("#listing").load(url, folderLoaded);
 }
@@ -42,7 +40,6 @@ function loadPage(id, page)
 
 function folderLoaded()
 {
-    console.log('Applying changes to folder ' + currentFolder);
     $(".folder-link").css("font-weight", "");
     $(".folder-" + currentFolder).css("font-weight", "bold");
     
@@ -52,6 +49,7 @@ function folderLoaded()
     if (click) {
         $("#mail").hide();
         $("#listing").show();
+        $("#compose").hide();
         click = false;
     }
 
@@ -61,12 +59,10 @@ function folderLoaded()
     else $('#nextpage').removeAttr('href');
 
     $("#compose-start").click(function() { compose(); return false; });
-    console.log('loaded folder ' + currentFolder);
 }
 
 function mailClick(o)
 {
-    console.log(o.href);
     $("#mail").load(o.href, mailLoaded);
 }
 
@@ -80,7 +76,6 @@ function mailLoaded()
     $("#unread").hide();
     $("#listing").hide();
     $("#mail").show();
-    console.log('loaded mail');
 }
 
 function markMailUnread(btn)
@@ -123,10 +118,9 @@ function forceDelta()
 function processDelta(text)
 {
     if (text == '1') {
-        console.log('delta detected');
         loadFolders();
         deltaCount = 1;
-    } else if (deltaCount < 300) deltaCount++;
+    } else if (deltaCount < 30) deltaCount++;
 }
 
 $(document).on('submit', '#compose_form', function() {            
@@ -137,9 +131,9 @@ $(document).on('submit', '#compose_form', function() {
         dataType: 'json',
         data    : $(this).serialize(),
         success : function( data ) {
-            console.log(data);
             if (data.error == false) {
-                $.dialog({title: 'Sending EveMail...', content: data.message, type: 'green', backgroundDismiss:true, escapeKey:true});
+                //$.dialog({title: 'Sending EveMail...', content: data.message, type: 'green', backgroundDismiss:true, escapeKey:true});
+                $.confirm({title:'Sending EveMail...', content: data.message, type: 'green', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'OK', action: function() {  } }, noop:{text:'Dismiss', action: function() {} }}});
                 $("#mail").hide();
                 $("#compose").hide();
                 $("#listing").show();
@@ -149,6 +143,7 @@ $(document).on('submit', '#compose_form', function() {
             $("#compose-btn").removeAttr("disabled")
         },
         error   : function( xhr, err ) {
+            console.log(err);
             alert('Error');     
             $("#compose-btn").removeAttr("disabled");
         }

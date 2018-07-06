@@ -33,7 +33,7 @@ while ($minute == date('Hi')) {
 }
 $guzzler->finish();
 
-function success(&$guzzler, $params, $content) {
+function success(&$guzzler, &$params, $content) {
     $json = json_decode($content, true);
     $access_token = $json['access_token'];
     $row = $params['config']['row'];
@@ -42,6 +42,13 @@ function success(&$guzzler, $params, $content) {
     $body = @$row['body'];
     $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token"];
     $guzzler->call($url, '\podmail\postSuccess', '\podmail\ESI::fail', $params, $headers, $row['type'], $body);
+}
+
+function fail($guzzler, $params, $ex)
+{
+    $db = $params['config']['db'];
+    $row = $params['config']['row'];
+    $db->update('actions', $row, ['status' => 'failed', 'code' => $ex->getCode(), 'message' => $ex->getMessage()]);
 }
 
 function postSuccess($guzzler, $params, $content)
@@ -56,7 +63,7 @@ function postSuccess($guzzler, $params, $content)
             echo "$char_id sent eve_mail " . $content . "\n";
             break;
         case 'setread':
-            $is_read = $row['is_read'] == true;
+            $is_read = ($row['is_read'] == true);
             $db->update('mails', ['owner' => $char_id, 'mail_id' => $mail_id], ['$set' => ['is_read' => $is_read]]);
             echo "$char_id is_read $mail_id " . ($is_read ? "true" : "false") . "\n";
             break;

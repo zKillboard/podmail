@@ -12,7 +12,7 @@ if ($form_recips == "") return sendStatus($response, "Please provide recipient(s
 if ($form_subject == "") return sendStatus($response, "Please provide a subject...", true);
 if ($form_body == "") return sendStatus($response, "Please provide a message body...", true);
 
-$form_body .= "\n\nSent using <a href='https://podmail.zzeve.com/'>PodMail</a>.";
+$form_body .= "<br/><br/>---<br/>Sent using <a href='https://podmail.zzeve.com/'>PodMail</a>.";
 
 $mail = ['subject' => trim($form_subject), 'body' => trim($form_body), "approved_cost" => ((int) 10000)];
 
@@ -28,7 +28,7 @@ foreach ($form_recips as $form_recip) {
         if (!isset($json['character'])) return sendStatus($response, "Unable to determine character_id for $name", true);
         $chars = $json['character'];
         $recipient = ['id' => $chars[0], 'type' => 'character_id'];
-        $db->insert('information', ['type' => 'character', 'id' => (int) $chars[0], 'lastUpdated' => 0]);
+        //$db->insert('information', ['type' => 'character_id', 'id' => (int) $chars[0], 'lastUpdated' => 0]);
     }
     $type = str_replace('_id', '', $recipient['type']);
     $recips[] = ['recipient_id' => $recipient['id'], 'recipient_type' => str_replace('_id', '', $recipient['type'])];

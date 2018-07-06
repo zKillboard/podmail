@@ -6,6 +6,7 @@ class Info
 {
     public static function addChar(Db $db, int $id, string $name = null)
     {
+        if ($id <= 0) return;
         if ($db->exists('information', ['type' => 'character_id', 'id' => $id]) === false) {
             if ($name == null) $name = "character_id $id";
             $db->insert('information', ['type' => 'character_id', 'id' => $id, 'name' => $name, 'lastUpdated' => 0]);
@@ -14,6 +15,7 @@ class Info
 
     public static function addCorp(Db $db, int $id, string $name = null)
     {   
+        if ($id <= 0) return;
         if ($db->exists('information', ['type' => 'corporation_id', 'id' => $id]) === false) {
             if ($name == null) $name = "corporation $id";
             $db->insert('information', ['type' => 'corporation_id', 'id' => $id, 'name' => $name, 'lastUpdated' => 0]);
@@ -22,6 +24,7 @@ class Info
 
     public static function addAlliance(Db $db, int $id, string $name = null)
     {   
+        if ($id <= 0) return;
         if ($db->exists('information', ['type' => 'alliance_id', 'id' => $id]) === false) {
             if ($name == null) $name = "alliance $id";
             $db->insert('information', ['type' => 'alliance_id', 'id' => $id, 'name' => $name, 'lastUpdated' => 0]);

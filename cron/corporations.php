@@ -26,8 +26,7 @@ function success($guzzler, $params, $content)
 {
     $corporation = json_decode($content, true);
     $row = $params['row'];
-    if (@$row['name'] != @$corporation['name']) {
-        $db = $params['config']['db'];
-        $db->update('information', $row, ['$set' => ['name' => $corporation['name'], 'search' => strtolower($corporation['name']), 'lastUpdated' => time()]]);
-    }
+    $db = $params['config']['db'];
+    $db->update('information', $row, ['$set' => ['name' => $corporation['name'], 'search' => strtolower($corporation['name']), 'lastUpdated' => time()]]);
+    Info::addAlliance($db, @$corporation['alliance_id']);
 }

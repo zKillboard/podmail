@@ -41,7 +41,17 @@ function success(&$guzzler, $params, $content)
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v1/characters/$char_id/mail/$mail_id/";
-    $guzzler->call($url, '\podmail\body_success', '\podmail\ESI::fail', $params, $headers);
+    $guzzler->call($url, '\podmail\body_success', '\podmail\body_fail', $params, $headers);
+}
+
+function body_fail(&$guzzler, $params, $ex)
+{
+    $db = $params['config']['db'];
+    if ($ex->getCode() == 404) { // Mail not found!
+        $db->delete('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']]);
+        echo "Mail not found, purging...\n";
+        Util::sendDelta($db, $params['char_id']);
+    } else ESI::fail($guzzler, $params, $ex);
 }
 
 function body_success(&$guzzler, $params, $content)

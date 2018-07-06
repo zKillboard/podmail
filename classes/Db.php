@@ -53,6 +53,7 @@ class Db
     public function update(string $coll, array $filter = [], array $values, array $options = [])
     {
         $bulk = new \MongoDB\Driver\BulkWrite();
+        if (isset($filter['_id'])) $filter = ['_id' => $filter['_id']];
         $bulk->update($filter, $values, $options);
         return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getUpsertedCount();
     }
@@ -60,6 +61,7 @@ class Db
     public function delete(string $coll, array $filter = [])
     {
         $bulk = new \MongoDB\Driver\BulkWrite();
+        if (isset($filter['_id'])) $filter = ['_id' => $filter['_id']];
         $bulk->delete($filter);
         return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getDeletedCount();
     }

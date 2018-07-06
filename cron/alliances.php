@@ -26,8 +26,6 @@ function success($guzzler, $params, $content)
 {
     $alliance = json_decode($content, true);
     $row = $params['row'];
-    if (@$row['name'] != @$alliance['name']) {
-        $db = $params['config']['db'];
-        $db->update('information', $row, ['$set' => ['name' => $alliance['name'], 'search' => strtolower($alliance['name']), 'lastUpdated' => time()]]);
-    }
+    $db = $params['config']['db'];
+    $db->update('information', $row, ['$set' => ['name' => $alliance['name'], 'search' => strtolower($alliance['name']), 'lastUpdated' => time()]]);
 }
