@@ -14,7 +14,7 @@ while ($minute == date('Hi')) {
     $scopes = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastChecked' => ['$lt' => (time() - 60)]]);
     foreach ($scopes as $row) {
         $config['row'] = $row;
-        $config['iterate'] = $row['lastChecked'] == 0 || date('i') == 0;
+        $config['iterate'] = $row['lastChecked'] == 0 || date('i') == 45;
         $db->update('mails', ['owner' => $row['character_id'], 'labels' => ['$ne' => 999999999]], ['$set' => ['purge' => true]], ['multi' => true]);
         $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); // Push ahead just in case of error
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
@@ -77,6 +77,12 @@ function mailSuccess(&$guzzler, $params, $content)
         } else {
             $db->update('mails', ['owner' => $char_id, 'mail_id' => $mail['mail_id']], ['$set' => ['purge' => false]]);
             $cmail = $db->queryDoc('mails', ['owner' => $char_id, 'mail_id' => $mail['mail_id']]);
+            $filtered = Util::removeMailingLists($mail['labels']);
+            if ($cmail['labels'] != $filtered) {
+                echo $mail['mail_id'] . "\n" . print_r($cmail['labels']) . print_r($filtered);
+                //$db->update('mails', $cmail, ['$set' => ['labels' => $mail['labels']]]);
+                $set_delta = true;
+            }
             if ($cmail['is_read'] != $mail['is_read']) {
                 $db->update('mails', $cmail, ['$set' => ['is_read' => $mail['is_read']]]);
                 $set_delta = true;
@@ -86,7 +92,7 @@ function mailSuccess(&$guzzler, $params, $content)
         $tcount++;
     }
 
-    if (sizeof($json) >= 50 && $tcount < 1500 && ($count <= 30 || $params['iterate'] == true)) {
+    if (sizeof($json) >= 50 && /*$tcount < 1500 &&*/ ($count > 0 || $params['iterate'] == true)) {
         $params['tcount'] = $tcount;
         $params['last_mail_id'] = $current_mail_id;
         doNextCall($params, $params['access_token'], $guzzler);

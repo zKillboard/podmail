@@ -1,5 +1,6 @@
 var currentFolder = 0;
 var currentPage = 0;
+var currentMail = 0;
 var click = false;
 var deltaCount = 1;
 $( document ).ready(function() {
@@ -45,6 +46,7 @@ function folderLoaded()
     
     $(".subjectrow").click(function() { mailClick(this); return false; } );
     $("#folders").html($("#pre-folders").html());
+    $("#compose-start").click(function() { compose(); return false; });
     $(".folder-link").click(function (e) { loadFolderClick($(this).attr('folder')); return false; });
     if (click) {
         $("#mail").hide();
@@ -58,7 +60,39 @@ function folderLoaded()
     if (currentPage < ($('#nextpage').attr('max') - 1)) $('#nextpage').click(function() { loadPage(currentFolder, (currentPage + 1)); return false; });
     else $('#nextpage').removeAttr('href');
 
-    $("#compose-start").click(function() { compose(); return false; });
+    $("#mass-checkbox").click(function() { $(".mail-checkbox").prop('checked', $(this).prop('checked')); setMassButtons(); });
+    $(".mail-checkbox").click(function() { setMassButtons(); });
+    $("#mass-read").click(function() { massSetRead('true'); });
+    $("#mass-unread").click(function() { massSetRead('false'); });
+    $("#mass-delete").confirm({title:'Deleting multiple EveMails', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { massDelete(); } }, noop:{text:'Dismiss', action: function() {} }}});
+}
+
+function setMassButtons()
+{
+    var count = $(".mail-checkbox:checked").length;
+    var isDisabled = (count == 0);
+    $("#mass-delete").prop('disabled', isDisabled);
+    $("#mass-read").prop('disabled', isDisabled);
+    $("#mass-unread").prop('disabled', isDisabled);
+}
+
+function massSetRead(is_read)
+{
+    $(".mail-checkbox:checked").each(function() {
+            mail_id = $(this).attr('mail_id');
+            if (is_read == 'true') $(".mail-" + mail_id).removeClass('unread');
+            else $(".mail-" + mail_id).addClass('unread');
+            $.ajax('/action/mail/' + mail_id + '/is_read/' + is_read, {method: 'post'});
+            });
+}
+
+function massDelete()
+{
+    $(".mail-checkbox:checked").each(function() {
+            mail_id = $(this).attr('mail_id');
+            $("#mail-" + mail_id).addClass('strike');
+            $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
+            });
 }
 
 function mailClick(o)
@@ -126,29 +160,29 @@ function processDelta(text)
 $(document).on('submit', '#compose_form', function() {            
         $("#compose-btn").attr("disabled", "disabled");
         $.ajax({
-        url     : $(this).attr('action'),
-        type    : $(this).attr('method'),
-        dataType: 'json',
-        data    : $(this).serialize(),
-        success : function( data ) {
-            if (data.error == false) {
-                //$.dialog({title: 'Sending EveMail...', content: data.message, type: 'green', backgroundDismiss:true, escapeKey:true});
-                $.confirm({title:'Sending EveMail...', content: data.message, type: 'green', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'OK', action: function() {  } }, noop:{text:'Dismiss', action: function() {} }}});
-                $("#mail").hide();
-                $("#compose").hide();
-                $("#listing").show();
-            } else {
-                $.dialog({title: 'Sending EveMail...', content: data.message, type: 'red'});
-            }
-            $("#compose-btn").removeAttr("disabled")
-        },
-        error   : function( xhr, err ) {
-            console.log(err);
-            alert('Error');     
-            $("#compose-btn").removeAttr("disabled");
-        }
-        });    
-        return false;
+url     : $(this).attr('action'),
+type    : $(this).attr('method'),
+dataType: 'json',
+data    : $(this).serialize(),
+success : function( data ) {
+if (data.error == false) {
+//$.dialog({title: 'Sending EveMail...', content: data.message, type: 'green', backgroundDismiss:true, escapeKey:true});
+$.confirm({title:'Sending EveMail...', content: data.message, type: 'green', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'OK', action: function() {  } }, noop:{text:'Dismiss', action: function() {} }}});
+$("#mail").hide();
+$("#compose").hide();
+$("#listing").show();
+} else {
+$.dialog({title: 'Sending EveMail...', content: data.message, type: 'red'});
+}
+$("#compose-btn").removeAttr("disabled")
+},
+error   : function( xhr, err ) {
+console.log(err);
+alert('Error');     
+$("#compose-btn").removeAttr("disabled");
+          }
+});    
+return false;
 });
 
 function compose_prepare(recips = '', subject = '', body = '')
@@ -171,6 +205,7 @@ function compose()
 {
     compose_prepare();
     compose_show();
+    $("#recipients").focus();
 }  
 
 function reply()

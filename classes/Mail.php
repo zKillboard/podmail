@@ -14,7 +14,7 @@ class Mail
                 $db->update('mails', $mail, ['$set' => ['is_read' => $is_read]]);
                 Util::setDelta($db, $char_id);
             } else {
-                $db->insert('actions', ['mail_id' => $mail_id, 'character_id' => $char_id, 'action' => 'setread', 'status' => 'pending', 'type' => 'put', 'url' => "$esi/v1/characters/$char_id/mail/$mail_id/", 'body' => json_encode(['labels' => [], 'read' => $is_read]), 'is_read' => $is_read]);
+                $db->insert('actions', ['mail_id' => $mail_id, 'character_id' => $char_id, 'action' => 'setread', 'status' => 'pending', 'type' => 'put', 'url' => "$esi/v1/characters/$char_id/mail/$mail_id/", 'body' => json_encode(['labels' => Util::removeMailingLists($db, $mail['labels']), 'read' => $is_read]), 'is_read' => $is_read]);
             }
         }
     }

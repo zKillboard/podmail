@@ -16,7 +16,7 @@ while ($minute == date('Hi')) {
     $unFetched = $db->query('mails', ['fetched' => false], ['sort' => ['mail_id' => -1], 'limit' => 10]);
     foreach ($unFetched as $mail) {
         $params = ['mail_id' => $mail['mail_id']];
-        $db->update('mails', $mail, ['$set' => ['fetched' => null]]);
+        $db->update('mails', ['mail_id' => $mail['mail_id']], ['$set' => ['fetched' => null]], ['multi' => true]);
         $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $mail['owner']]);
 
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
@@ -58,6 +58,6 @@ function body_success(&$guzzler, $params, $content)
 {
     $mail = json_decode($content, true);
     $db = $params['config']['db'];
-    $db->update('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]]);
+    $db->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]], ['multi' => true]);
     Util::sendDelta($db, $params['char_id']);
 }

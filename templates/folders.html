@@ -2,6 +2,6 @@
 <button type="submit" id="compose-start" class="btn btn-primary btn-sm">Compose</button>
 {% for folder in folders %}
 <hr/>
-<a href="/folder/{{ folder.label_id }}" id="folder-{{ folder.label_id }}" folder="{{ folder.label_id }}" class="folder-link folder-{{ folder.label_id }}">{{ folder.name }} <span class='float-right'>{% if folder.unread > 0 %}<span class='unread'>{{ folder.unread }}</span> / {% endif %}{% if folder.count > 0 %}<span class='noweight'>{{ folder.count }}</span>{% endif %}</span></a>
+<a href="/folder/{{ folder.label_id }}"  id="folder-{{ folder.label_id }}" folder="{{ folder.label_id }}" class="folder-link folder-{{ folder.label_id }}"><div>{{ folder.name }}<span class="float-right">{% if folder.unread > 0 %}<span class='unread'>{{ folder.unread }}</span>{% endif %}</span></div></a>
 {% endfor %}
 <hr/>

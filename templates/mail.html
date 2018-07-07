@@ -1,10 +1,10 @@
 <hr/>
 <a href='#' id='showlisting'>Back</a>&nbsp;&nbsp;
-<button class="btn btn-sm btn-primary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit">Mark Unread</button>
+<button class="btn btn-sm btn-secondary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit">Mark Unread</button>
 {% if mail.is_notifcation != true %}
-<button class="btn btn-sm btn-primary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit">Reply</button>
-<button class="btn btn-sm btn-primary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit">Forward</button>
-<button class="btn btn-primary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit">Delete</button>
+<button class="btn btn-sm btn-secondary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit">Reply</button>
+<button class="btn btn-sm btn-secondary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit">Forward</button>
+<button class="btn btn-secondary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit">Delete</button>
 {% endif %}
 <hr/>
 <span class="float-right">

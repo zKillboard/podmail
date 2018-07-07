@@ -40,7 +40,7 @@ function mailSuccess(&$guzzler, $params, $content)
     $labels = $labels['labels'];
 
     $labels[] = ['label_id' => 0, 'name' => 'All Mails'];
-    $labels[] = ['label_id' => 999999998, 'name' => '<i>No Label<i>'];
+    $labels[] = ['label_id' => 999999998, 'name' => 'No Label'];
     $labels[] = ['label_id' => 999999999, 'name' => 'Notifications'];
 
     $l = [];
