@@ -52,5 +52,5 @@ function mailSuccess(&$guzzler, $params, $content)
     ksort($l);
     $char_id = $params['char_id'];
     $db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id], ['$set' => ['labels' => $l, 'lastLabelUpdate' => time()]]);
-    Util::setDelta($db, $char_id);
+    Util::setDelta($params['config'], $char_id);
 }

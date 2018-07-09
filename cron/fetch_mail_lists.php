@@ -44,6 +44,5 @@ function mailSuccess(&$guzzler, $params, $content)
 
         echo "List $id => $name\n";
         $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
-        $db->update('delta', [], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]], ['multi' => true]);
     }
 }

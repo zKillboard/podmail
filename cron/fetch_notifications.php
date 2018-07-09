@@ -58,7 +58,7 @@ function mailSuccess(&$guzzler, $params, $content)
     foreach ($json as $notif) {
         $notif_mail = ['mail_id' => $notif['notification_id'], 'owner' => $char_id];
         if (!$db->exists('mails', $notif_mail)) {
-            if ($notif['sender_type'] == 'character') Info::addChar($db, $notif['sender_id']);
+            if ($notif['sender_type'] == 'character') Info::addChar($params['config'], $notif['sender_id']);
             if ($notif['sender_type'] == 'corporation') Info::addCorp($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'alliance') Info::addAlliance($db, $notif['sender_id']);
 

@@ -4,14 +4,14 @@ namespace podmail;
 
 $db = $config['db'];
 $id = (int) $args['id'];
-$page = (int) $args['page'];
+$page = (int) @$args['page'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
 $labels = $row['labels'];
 $folder = $labels[$id];
 $folder['label_id'] = $id;
 
-$filter = ['owner' => $char_id, 'deleted' => ['$ne' => true], 'fetched' => true];
+$filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true], 'fetched' => true];
 if ($id == 999999998) $filter['labels'] = [];
 else if ($id != 0) $filter['labels'] = $id;
 else $filter['labels'] = ['$ne' => 999999999];

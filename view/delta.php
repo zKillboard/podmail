@@ -1,12 +1,18 @@
 <?php
 
-$db = $config['db'];
-$row = $db->queryDoc('deltas', ['character_id' => $char_id]);
-if ($row == null) {
-    $db->insert('deltas',  ['character_id' => $char_id, 'uniq' => null]);
-} else {
-    // Don't use $row, prevents atomicity
-    $db->update('deltas', ['character_id' => $char_id, 'uniq' => $row['uniq']], ['$set' => ['delta' => 0]]);
+if ($char_id == 0) return $response;
+
+$redis = $config['redis'];
+
+$key = "podmail:delta:$char_id";
+$ret = $redis->multi()->get($key)->del($key)->exec();
+$row = unserialize($ret[0]);
+
+$payload = ['delta' => @$row['uniq']];
+
+if (isset($row['notification'])) {
+    $payload['notification'] = $row['notification'];
 }
 
-return $response->withHeader('Content-type', 'application/json')->getBody()->write(json_encode(['delta' => @$row['uniq']]));
+$json = json_encode($payload);
+return $app->view->render($response->withHeader('Content-type', 'application/json'), 'json.twig', ['json' => $json]);

@@ -94,10 +94,13 @@ function folderLoaded()
         pushState('/folder/' + currentFolder);
     }
 
-    if (currentPage > 0) $('#prevpage').click(function() { loadPage(currentFolder, (currentPage - 1)); return false; });
+    if (currentPage > 0) $('#prevpage').click(function() { loadPage(currentFolder, (currentPage - 1)); pushState("/folder/" + currentFolder + "/" + (currentPage - 1)); return false; });
     else $('#prevpage').removeAttr('href');
-    if (currentPage < ($('#nextpage').attr('max') - 1)) $('#nextpage').click(function() { loadPage(currentFolder, (currentPage + 1)); return false; });
+    if (currentPage < ($('#nextpage').attr('max') - 1)) $('#nextpage').click(function() { loadPage(currentFolder, (currentPage + 1)); pushState("/folder/" + currentFolder + "/" + (currentPage + 1)); return false; });
     else $('#nextpage').removeAttr('href');
+
+    $("#folder-id-content").css("display", "block");
+    $('[data-toggle="tooltip"]').tooltip()
 
     $("#mass-checkbox").click(function() { $(".mail-checkbox").prop('checked', $(this).prop('checked')); setMassButtons(); });
     $(".mail-checkbox").click(function() { setMassButtons(); });
@@ -131,7 +134,7 @@ function massDelete()
 {
     $(".mail-checkbox:checked").each(function() {
             mail_id = $(this).attr('mail_id');
-            $("#mail-" + mail_id).addClass('strike');
+            $("#mail-" + mail_id).addClass('strike').hide();
             $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
             });
     setTimeout("forceDelta();", 3000);
@@ -152,6 +155,8 @@ function mailLoaded(o)
     $("#unread").hide();
     $("#listing").hide();
     $("#mail").show();
+    $("#mail-id-content").css("display", "block");
+    $('[data-toggle="tooltip"]').tooltip()
     var mail_id = $("#mail-id").html();
     currentMail = mail_id;
     pushState('/mail/' + mail_id);
@@ -170,6 +175,7 @@ function deleteMail(btn)
 {
     mail_id = $(btn).attr('mail_id');
     $("#mail-" + mail_id).addClass('strike');
+    $("#div-mail-" + mail_id).hide();
     $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
     setTimeout("forceDelta();", 3000);
 }
@@ -214,11 +220,12 @@ function forceDelta()
 
 function processDelta(data)
 {
-    data = JSON.parse(data);
     if (deltaCurrent != data.delta) {
+        console.log(data);
         deltaCurrent = data.delta;
         loadFolders();
         deltaCount = 1;
+        if (data.notification) htmlNotify(data.notification);
     } else if (deltaCount < 30) deltaCount++;
 }
 
@@ -241,7 +248,7 @@ $.dialog({title: 'Sending EveMail...', content: data.message, type: 'red'});
 $("#compose-btn").removeAttr("disabled")
 },
 error   : function( xhr, err ) {
-console.log(err);
+//console.log(err);
 alert('Error');     
 $("#compose-btn").removeAttr("disabled");
 }
@@ -292,16 +299,12 @@ function forward()
 
 $(window).on("popstate", function(e) {
         if (e.originalEvent.state !== null) {
-            console.log(location.href);
-            console.log(event.state);
             if (event.state.currentMail != 0) {
-                console.log('load mail');
                 $("#mail").load(location.href, mailLoaded);
                 $("#listing").hide();
                 $("#compose").hide();
                 $("#mail").show();
             } else {
-                console.log('load folder');
                 loadFolder(event.state.currentFolder, event.state.currentPage);
                 $("#mail").hide();
                 $("#compose").hide();
@@ -316,9 +319,7 @@ function pushState(newURL)
 {
     if (newURL == lastState) return;
     lastState = newURL;
-    console.log("pushing state " + newURL);
     state = {currentFolder: currentFolder, currentPage: currentPage, currentMail: currentMail};
-    console.log(state);
     history.pushState(state, '', newURL);
 }
 
@@ -329,7 +330,6 @@ function checkSessionStorage()
     sessionStorage.removeItem("mail_id");
     sessionStorage.removeItem("folder_id");
     if (mail_id) {
-        console.log('session load mail ' + mail_id);
         $("#mail").load('/mail/' + mail_id, mailLoaded);
         $("#listing").hide();
         $("#compose").hide();
@@ -337,10 +337,33 @@ function checkSessionStorage()
         return;
     }
     if (folder_id) {
-        console.log('session load folder ' + folder_id);
         loadFolderClick(folder_id);
         $("#mail").hide();
         $("#compose").hide();
         $("#listing").show(); 
     }
+}
+
+function htmlNotify (data)
+{
+    if("Notification" in window) {
+        if (Notification.permission !== 'denied' && Notification.permission !== "granted") {
+            Notification.requestPermission(function (permission) {
+                    if (permission === 'granted') htmlNotify(data);
+                    });
+            return;
+        }
+        if (Notification.permission === 'granted') {
+            var notif = new Notification(data.title, {
+body: data.message,
+icon: data.image,
+});
+setTimeout(function() { notif.close() }, 20000);
+notif.onclick = function () {
+    notif.close();
+    window.focus();
+    //window.open(data.url).focus();
+};
+}
+}
 }

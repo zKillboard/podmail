@@ -73,5 +73,5 @@ function postSuccess($guzzler, $params, $content)
             break;
     }
     $db->delete('actions', $row);
-    Util::setDelta($db, $char_id);
+    Util::setDelta($params['config'], $char_id);
 }

@@ -1,3 +1,3 @@
 <?php
 
-$app->view->render($response, 'about.html');
+return $app->view->render($response, 'about.html');

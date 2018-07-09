@@ -21,8 +21,9 @@
         <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 
-        <link href="/gre/gre.css" rel="stylesheet">
+        <link rel="stylesheet" href="/gre/gre.css">
         <link rel="stylesheet" href="/css/podmail.css?v={{ random() }}">
+        <link rel="stylesheet" href="/css/sticky-footer.css">
     </head>
     <body>
         <section id="app" class="container-fluid">
@@ -31,7 +32,12 @@
         {% block content %}Default content{% endblock %}
         </section>
 
-        <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+        <br/>
+        <footer class="footer">
+            <span class="text-muted"><small><small>PodMail - all mails are kept private and not shared with anyone. | <a href='https://github.com/zKillboard/podmail'>GitHub</a> | <a href="/about">About</a></small></small></span>
+        </footer>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.0/jquery-confirm.min.js"></script>

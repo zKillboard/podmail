@@ -9,9 +9,15 @@ class Util
         return new \cvweiss\Guzzler($maxConcurrent, 1, 'podmail - ' . $config['domain']);
     }
 
-    public static function setDelta(Db $db, int $char_id)
+    public static function setDelta(array $config, int $char_id, array $notification = [])
     {
-        $db->update('deltas', ['character_id' => $char_id], ['$set' => ['uniq' => uniqid("", true)]]);
+        $redis = $config['redis'];
+
+        $update = ['uniq' => uniqid("", true)];
+        if (sizeof($notification) > 0) {
+            $update['notification']  = $notification;
+        }
+        $redis->setex("podmail:delta:$char_id", 3600, serialize($update));
     }
 
     public static function removeMailingLists(Db $db, array $labels)

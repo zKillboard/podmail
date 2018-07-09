@@ -40,6 +40,6 @@ function addRoute(\Slim\App &$app, string $url, string $file, array $config, int
     if (!in_array($type, $validTypes)) throw new \IllegalArguementException("Invalid type: $type");
     $app->$type($url, function (\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, array $args) 
             use ($app, $file, $char_id, $config) {
-                return include "view/" . $file;
+                return (include "view/" . $file)->withHeader('Access-Control-Allow-Origin', "https://" . $config['domain'])->withHeader('Access-Control-Allow-Methods', 'GET, POST')->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization');
             });
 }

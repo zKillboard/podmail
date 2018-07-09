@@ -21,7 +21,7 @@
 	if (typeof $.fn.gre === 'undefined') {
 		// define default options
 		var defaults = {
-			content_css_url: 'gre/gre.css',
+			content_css_url: '/gre/gre.css',
 			height: 250
 		};
 		$.fn.gre = function (options) {

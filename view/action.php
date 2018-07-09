@@ -11,6 +11,7 @@ $value = $args['value'];
 switch ($type) {
     case 'mail':
         handleMailAction($config, $char_id, $id, $action, $value);
+        return $response;
         break;
     default:
         throw new \InvalidArgumentException("Unknown type: $type");

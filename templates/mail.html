@@ -1,13 +1,15 @@
+<div id="mail-id-content" style='display: none;'>
 <hr/>
+{% if mail.from %}
 <a href='#' id='showlisting'><i class="fas fa-arrow-left" style='padding-right: 2em;'></i></a>
-<button class="btn btn-sm btn-secondary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-envelope"></i></button>
+<button class="btn btn-sm btn-secondary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
 {% if mail.is_notifcation != true %}
-<button class="btn btn-sm btn-secondary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-reply"></i></button>
-<button class="btn btn-sm btn-secondary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-arrow-circle-right"></i></button>
-<button class="btn btn-secondary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-trash-alt"></i></button>
+<button class="btn btn-sm btn-secondary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Reply"><i class="fas fa-reply"></i></button>
+<button class="btn btn-sm btn-secondary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Forward"><i class="fas fa-arrow-circle-right"></i></button>
+<button class="btn btn-secondary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
 {% endif %}
 <hr/>
-<strong>Subject: <span id='mail-subject'>{{ mail.subject|raw }}</span></strong>
+<strong><span id='mail-subject'>{{ mail.subject|raw }}</span></strong>
 <hr/>
 <span class="float-right">
 <span id="mail-dttm">{{ mail.dttm }}</span><br/>
@@ -21,8 +23,11 @@ To:
 </span>
 <hr/>
 <span id='mail-body'>{{ mail.body|raw }}</span>
-<hr/>
-<small>mail_id:<span id="mail-id">{{ mail.mail_id }}</span></small>
+</div>
+<small style="display: none;">mail_id:<span id="mail-id">{{ mail.mail_id }}</span></small>
+{% else %}
+<i>This mail does not exist, has not been fetched yet, or you do not have access.</i>
+{% endif %}
 <script type="text/javascript">
 window.onload = function() {
     if (!window.jQuery) {  
