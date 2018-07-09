@@ -1,11 +1,13 @@
 <hr/>
-<a href='#' id='showlisting'>Back</a>&nbsp;&nbsp;
-<button class="btn btn-sm btn-secondary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit">Mark Unread</button>
+<a href='#' id='showlisting'><i class="fas fa-arrow-left"></i></a>&nbsp;&nbsp;
+<button class="btn btn-sm btn-secondary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-envelope"></i></button>
 {% if mail.is_notifcation != true %}
-<button class="btn btn-sm btn-secondary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit">Reply</button>
-<button class="btn btn-sm btn-secondary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit">Forward</button>
-<button class="btn btn-secondary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit">Delete</button>
+<button class="btn btn-sm btn-secondary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-reply"></i></button>
+<button class="btn btn-sm btn-secondary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-arrow-circle-right"></i></button>
+<button class="btn btn-secondary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit"><i class="fas fa-trash-alt"></i></button>
 {% endif %}
+<hr/>
+<strong>Subject: <span id='mail-subject'>{{ mail.subject|raw }}</span></strong>
 <hr/>
 <span class="float-right">
 <span id="mail-dttm">{{ mail.dttm }}</span><br/>
@@ -17,8 +19,6 @@ To:
 {% set first = true %}
 <span id='mail-to'>{% for recip in mail.recipients %}{% if first == false %}, {% endif %}{{ recip.recipient_name }}{% set first = false %}{% endfor %}</span><br/>
 </span>
-<hr/>
-Subject: <span id='mail-subject'>{{ mail.subject|raw }}</span>
 <hr/>
 <span id='mail-body'>{{ mail.body|raw }}</span>
 <hr/>
