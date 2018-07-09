@@ -77,11 +77,11 @@ function mailSuccess(&$guzzler, $params, $content)
         } else {
             $db->update('mails', ['owner' => $char_id, 'mail_id' => $mail['mail_id']], ['$set' => ['purge' => false]]);
             $cmail = $db->queryDoc('mails', ['owner' => $char_id, 'mail_id' => $mail['mail_id']]);
-            $filtered = Util::removeMailingLists($mail['labels']);
-            if ($cmail['labels'] != $filtered) {
-                echo $mail['mail_id'] . "\n" . print_r($cmail['labels']) . print_r($filtered);
+            $filtered = Util::removeMailingLists($db, $cmail['labels']);
+            if ($mail['labels'] != $filtered) {
+                echo $mail['mail_id'] . "\n" . print_r($mail['labels'], true) . print_r($filtered, true);
                 //$db->update('mails', $cmail, ['$set' => ['labels' => $mail['labels']]]);
-                $set_delta = true;
+                //$set_delta = true;
             }
             if ($cmail['is_read'] != $mail['is_read']) {
                 $db->update('mails', $cmail, ['$set' => ['is_read' => $mail['is_read']]]);

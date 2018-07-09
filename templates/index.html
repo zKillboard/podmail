@@ -1,15 +1,15 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-<div class="container" style='margin: 0px; padding: 0px;'>
   <div class="row">
-    <div id='folders' class="col-2">Loading...</div>
-    <div class="col-10">
-      <div id='listing'>Loading...</div>
-      <div id='mail'></div>
-      {% include 'compose.html' %}
+    <div class="col-2" id="col-menu">
+        <div id="folders">Loading...</div>
+    </div>
+    <div class="col-10" id="col-content">
+      <div id="listing">Loading...</div>
+      <div id="mail"></div>
+      {% include "compose.html" %}
     </div>
   </div>
-</div>
-<div id='pre-folders' class='d-none'>foo</div>
+<div id="pre-folders" class="d-none">foo</div>
 {% endblock %}

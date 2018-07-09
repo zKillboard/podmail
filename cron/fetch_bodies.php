@@ -10,7 +10,6 @@ $db = $config['db'];
 $db->update('mails', ['fetched' => ['$exists' => false]], ['$set' => ['fetched' => false]], ['multi' => true]);
 $db->update('mails', ['fetched' => null], ['$set' => ['fetched' => false]], ['multi' => true]);
 
-$count = 0;
 $minute = date('Hi');
 while ($minute == date('Hi')) {
     $unFetched = $db->query('mails', ['fetched' => false], ['sort' => ['mail_id' => -1], 'limit' => 10]);
@@ -20,14 +19,12 @@ while ($minute == date('Hi')) {
         $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $mail['owner']]);
 
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
-        $count++;
     } 
     if (sizeof($unFetched) == 0) {
         $guzzler->tick();
         sleep(1);
     }
 }
-if ($count > 0) echo "Fetched $count mails\n";
 $guzzler->finish();
 
 function success(&$guzzler, $params, $content)
@@ -59,5 +56,6 @@ function body_success(&$guzzler, $params, $content)
     $mail = json_decode($content, true);
     $db = $params['config']['db'];
     $db->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]], ['multi' => true]);
+    echo $params['char_id'] . " fetched  " . $params['mail_id'] . "\n";
     Util::sendDelta($db, $params['char_id']);
 }

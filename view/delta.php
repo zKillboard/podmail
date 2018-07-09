@@ -1,9 +1,12 @@
 <?php
 
 $db = $config['db'];
-$row = $db->queryDoc('delta', ['character_id' => $char_id]);
-if ($row['delta'] == 1) {
-    $db->update('delta', ['character_id' => $char_id, 'uniq' => $row['uniq']], ['$set' => ['delta' => 0]]);
-    $response->getBody()->write('1');
+$row = $db->queryDoc('deltas', ['character_id' => $char_id]);
+if ($row == null) {
+    $db->insert('deltas',  ['character_id' => $char_id, 'uniq' => null]);
+} else {
+    // Don't use $row, prevents atomicity
+    $db->update('deltas', ['character_id' => $char_id, 'uniq' => $row['uniq']], ['$set' => ['delta' => 0]]);
 }
-return $response;
+
+return $response->withHeader('Content-type', 'application/json')->getBody()->write(json_encode(['delta' => @$row['uniq']]));

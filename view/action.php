@@ -20,7 +20,7 @@ function handleMailAction(array $config, int $char_id, int $id, string $action, 
 {
     switch ($action) {
        case 'is_read':
-            Mail::setReadStatus($config, $char_id, $id, ($value == 'read')); 
+            Mail::setReadStatus($config, $char_id, $id, ($value == 'true')); 
             break;
         case 'delete':
             Mail::delete($config, $char_id, $id);

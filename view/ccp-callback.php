@@ -35,8 +35,8 @@ $char_id = (int) $info['CharacterID'];
 $char_name = $info['CharacterName'];
 $scopes = $info['Scopes'];
 
-if (!$config['db']->exists('delta', ['character_id' => $char_id])) {
-    $config['db']->insert('delta', ['character_id' => $char_id, 'delta' => 0]);
+if (!$config['db']->exists('deltas', ['character_id' => $char_id])) {
+    $config['db']->insert('deltas', ['character_id' => $char_id, 'delta' => 0]);
 }
 Info::addChar($config['db'], $char_id, $char_name);
 Info::addScopes($config['db'], $char_id, $scopes, $refresh_token);

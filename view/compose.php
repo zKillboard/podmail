@@ -12,7 +12,7 @@ if ($form_recips == "") return sendStatus($response, "Please provide recipient(s
 if ($form_subject == "") return sendStatus($response, "Please provide a subject...", true);
 if ($form_body == "") return sendStatus($response, "Please provide a message body...", true);
 
-$form_body .= "<br/><br/>---<br/>Sent using <a href='https://podmail.zzeve.com/'>PodMail</a>.";
+if (strpos($form_body, "PodMail") === false) $form_body .= "<br/><br/>---<br/>Sent using <a href='https://podmail.zzeve.com/'>PodMail</a>.";
 
 $mail = ['subject' => trim($form_subject), 'body' => trim($form_body), "approved_cost" => ((int) 10000)];
 

@@ -5,6 +5,12 @@ namespace podmail;
 $db = $config['db'];
 $id = (int) $args['id'];
 $page = (int) $args['page'];
+
+$row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
+$labels = $row['labels'];
+$folder = $labels[$id];
+$folder['label_id'] = $id;
+
 $filter = ['owner' => $char_id, 'deleted' => ['$ne' => true], 'fetched' => true];
 if ($id == 999999998) $filter['labels'] = [];
 else if ($id != 0) $filter['labels'] = $id;
@@ -21,4 +27,4 @@ if ($count == 0) {
 
 Info::addInfo($db, $mails);
 
-return $app->view->render($response, 'mails.html', ['mails' => $mails, '$id' => $id, 'count' => $count, 'page' => (1 + $page), 'max' => $max, 'iterated' => $iterated]);
+return $app->view->render($response, 'mails.html', ['folder' => $folder, 'mails' => $mails, '$id' => $id, 'count' => $count, 'page' => (1 + $page), 'max' => $max, 'iterated' => $iterated]);

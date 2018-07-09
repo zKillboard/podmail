@@ -23,9 +23,9 @@ hr {
 }
 
 .from {
-    width: 150px;
-    min-width: 150px;
-    max-width: 150px;
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
     display: inline-block;
     margin-right: 1em;
     white-space: nowrap;
@@ -44,4 +44,8 @@ hr {
 
 .hidden {
     display: none;
+}
+
+.right {
+        text-align: right;
 }

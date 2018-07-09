@@ -11,7 +11,7 @@ class Util
 
     public static function setDelta(Db $db, int $char_id)
     {
-        $db->update('delta', ['character_id' => $char_id], ['$set' => ['delta' => 1, 'uniq' => uniqid("", true)]]);
+        $db->update('deltas', ['character_id' => $char_id], ['$set' => ['uniq' => uniqid("", true)]]);
     }
 
     public static function removeMailingLists(Db $db, array $labels)

@@ -24,9 +24,11 @@ while ($minute == date('Hi')) {
         if (in_array($char_id, $chars)) { echo ("dupe $char_id\n"); continue; }
         $chars[] = $char_id;
 
+        $db->update('information', $row, ['$set' => ['lastUpdated' => time()]]);
+
         $params['row'] = $row;
         $params['config'] = $config;
-        $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\ESI::fail', $params);
+        $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\fail', $params);
     }
     $guzzler->finish();
     if (sizeof($toUpdate) == 0) {
@@ -35,6 +37,15 @@ while ($minute == date('Hi')) {
     }
 }
 $guzzler->finish();
+
+function fail($guzzler, $params, $ex)
+{
+    $db = $params['config']['db'];
+    $row = $params['row'];
+    // Try again in two minutes
+    $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
+    echo $row['id'] . " failed to retrieve information....\n";
+}
 
 function success($guzzler, $params, $content)
 {
