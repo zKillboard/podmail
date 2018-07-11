@@ -13,12 +13,12 @@ if (!$db->exists('information', ['type' => 'label_id', 'id' => 999999999])) {
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $db->update('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastChecked' => ['$exists' => false]], ['$set' => ['lastChecked' => 0]], ['multi' => true]);
-    $scopes = $db->query('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastChecked' => ['$lte' => (time() - 900)]]);
+    $db->update('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastNotifChecked' => ['$exists' => false]], ['$set' => ['lastNotifChecked' => 0]], ['multi' => true]);
+    $scopes = $db->query('scopes', ['scope' => 'esi-characters.read_notifications.v1', 'lastNotifChecked' => ['$lte' => (time() - 900)]]);
     foreach ($scopes as $row) {
         $config['row'] = $row;
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
-        $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); 
+        $db->update('scopes', $row, ['$set' => ['lastNotifChecked' => time()]]); 
     }
     if (sizeof($scopes) == 0) {
         $guzzler->tick();
@@ -33,7 +33,7 @@ function success(&$guzzler, $params, $content)
     $json = json_decode($content, true);
     $access_token = $json['access_token'];
     $row = $params['config']['row'];
-    $params['config']['db']->update('scopes', $row, ['$set' => ['lastChecked' => time()]]);
+    $params['config']['db']->update('scopes', $row, ['$set' => ['lastNotifChecked' => time()]]);
 
     doNextCall($params, $access_token, $guzzler);
 }
@@ -55,10 +55,11 @@ function mailSuccess(&$guzzler, $params, $content)
     $db = $params['config']['db'];
     $json = json_decode($content, true);
     $char_id = $params['char_id'];
+    $count = 0;
     foreach ($json as $notif) {
         $notif_mail = ['mail_id' => $notif['notification_id'], 'owner' => $char_id];
         if (!$db->exists('mails', $notif_mail)) {
-            if ($notif['sender_type'] == 'character') Info::addChar($params['config'], $notif['sender_id']);
+            if ($notif['sender_type'] == 'character') Info::addChar($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'corporation') Info::addCorp($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'alliance') Info::addAlliance($db, $notif['sender_id']);
 
@@ -68,6 +69,7 @@ function mailSuccess(&$guzzler, $params, $content)
             $notif['mail_id'] = $notif['notification_id'];
             $notif['owner'] = $char_id;
             $notif['fetched'] = true;
+            $notif['deleted'] = false;
             $notif['unixtime'] = strtotime($notif['timestamp']);
             $notif['recipients'] = [['recipient_type' => 'character', 'recipient_id' => $char_id]];
             $notif['from'] = $notif['sender_id'];
@@ -80,4 +82,5 @@ function mailSuccess(&$guzzler, $params, $content)
         }
     }
     if ($set_delta) Util::setDelta($db, $char_id);
+    if ($count) echo "$char_id added $count notifications\n";
 }

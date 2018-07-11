@@ -48,11 +48,11 @@ class Info
         }
     }
 
-    public static function addMailingList(Db $db, int $char_id, int $mailing_list_id)
+    public static function addMailingList(Db $db, int $mailing_list_id, string $name)
     {   
         if ($db->exists('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id]) === false) {
             echo "Adding mailing list: $mailing_list_id\n";
-            $db->insert('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id, 'name' => "mail list $mailing_list_id", 'character_id' => $char_id, 'update' => true]);
+            $db->insert('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id, 'name' => $name]);
         }
     }
 

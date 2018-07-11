@@ -134,7 +134,8 @@ function massDelete()
 {
     $(".mail-checkbox:checked").each(function() {
             mail_id = $(this).attr('mail_id');
-            $("#mail-" + mail_id).addClass('strike').hide();
+            $("#mail-" + mail_id).addClass('strike');
+            $("#div-mail-" + mail_id).hide();
             $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
             });
     setTimeout("forceDelta();", 3000);
@@ -263,11 +264,13 @@ function compose_prepare(recips = '', subject = '', body = '')
     $("iframe").remove();
     $("#body").val(body);
     $(".gre").gre();
-    $("#cancel-compose").click(function() { history.back();; return false; });
+    $("#cancel-compose").click(function() { history.back(); return false; });
+    pushState("/compose");
     var width = parseInt($("body").css("width"));
     if (width <= 768) {
         $("#col-menu").hide();
     }
+
 }
 
 function compose_show()
@@ -344,6 +347,7 @@ function checkSessionStorage()
     }
 }
 
+var notifsDisplayed = [];
 function htmlNotify (data)
 {
     if("Notification" in window) {
@@ -354,16 +358,12 @@ function htmlNotify (data)
             return;
         }
         if (Notification.permission === 'granted') {
-            var notif = new Notification(data.title, {
-body: data.message,
-icon: data.image,
-});
-setTimeout(function() { notif.close() }, 20000);
-notif.onclick = function () {
-    notif.close();
-    window.focus();
-    //window.open(data.url).focus();
-};
-}
-}
+            if (notifsDisplayed.indexOf(data.uniqid) != -1) return;
+            if (data.unixtime < (Math.floor(new Date().getTime() / 1000) - 180)) return;
+            notifsDisplayed.push(data.uniqid);
+            var notif = new Notification(data.title, {body: data.message, icon: data.image,});
+            setTimeout(function() { notif.close() }, 20000);
+            notif.onclick = function () { notif.close(); window.focus();};
+        }
+    }
 }

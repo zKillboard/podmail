@@ -4,7 +4,7 @@ namespace podmail;
 
 require_once '../init.php';
 
-$guzzler = Util::getGuzzler($config, 5);
+$guzzler = Util::getGuzzler($config, 25);
 $db = $config['db'];
 
 $db->update('mails', ['fetched' => ['$exists' => false]], ['$set' => ['fetched' => false]], ['multi' => true]);
@@ -62,8 +62,7 @@ function body_success(&$guzzler, $params, $content)
         $title = isset($info['name']) ? $info['name'] : 'New EveMail';
         $image = ($info['type'] == 'character_id') ? "https://imageserver.eveonline.com/Character/" . $mail['from'] . "_32.jpg" : "https://podmail.zzeve.com/images/podmail.png";
 
-        $notify = ["title" => $title, "image" => $image, "message" => $mail["subject"], 'mail_id' => $params['mail_id']];
+        $notify = ["title" => $title, "image" => $image, "message" => $mail["subject"], 'mail_id' => $params['mail_id'], 'unixtime' => time(), 'uniqid' => uniqid("", true)];
     }
     Util::setDelta($params['config'], (int) $params['char_id'], $notify);
-    //echo $params['char_id'] . " fetched  " . $params['mail_id'] . "\n";
 }

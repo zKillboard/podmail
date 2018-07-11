@@ -28,6 +28,19 @@ class Db
         return 0;
     }
 
+    public function distinct(string $coll, string $key, array $filter = [])
+    {   
+        $command = new \MongoDB\Driver\Command([
+                // build the 'distinct' command
+                'distinct' => $coll, // specify the collection name
+                'key' => $key, // specify the field for which we want to get the distinct values
+                'query' => $filter // criteria to filter documents
+        ]);
+        $cursor = $this->manager->executeCommand($this->namespace, $command);
+        $ret = current($cursor->toArray())->values;
+        return $ret;
+    }
+
     public function queryDoc(string $coll, array $filter = [], array $options = [])
     {
         $cursor = $this->query($coll, $filter, $options);

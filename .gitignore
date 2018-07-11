@@ -3,3 +3,4 @@
 /cron/logs/*
 /cron/locks/*
 /vendor
+/work

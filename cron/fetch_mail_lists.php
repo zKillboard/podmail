@@ -8,15 +8,17 @@ $guzzler = Util::getGuzzler($config, 1);
 $db = $config['db'];
 
 $minute = date('Hi');
-//while ($minute == date('Hi')) {
-    $unFetched = $db->query('information', ['type' => 'mailing_list_id', 'update' => true]);
-    $candidates = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1'], ['sort' => ['_id' => -1], 'limit' => 20]);
-
-    foreach ($candidates as $row) {
+while ($minute == date('Hi')) {
+    $db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastListUpdate' => ['$exists' => false]], ['$set' => ['lastListUpdate' => 0]], ['multi' => true]);
+    $rows = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastListUpdate' => ['$lt' => (time() - 3600)]]);
+    foreach ($rows as $row) {
         $params = ['row' => $row];
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
     } 
-//}
+    $guzzler->finish();
+    sleep(1);
+    break;
+}
 $guzzler->finish();
 
 function success(&$guzzler, $params, $content)
@@ -29,20 +31,19 @@ function success(&$guzzler, $params, $content)
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v1/characters/$char_id/mail/lists/";
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
+    $guzzler->call($url, '\podmail\listSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
-function mailSuccess(&$guzzler, $params, $content)
+function listSuccess(&$guzzler, $params, $content)
 {
     $db = $params['config']['db'];
     $lists = json_decode($content, true);
     foreach ($lists as $list) {
         $id = (int) $list['mailing_list_id'];
         $name = $list['name'];
-        $cdoc = $db->queryDoc('information', ['type' => 'mailing_list_id', 'id' => $id]);
-        if (!isset($cdoc['update'])) continue;
-
-        echo "List $id => $name\n";
-        $db->update('information', ['type' => 'mailing_list_id', 'id' => $id], ['$set' => ['name' => $name], '$unset' => ['character_id' => 1, 'update' => 1]]);
+        Info::addMailingList($db, $id, $name);
     }
+    $db->update("scopes", ['scope' => 'esi-mail.read_mail.v1', 'character_id' => (int) $params['char_id']], ['$set' => ['lastListUpdate' => time(), 'mail_lists' => $lists]]);
+    Util::setDelta($params['config'], $params['char_id']);
+    echo $params['char_id'] . " mail lists loaded\n";
 }

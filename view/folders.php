@@ -11,30 +11,26 @@ foreach ($labels as $label) {
     if ($label_id == 999999998) $filter['labels'] = [];
     else if ($label_id != 0) $filter['labels'] = $label_id;
     else $filter['labels'] = ['$ne' => 999999999];
-    $count = 0; //$db->count('mails', $filter);
-
-    if ($count == 0 && $label_id == 999999998) continue;
 
     $filter['is_read'] = false;
     $label['unread'] = $db->count('mails', $filter);
-    $label['count'] = $count;
-    $label['read'] = $read;
     $folders[$label_id] = $label;
 }
+ksort($folders);
+$notifs = $folders[999999999];
+unset($folders[999999999]);
 
-$lists = $db->query('information', ['type' => 'mailing_list_id'], ['mailing_list_id' => 1]);
+$lists = $row['mail_lists'];
+$sort = [];
 foreach ($lists as $list) {
-    $list_id = $list['id'];
+    $list_id = $list['mailing_list_id'];
     $list['label_id'] = $list['id'];
     $count = 0; //$db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'fetched' => true]);
-    $read = $db->exists('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'fetched' => true]);
-    if ($read) {
-        $list['count'] = $count;
-        $list['read'] = $read;
-        $list['unread'] = $db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'is_read' => false, 'fetched' => true]);
-        $folders[$list_id] = $list;
-    }
+    $list['unread'] = $db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'is_read' => false, 'fetched' => true]);
+    $sort[$list['name']] = $list;
 }
-ksort($folders);
+ksort($sort);
+$folders = array_merge($folders, $sort);
+$folders[] = $notifs;
 
 return $app->view->render($response, 'folders.html', ['folders' => $folders]);

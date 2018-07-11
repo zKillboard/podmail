@@ -7,10 +7,10 @@ require_once '../init.php';
 $guzzler = Util::getGuzzler($config, 1);
 $db = $config['db'];
 
-$db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastLabelUpdate' => ['$exists' => false]], ['$set' => ['lastLabelUpdate' => 0]], ['multi' => true]);
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
+    $db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastLabelUpdate' => ['$exists' => false]], ['$set' => ['lastLabelUpdate' => 0]], ['multi' => true]);
     $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastLabelUpdate' => ['$lt' => (time() - 3600)]]);
     if ($row != null) {
         $params = ['row' => $row];

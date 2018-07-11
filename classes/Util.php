@@ -14,10 +14,14 @@ class Util
         $redis = $config['redis'];
 
         $update = ['uniq' => uniqid("", true)];
+        $key = "podmail:delta:$char_id";
+        $current = unserialize($redis->get($key));
+        if (sizeof($notification) == 0 && isset($current['notification'])) $update['notification'] = $current['notification'];
+
         if (sizeof($notification) > 0) {
             $update['notification']  = $notification;
         }
-        $redis->setex("podmail:delta:$char_id", 3600, serialize($update));
+        $redis->setex("podmail:delta:$char_id", (86400 * 7), serialize($update));
     }
 
     public static function removeMailingLists(Db $db, array $labels)
