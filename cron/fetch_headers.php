@@ -6,17 +6,20 @@ require_once '../init.php';
 
 $guzzler = Util::getGuzzler($config, 10);
 $db = $config['db'];
+$redis = $config['redis'];
 
 $iterated = [];
 $minute = date('Hi');
 while ($minute == date('Hi')) {
     $scopes = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastChecked' => ['$lt' => (time() - 31)]]);
     foreach ($scopes as $row) {
+        $char_id = $row['character_id'];
         $config['row'] = $row;
-        if (($row['lastChecked'] == 0 || date('i') == 13) && !in_array($row['character_id'], $iterated)) {
+        if ($redis->set("podmail:iterate:$char_id", "true", ['nx', 'ex' => 3600]) === true || $row['lastChecked'] == 0) {
+            echo "Iterating $char_id\n";
             $config['iterate'] = true;
-            echo $row['character_id'] . " iterating...\n";
-            $iterated[] = $row['character_id'];
+            $iterated[] = $char_id;
+            $db->update('mails', ['owner' => $char_id, 'labels' => ['$ne' => 999999999]], ['$set' => ['purge' => true]], ['multi' => true]);
         }
         $db->update('scopes', $row, ['$set' => ['lastChecked' => time()]]); // Push ahead just in case of error
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
@@ -66,6 +69,7 @@ function mailSuccess(&$guzzler, $params, $content)
             $mail['fetched'] = false;
             $mail['unixtime'] = strtotime($mail['timestamp']);
             $mail['deleted'] = false;
+            $mail['purge'] = false;
             $mail['lastChecked'] = time();
             Info::addChar($db, (int) $mail['from']);
             $recipients = isset($mail['recipients']) ? $mail['recipients'] : [['recipient_type' => $mail['recipient_type'], 'recipient_id' => $mail['recipient_id']]];
@@ -79,9 +83,10 @@ function mailSuccess(&$guzzler, $params, $content)
             $count++;
         } else {
             $cmail = $db->queryDoc('mails', ['owner' => $char_id, 'mail_id' => $mail['mail_id']]);
+            if ($params['iterate'] == true && @$cmail['purge'] == true) $db->update('mails', $cmail, ['$set' => ['purge' => false]]);
             $filtered = Util::removeMailingLists($db, $cmail['labels']);
             if ($mail['labels'] != $filtered) {
-                echo $mail['mail_id'] . "\n" . print_r($mail['labels'], true) . print_r($filtered, true);
+                //echo $mail['mail_id'] . "\n" . print_r($mail['labels'], true) . print_r($filtered, true);
                 //$db->update('mails', $cmail, ['$set' => ['labels' => $mail['labels']]]);
                 //$set_delta = true;
             }
@@ -94,13 +99,15 @@ function mailSuccess(&$guzzler, $params, $content)
         $tcount++;
     }
 
-    if (sizeof($json) >= 50 /*&& $tcount < 1500*/ && ($count > 0 || $params['iterate'] == true)) {
+    if (sizeof($json) >= 50 && ($count > 0 || $params['iterate'] == true)) {
         $params['tcount'] = $tcount;
         $params['last_mail_id'] = $current_mail_id;
         doNextCall($params, $params['access_token'], $guzzler);
     } else if ($params['iterate'] == true) {
-        $db->update('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id], ['$set' => ['iterated' => true]]);
-    }
+        $purgeCount = $db->count('mails', ['owner' => $char_id, 'purge' => true]);
+        if ($purgeCount) echo "$char_id Purge $purgeCount mails. (dry run)\n";
+        $db->update('scopes', $params['config']['row'], ['$set' => ['iterated' => true]]);
+    } else $db->update('scopes', $params['config']['row'], ['$set' => ['lastChecked' => time()]]);
     if ($count > 0) echo $char_id . " Added $count mails\n";
     if ($set_delta) Util::setDelta($params['config'], $char_id);
 }

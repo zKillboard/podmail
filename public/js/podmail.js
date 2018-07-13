@@ -76,6 +76,7 @@ function folderLoaded()
 {
     $(".folder-link").css("font-weight", "");
     $(".folder-" + currentFolder).css("font-weight", "bold");
+    $(".tooltip-inner").remove();
 
     $(".subjectrow").click(function() { mailClick(this); return false; } );
     $("#folders").html($("#pre-folders").html());
@@ -221,7 +222,14 @@ function forceDelta()
 
 function processDelta(data)
 {
-    if (deltaCurrent != data.delta) {
+    console.log(data);
+    if (data.refresh == true) {
+        window.location = '/';
+        return;
+    } else if (data.logout == true) {
+        window.location = '/logout';
+        return;
+    } else if (deltaCurrent != data.delta) {
         console.log(data);
         deltaCurrent = data.delta;
         loadFolders();
@@ -239,7 +247,7 @@ dataType: 'json',
 data    : $(this).serialize(),
 success : function( data ) {
 if (data.error == false) {
-$.confirm({title:'Sending EveMail...', content: data.message, type: 'green', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'OK', action: function() {  } }, noop:{text:'Dismiss', action: function() {} }}});
+$.confirm({title:'Sending EveMail...', content: data.message, type: 'green', useBootstrap: true, autoClose: 'noop|3000', backgroundDismiss:true, escapeKey:true, buttons: {noop:{text:'Dismiss', action: function() {} }}});
 $("#mail").hide();
 $("#compose").hide();
 $("#listing").show();
@@ -363,7 +371,7 @@ function htmlNotify (data)
             notifsDisplayed.push(data.uniqid);
             var notif = new Notification(data.title, {body: data.message, icon: data.image,});
             setTimeout(function() { notif.close() }, 20000);
-            notif.onclick = function () { notif.close(); window.focus();};
+            notif.onclick = function () { notif.close(); mailClick({href: '/mail/' + data.mail_id}); window.focus();};
         }
     }
 }

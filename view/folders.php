@@ -3,6 +3,7 @@
 $db = $config['db'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
+
 $labels = $row['labels'];
 $folders = [];
 foreach ($labels as $label) {
@@ -24,7 +25,7 @@ $lists = $row['mail_lists'];
 $sort = [];
 foreach ($lists as $list) {
     $list_id = $list['mailing_list_id'];
-    $list['label_id'] = $list['id'];
+    $list['label_id'] = $list['mailing_list_id'];
     $count = 0; //$db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'fetched' => true]);
     $list['unread'] = $db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'is_read' => false, 'fetched' => true]);
     $sort[$list['name']] = $list;

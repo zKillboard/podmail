@@ -1,28 +1,28 @@
-<div id="mail-id-content" style='display: none;'>
+<div id="mail-id-content" style="display: none;">
 <hr/>
 {% if mail.from %}
-<a href='back' id='showlisting'><i class="fas fa-arrow-left" style='padding-right: 2em;'></i></a>
-<button class="btn btn-sm btn-secondary" id='unread_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
+<a href="back" id="showlisting"><i class="fas fa-arrow-left" style="padding-right: 2em;"></i></a>
+<button class="btn btn-sm btn-secondary" id="unread_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
 {% if mail.is_notifcation != true %}
-<button class="btn btn-sm btn-secondary" id='reply_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Reply"><i class="fas fa-reply"></i></button>
-<button class="btn btn-sm btn-secondary" id='forward_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Forward"><i class="fas fa-arrow-circle-right"></i></button>
-<button class="btn btn-secondary btn-sm" id='delete_btn' mail_id='{{ mail.mail_id }}' type="submit" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
+<button class="btn btn-sm btn-secondary" id="reply_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Reply"><i class="fas fa-reply"></i></button>
+<button class="btn btn-sm btn-secondary" id="forward_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Forward"><i class="fas fa-arrow-circle-right"></i></button>
+<button class="btn btn-secondary btn-sm" id="delete_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
 {% endif %}
 <hr/>
-<h3><span id='mail-subject'>{{ mail.subject|raw }}</span></h3>
+<h3><span id="mail-subject">{{ mail.subject|raw }}</span></h3>
 <hr/>
 <span class="float-right">
-<span id="mail-dttm">{{ mail.dttm }}</span><br/>
+<span id="mail-dttm">{{ mail.fancytime }}</span><br/>
 <span id="unread" class="float-right">Unread</span>
 </span>
 <span>
-From: <span id='mail-from'>{{ mail.from_name }}</span><br/>
+From: <span id="mail-from">{{ mail.from_name }}</span><br/>
 To: 
 {% set first = true %}
-<span id='mail-to'>{% for recip in mail.recipients %}{% if first == false %}, {% endif %}{{ recip.recipient_name }}{% set first = false %}{% endfor %}</span><br/>
+<span id="mail-to">{% for recip in mail.recipients %}{% if first == false %}, {% endif %}{{ recip.recipient_name }}{% set first = false %}{% endfor %}</span><br/>
 </span>
 <hr/>
-<span id='mail-body'>{{ mail.body|raw }}</span>
+<span id="mail-body">{{ mail.body|raw }}</span>
 </div>
 <small style="display: none;">mail_id:<span id="mail-id">{{ mail.mail_id }}</span></small>
 {% else %}
@@ -32,8 +32,8 @@ To:
 window.onload = function() {
     if (!window.jQuery) {  
         // jQuery is not loaded
-        sessionStorage.setItem('mail_id', {{ mail.mail_id }});
-        window.location = '/';
+        sessionStorage.setItem("mail_id", {{ mail.mail_id }});
+        window.location = "/";
     }
 }
 </script>

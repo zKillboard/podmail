@@ -8,8 +8,13 @@ $page = (int) @$args['page'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
 $labels = $row['labels'];
-$folder = $labels[$id];
+$lists = $row['mail_lists'];
+$folder = $labels[$id] != null ? $labels[$id]  : $lists[$id];
 $folder['label_id'] = $id;
+if ($folder['name'] == null) {
+    $list = $db->queryDoc('information', ['type' => 'mailing_list_id', 'id' => $id]);
+    $folder['name'] = $list['name'];    
+}
 
 $filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true], 'fetched' => true];
 if ($id == 999999998) $filter['labels'] = [];

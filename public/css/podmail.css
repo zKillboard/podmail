@@ -1,5 +1,6 @@
 body {
     overflow-y: scroll;
+    font-size: 11pt;
 }
 
 a {
@@ -7,7 +8,7 @@ a {
 }
 
 hr {
-    margin: 5px;
+    margin: 1px;
 }  
 
 .unread {
@@ -23,9 +24,9 @@ hr {
 }
 
 .from {
-    width: 140px;
-    min-width: 140px;
-    max-width: 140px;
+    width: 145px;
+    min-width: 145px;
+    max-width: 145px;
     display: inline-block;
     margin-right: 1em;
     white-space: nowrap;
@@ -48,4 +49,8 @@ hr {
 
 .right {
         text-align: right;
+}
+
+.dttm {
+    font-family: consolas;
 }

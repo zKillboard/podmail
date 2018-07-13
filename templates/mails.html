@@ -1,4 +1,4 @@
-<div id='folder-id-content' style='display: none;'>
+<div id="folder-id-content" style="display: none;">
 <hr/>
 {% if mails|length == 0 %}
     {% if iterated == false %}
@@ -8,34 +8,35 @@
     {% endif %}
 {% else %}
 <div class="form-check" id="checkbox-master">
-    <input  id='mass-checkbox' type='checkbox' class="form-check-input mail-checkbox"/>
-    <button id='mass-read' class='btn btn-sm btn-secondary' disabled='true' data-toggle="tooltip" title="Mark as Read"><i class="fas fa-envelope-open"></i></button>
-    <button id='mass-unread' class='btn btn-sm btn-secondary' disabled='true' data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
-    <button id='mass-delete' class='btn btn-sm btn-secondary' disabled='true' data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
+    <input  id="mass-checkbox" type="checkbox" class="form-check-input mail-checkbox"/>
+    <button id="mass-read" class="btn btn-sm btn-secondary" disabled="true" data-toggle="tooltip" title="Mark as Read"><i class="fas fa-envelope-open"></i></button>
+    <button id="mass-unread" class="btn btn-sm btn-secondary" disabled="true" data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
+    <button id="mass-delete" class="btn btn-sm btn-secondary" disabled="true" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
 <span style="padding-left: 3.5em;"><strong>{{ folder.name }}</strong></span>
 <div class="float-right">
 {% set start = (page * 25) - 24 %}
-<a href='' id='prevpage'><i class="fas fa-chevron-left"></i></a> {{ start }} - {{ start + mails|length - 1 }} of {{ count }} <a href='' id='nextpage' max='{{ max }}'><i class="fas fa-chevron-right"></i></a>
+<a href="" id="prevpage"><i class="fas fa-chevron-left"></i></a> {{ start }} - {{ start + mails|length - 1 }} of {{ count }} <a href="" id="nextpage" max="{{ max }}"><i class="fas fa-chevron-right"></i></a>
 </div>
 </div>
 {% for mail in mails %}
+<hr/>
 <div class="form-check" id="div-mail-{{ mail.mail_id }}">
-    <hr/>
-    <input type='checkbox' id='checkbox-{{ mail.mail_id}}' mail_id="{{ mail.mail_id }}" class="form-check-input mail-checkbox"/>
+    <input type="checkbox" id="checkbox-{{ mail.mail_id}}" mail_id="{{ mail.mail_id }}" class="form-check-input mail-checkbox"/>
     <a class="subjectrow" id="mail-{{ mail.mail_id }}" href="/mail/{{ mail.mail_id }}">
-        <div class="{{ (mail.is_read == 1 ) ? '' : 'unread' }} {{ mail.deleted == 1 ? 'strike' : '' }} mail-{{ mail.mail_id}}">
-            <span class='float-right dnone dsmall-block'>{{ mail.dttm }}</span><span class="from">{% if character_id == mail.from %}To: {{ mail.recipients|first.recipient_name }}{% else %}{{ mail.from_name }}{% endif %}{% if mail.recipients|length > 1 %}, ...{% endif %}</span><br class="d-block d-sm-none"/><span class='subject'>{{ mail.subject|raw }}</span>
+        <div class="{{ (mail.is_read == 1 ) ? "" : "unread" }} {{ mail.deleted == 1 ? "strike" : "" }} mail-{{ mail.mail_id}}">
+            <span class="float-right dnone dsmall-block">{{ mail.timeago }}</span><span class="from">{% if character_id == mail.from %}To: {{ mail.recipients|first.recipient_name }}{% else %}{{ mail.from_name }}{% endif %}{% if mail.recipients|length > 1 %}, ...{% endif %}</span><br class="d-block d-sm-none"/><span class="subject">{{ mail.subject|raw }}</span>
         </div>
     </a>
 </div>
 {% endfor %}
+<hr/>
 {% endif %}
 <script type="text/javascript">
 window.onload = function() {
     if (!window.jQuery) {  
         // jQuery is not loaded
-        sessionStorage.setItem('folder_id', {{ folder.label_id }});
-        window.location = '/';
+        sessionStorage.setItem("folder_id", {{ folder.label_id }});
+        window.location = "/";
     }
 }
 </script>

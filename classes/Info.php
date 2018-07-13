@@ -34,21 +34,25 @@ class Info
     public static function addScopes(Db $db, int $char_id, string $scopes, string $refresh_token)
     {
         $scopes = explode(' ' , $scopes);
-        $db->delete('scopes', ['character_id' => $char_id]);
         foreach ($scopes as $scope) {
-            $db->insert('scopes', ['character_id' => $char_id, 'scope' => $scope, 'refresh_token' => $refresh_token, 'lastChecked' => 0]);
+            if (!$db->exists('scopes', ['character_id' => $char_id, 'scope' => $scope])) {
+                $db->insert('scopes', ['character_id' => $char_id, 'scope' => $scope, 'refresh_token' => $refresh_token, 'lastChecked' => 0]);
+            }
         }
+        // Just to be sure, make sure they all have the same refresh_token
+        $db->update('scopes', ['character_id' => $char_id], ['$set' => ['refresh_token' => $refresh_token]], ['multi' => true]);
     }
 
     public static function addLabel(Db $db, int $char_id, int $label_id)
     {
+        return;
         if ($db->exists('information', ['type' => 'label_id', 'id' => $label_id]) === false) {
             echo "Adding label $label_id\n";
             $db->insert('information', ['type' => 'label_id', 'id' => $label_id, 'name' => "label $label_id", 'character_id' => $char_id, 'update' => true]);
         }
     }
 
-    public static function addMailingList(Db $db, int $mailing_list_id, string $name)
+    public static function addMailingList(Db $db, int $mailing_list_id, string $name = "")
     {   
         if ($db->exists('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id]) === false) {
             echo "Adding mailing list: $mailing_list_id\n";
@@ -67,7 +71,8 @@ class Info
             case 'alliance':
                 return self::addAlliance($db, $recipient['recipient_id']);
             case 'mailing_list':
-                return self::addMailingList($db, $char_id, $recipient['recipient_id']);
+                return; 
+                return self::addMailingList($db, $recipient['recipient_id']);
             default:
                 echo "Unknown recipient type:\n" . print_r($recipient, true) . "\n";
                 throw new \IllegalArguementException("Unknown recipient type:\n" . print_r($recipient, true));
@@ -119,7 +124,15 @@ class Info
                         $element['recipient_name'] = $name;
                         break;
                     case 'timestamp':
-                        $element['dttm'] = date('Y.m.d H:i', $element['unixtime']) . " UTC";
+                        $element['dttm'] = date('Y.m.d H:i', $element['unixtime']);
+                        if (date('d', $element['unixtime']) == date('d', time())) {
+                            $element['timeago'] = date('g:i A', $element['unixtime']);
+                        } else if(date('Y', $element['unixtime']) == date('Y', time())) {
+                            $element['timeago'] = date('M d', $element['unixtime']);
+                        } else {
+                            $element['timeago'] = date('M d, Y', $element['unixtime']);
+                        }
+                        $element['fancytime'] = date('D, F d, Y H:i', $element['unixtime']);
                         break;
                     default: 
                         //echo "Unknown key: $key => $value"; die();

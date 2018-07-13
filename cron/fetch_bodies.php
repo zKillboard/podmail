@@ -39,6 +39,7 @@ function success(&$guzzler, $params, $content)
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v1/characters/$char_id/mail/$mail_id/";
     $guzzler->call($url, '\podmail\body_success', '\podmail\body_fail', $params, $headers);
+    Util::setDelta($params['config'], $params['char_id']);
 }
 
 function body_fail(&$guzzler, $params, $ex)
@@ -55,7 +56,7 @@ function body_success(&$guzzler, $params, $content)
 {
     $mail = json_decode($content, true);
     $db = $params['config']['db'];
-    $db->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'body' => $mail['body']]], ['multi' => true]);
+    $db->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'purge' => false, 'body' => $mail['body']]], ['multi' => true]);
     $notify = [];
     if ($mail['labels'] != [2] && @$mail['is_read'] != true && strtotime($mail['timestamp']) >= (time() - 120)) {
         $info = $db->queryDoc("information", ['id' => (int) $mail['from']]);

@@ -45,5 +45,4 @@ function listSuccess(&$guzzler, $params, $content)
     }
     $db->update("scopes", ['scope' => 'esi-mail.read_mail.v1', 'character_id' => (int) $params['char_id']], ['$set' => ['lastListUpdate' => time(), 'mail_lists' => $lists]]);
     Util::setDelta($params['config'], $params['char_id']);
-    echo $params['char_id'] . " mail lists loaded\n";
 }

@@ -65,6 +65,10 @@ class Db
 
     public function update(string $coll, array $filter = [], array $values, array $options = [])
     {
+        if (!(isset($values['$set']) || isset($values['$unset']))) {
+            echo "Update without \$set or \$unset\n";
+            throw new \Exception("Update without \$set or \$unset\n");
+        }
         $bulk = new \MongoDB\Driver\BulkWrite();
         if (isset($filter['_id'])) $filter = ['_id' => $filter['_id']];
         $bulk->update($filter, $values, $options);

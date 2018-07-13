@@ -10,10 +10,9 @@ class Mail
         $db = $config['db'];
         $mail = $db->queryDoc('mails', ['owner' => $char_id, 'mail_id' => $mail_id]);
         if ($mail != null && $mail['is_read'] != $is_read) {
-            if (in_array(999999999, $mail['labels'])) {
-                $db->update('mails', $mail, ['$set' => ['is_read' => $is_read]]);
-                Util::setDelta($config, $char_id);
-            } else {
+            $db->update('mails', $mail, ['$set' => ['is_read' => $is_read]]);
+            Util::setDelta($config, $char_id);
+            if (!in_array(999999999, $mail['labels'])) { // Can't change status of notifications
                 $db->insert('actions', ['mail_id' => $mail_id, 'character_id' => $char_id, 'action' => 'setread', 'status' => 'pending', 'type' => 'put', 'url' => "$esi/v1/characters/$char_id/mail/$mail_id/", 'body' => json_encode(['labels' => Util::removeMailingLists($db, $mail['labels']), 'read' => $is_read]), 'is_read' => $is_read]);
             }
         }

@@ -14,6 +14,8 @@ $mail['body'] = str_replace("\n", '<br/>', $mail['body']);
 $mail['body'] = str_replace("href=\"killReport:", "target='_blank' href=\"https://zkillboard.com/kill/", $mail['body']);
 $mail['body'] = str_replace("href=\"showinfo:2//", "href=\"https://evewho.com/corpid/", $mail['body']);
 $mail['body'] = str_replace("href=\"showinfo:1373//", "href=\"https://evewho.com/pilotid/", $mail['body']);
+$mail['body'] = str_replace("href=\"showinfo:1375//", "href=\"https://evewho.com/pilotid/", $mail['body']);
+$mail['body'] = str_replace("href=\"showinfo:1377//", "href=\"https://evewho.com/pilotid/", $mail['body']);
 $mail['body'] = str_replace("href=\"showinfo:1383//", "href=\"https://evewho.com/pilotid/", $mail['body']);
 $mail['body'] = str_replace("href=\"http", "target='_blank' href=\"http", $mail['body']);
 $mail['body'] = str_replace("href='http", "target='_blank' href='http", $mail['body']);
