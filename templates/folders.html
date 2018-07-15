@@ -2,6 +2,7 @@
 <button type="submit" id="compose-start" class="btn btn-primary btn-sm" style='margin: 1em;'>Compose</button>
 {% for folder in folders %}
 <hr/>
+{% if folder.name == 'Notifications' %}<hr/>{% endif %}
 <a href="/folder/{{ folder.label_id }}"  id="folder-{{ folder.label_id }}" folder="{{ folder.label_id }}" class="folder-link folder-{{ folder.label_id }}"><div><span class="">{{ folder.name }}</span><span class="float-right">{% if folder.unread > 0 %}<span class='unread'>{{ folder.unread }}</span>{% endif %}</span></div></a>
 {% endfor %}
 <hr/>

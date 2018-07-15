@@ -15,6 +15,7 @@ while ($minute == date('Hi')) {
         $alli_id = $row['id'];
         $params['row'] = $row;
         $params['config'] = $config;
+        $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
         $guzzler->call("$esi/v3/alliances/$alli_id/", '\podmail\success', '\podmail\ESI::fail', $params);
     }
     if (sizeof($toUpdate)) $guzzler->finish();

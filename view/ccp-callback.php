@@ -35,6 +35,8 @@ $char_id = (int) $info['CharacterID'];
 $char_name = $info['CharacterName'];
 $scopes = $info['Scopes'];
 
+$redis = $config['redis'];
+$redis->setex("podmail:last_seen:$char_id", 604800, time());
 Info::addChar($config['db'], $char_id, $char_name);
 Info::addScopes($config['db'], $char_id, $scopes, $refresh_token);
 

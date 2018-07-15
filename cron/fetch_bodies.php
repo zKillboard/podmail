@@ -12,7 +12,7 @@ $db->update('mails', ['fetched' => null], ['$set' => ['fetched' => false]], ['mu
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $unFetched = $db->query('mails', ['fetched' => false], ['sort' => ['mail_id' => -1], 'limit' => 10]);
+    $unFetched = $db->query('mails', ['fetched' => 'do_fetch'], ['sort' => ['mail_id' => -1], 'limit' => 10]);
     foreach ($unFetched as $mail) {
         $params = ['mail_id' => $mail['mail_id']];
         $db->update('mails', ['mail_id' => (int) $mail['mail_id']], ['$set' => ['fetched' => null]], ['multi' => true]);
@@ -22,8 +22,8 @@ while ($minute == date('Hi')) {
     } 
     if (sizeof($unFetched) == 0) {
         $guzzler->tick();
-        usleep(100000);
     }
+    usleep(100000);
 }
 $guzzler->finish();
 

@@ -2,6 +2,10 @@
 
 namespace podmail;
 
+if ($request->isGet()) {
+    return $response->withStatus(302)->withRedirect('/');
+}
+
 $db = $config['db'];
 
 $form_recips = trim($request->getParsedBodyParam('recipients'));
@@ -20,6 +24,7 @@ $form_recips = explode(',', $form_recips);
 $recips = [];
 foreach ($form_recips as $form_recip) {
     $name = trim($form_recip);
+    if ($name == "") continue;
     $recipient = $db->queryDoc('information', ['search' => $name]);
     if ($recipient == null) {
         $esi = $config['ccp']['esi'];

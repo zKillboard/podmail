@@ -16,7 +16,8 @@ if ($folder['name'] == null) {
     $folder['name'] = $list['name'];    
 }
 
-$filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true], 'fetched' => true];
+$filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true]];
+if ($filter == "unread") $filter['is_read'] = false;
 if ($id == 999999998) $filter['labels'] = [];
 else if ($id != 0) $filter['labels'] = $id;
 else $filter['labels'] = ['$ne' => 999999999];

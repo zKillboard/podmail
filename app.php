@@ -25,6 +25,7 @@ addRoute($app, '/about', 'about.php', $config, $char_id);
 addRoute($app, '/action/{type}/{id}/{action}/{value}', 'action.php', $config, $char_id, 'post');
 addRoute($app, '/ccp-login', 'ccp-login.php', $config, $char_id);
 addRoute($app, '/ccp-callback', 'ccp-callback.php', $config, $char_id);
+addRoute($app, '/compose', 'compose.php', $config, $char_id);
 addRoute($app, '/compose', 'compose.php', $config, $char_id, 'post');
 addRoute($app, '/delta', 'delta.php', $config, $char_id);
 addRoute($app, '/folder/{id}[/{page}]', 'folder_id.php', $config, $char_id);

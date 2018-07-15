@@ -19,8 +19,8 @@
 </div>
 </div>
 {% for mail in mails %}
-<hr/>
 <div class="form-check" id="div-mail-{{ mail.mail_id }}">
+<hr/>
     <input type="checkbox" id="checkbox-{{ mail.mail_id}}" mail_id="{{ mail.mail_id }}" class="form-check-input mail-checkbox"/>
     <a class="subjectrow" id="mail-{{ mail.mail_id }}" href="/mail/{{ mail.mail_id }}">
         <div class="{{ (mail.is_read == 1 ) ? "" : "unread" }} {{ mail.deleted == 1 ? "strike" : "" }} mail-{{ mail.mail_id}}">

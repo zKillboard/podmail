@@ -8,7 +8,7 @@ $labels = $row['labels'];
 $folders = [];
 foreach ($labels as $label) {
     $label_id = $label['label_id'];
-    $filter = ['owner' => ['$in' => [$char_id]], 'fetched' => true, 'deleted' => false];
+    $filter = ['owner' => ['$in' => [$char_id]], 'deleted' => false];
     if ($label_id == 999999998) $filter['labels'] = [];
     else if ($label_id != 0) $filter['labels'] = $label_id;
     else $filter['labels'] = ['$ne' => 999999999];
@@ -26,8 +26,8 @@ $sort = [];
 foreach ($lists as $list) {
     $list_id = $list['mailing_list_id'];
     $list['label_id'] = $list['mailing_list_id'];
-    $count = 0; //$db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'fetched' => true]);
-    $list['unread'] = $db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'is_read' => false, 'fetched' => true]);
+    $count = 0;
+    $list['unread'] = $db->count('mails', ['owner' => ['$in' => [$char_id]], 'labels' => $list_id, 'is_read' => false]);
     $sort[$list['name']] = $list;
 }
 ksort($sort);

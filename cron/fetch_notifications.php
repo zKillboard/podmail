@@ -20,11 +20,8 @@ while ($minute == date('Hi')) {
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
         $db->update('scopes', $row, ['$set' => ['lastNotifChecked' => time()]]); 
     }
-    if (sizeof($scopes) == 0) {
-        $guzzler->tick();
-        sleep(1);
-    }
-    break;
+    $guzzler->tick();
+    sleep(1);
 }
 $guzzler->finish();
 

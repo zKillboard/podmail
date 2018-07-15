@@ -6,12 +6,12 @@ require_once '../init.php';
 
 $db = $config['db'];
 $esi = $config['ccp']['esi'];
-$guzzler = Util::getGuzzler($config);
+$guzzler = Util::getGuzzler($config, 25);
 
 $chars = [];
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['sort' => ['lastUpdated' => 1, '_id' => 1], 'limit' => 10]);
+    $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['sort' => ['lastUpdated' => 1], 'limit' => 25]);
     foreach ($toUpdate as $row) {
         $char_id = $row['id'];
 
@@ -24,17 +24,14 @@ while ($minute == date('Hi')) {
         if (in_array($char_id, $chars)) { echo ("dupe $char_id\n"); continue; }
         $chars[] = $char_id;
 
-        $db->update('information', $row, ['$set' => ['lastUpdated' => time()]]);
+        $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
 
         $params['row'] = $row;
         $params['config'] = $config;
         $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\fail', $params);
     }
-    $guzzler->finish();
-    if (sizeof($toUpdate) == 0) {
-        $guzzler->tick();
-        sleep(1);
-    }
+    $guzzler->tick();
+    if (sizeof($toUpdate) == 0) sleep(1);
 }
 $guzzler->finish();
 
@@ -46,9 +43,6 @@ function fail($guzzler, $params, $ex)
         $db->delete('information', $row);
         return;
     }
-    // Try again in two minutes
-    $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
-    echo $row['id'] . " failed to retrieve information....\n";
 }
 
 function success($guzzler, $params, $content)

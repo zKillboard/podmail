@@ -105,9 +105,9 @@ function folderLoaded()
 
     $("#mass-checkbox").click(function() { $(".mail-checkbox").prop('checked', $(this).prop('checked')); setMassButtons(); });
     $(".mail-checkbox").click(function() { setMassButtons(); });
-    $("#mass-read").click(function() { massSetRead('true'); });
-    $("#mass-unread").click(function() { massSetRead('false'); });
-    $("#mass-delete").confirm({title:'Deleting multiple EveMails', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { massDelete(); } }, noop:{text:'Dismiss', action: function() {} }}});
+    $("#mass-read").click(function() { massSetRead('true'); $(this).blur(); });
+    $("#mass-unread").click(function() { massSetRead('false'); $(this).blur(); });
+    $("#mass-delete").click(function() { $(this).blur(); }).confirm({title:'Deleting multiple EveMails', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { massDelete(); } }, noop:{text:'Dismiss', action: function() {} }}});
     currentMail = 0;
 }
 
@@ -150,10 +150,11 @@ function mailClick(o)
 function mailLoaded(o)
 {
     $("#showlisting").click(function() { history.back(); return false; });
-    $('#unread_btn').click(function() { markMailUnread(this); });
-    $('#delete_btn').confirm({title:'Deleting an EveMail', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { deleteMail($('#delete_btn'));  } }, noop:{text:'Dismiss', action: function() {} }}});
-    $("#reply_btn").click(function() { reply(); return false; });
-    $("#forward_btn").click(function() { forward(); return false; });
+    $('#unread_btn').click(function() { markMailUnread(this); $(this).blur(); });
+    $('#delete_btn').click(function() { $(this).blur(); }).confirm({title:'Deleting an EveMail', content: 'This action CANNOT be undone!<br/>Are you sure?', type: 'red', useBootstrap: true, autoClose: 'noop|5000', backgroundDismiss:true, escapeKey:true, buttons: {purge:{ text: 'DELETE', action: function() { deleteMail($('#delete_btn'));  } }, noop:{text:'Dismiss', action: function() {} }}});
+    $("#reply_btn").click(function() { reply(); $(this).blur(); return false; });
+    $("#reply_all_btn").removeAttr("disabled").click(function() { reply_all(); $(this).blur(); return false; });
+    $("#forward_btn").click(function() { forward(); $(this).blur(); return false; });
     $("#unread").hide();
     $("#listing").hide();
     $("#mail").show();
@@ -198,6 +199,7 @@ function showListing()
 
 function checkDelta()
 {
+    if (window.location.pathname == "/about") return;
     $.ajax('/delta', {success: processDelta, complete: nextDelta });
     nextDelta();
 }
@@ -295,9 +297,37 @@ function compose()
     $("#recipients").focus();
 }  
 
+function uniqueness(names) 
+{
+    var uniqueNames = [];
+    $.each(names, function(i, el){
+            el = el.trim();
+            if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
+            });
+    return uniqueNames;
+}
+
+function array_delete(array, element)
+{
+    var index = array.indexOf(element);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
+    return array;
+}
+
 function reply()
 {
     compose_prepare($("#mail-from").html(), "Re: " + $("#mail-subject").html(), "<br/><br/>--------------------------------<br/>" + $("#mail-subject").html() + "<br/>" + "From: " + $("#mail-from").html() + "<br/>Sent: " + $("#mail-dttm").html() + "<br/>To: " + $("#mail-to").html() + "<br/><br/>" + $("#mail-body").html());
+    compose_show();
+}
+
+function reply_all()
+{
+    var tos = $("#mail-from").html() + ", " + $("#mail-to").html();
+    tos = uniqueness(tos.split(","));
+    tos = array_delete(tos, character_name);
+    compose_prepare(tos.join(', '), "Re: " + $("#mail-subject").html(), "<br/><br/>--------------------------------<br/>" + $("#mail-subject").html() + "<br/>" + "From: " + $("#mail-from").html() + "<br/>Sent: " + $("#mail-dttm").html() + "<br/>To: " + $("#mail-to").html() + "<br/><br/>" + $("#mail-body").html());
     compose_show();
 }
 
@@ -310,20 +340,20 @@ function forward()
 
 $(window).on("popstate", function(e) {
         if (e.originalEvent.state !== null) {
-            if (event.state.currentMail != 0) {
-                $("#mail").load(location.href, mailLoaded);
-                $("#listing").hide();
-                $("#compose").hide();
-                $("#mail").show();
-            } else {
-                loadFolder(event.state.currentFolder, event.state.currentPage);
-                $("#mail").hide();
-                $("#compose").hide();
-                $("#listing").show();
-            }
-            return false;
+        if (event.state.currentMail != 0) {
+        $("#mail").load(location.href, mailLoaded);
+        $("#listing").hide();
+        $("#compose").hide();
+        $("#mail").show();
+        } else {
+        loadFolder(event.state.currentFolder, event.state.currentPage);
+        $("#mail").hide();
+        $("#compose").hide();
+        $("#listing").show();
         }
-});
+        return false;
+        }
+        });
 
 var lastState = null;
 function pushState(newURL)
@@ -367,6 +397,7 @@ function htmlNotify (data)
         }
         if (Notification.permission === 'granted') {
             if (notifsDisplayed.indexOf(data.uniqid) != -1) return;
+            if (window.location.pathname == "/about") return;
             if (data.unixtime < (Math.floor(new Date().getTime() / 1000) - 180)) return;
             notifsDisplayed.push(data.uniqid);
             var notif = new Notification(data.title, {body: data.message, icon: data.image,});

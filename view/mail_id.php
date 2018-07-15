@@ -6,6 +6,7 @@ $db = $config['db'];
 $mail_id = (int) $args['id'];
 
 $mail = $db->queryDoc('mails', ['owner' => ['$in' => [$char_id]], 'mail_id' => $mail_id]);
+if (!isset($mail['body'])) $mail['body'] = Mail::fetch_body($config, $char_id, $mail_id);
 $mail['mail_id'] = $mail_id;
 $mail['body'] = str_replace(" style=\"", " stile=\"", $mail['body']);
 $mail['body'] = str_replace(" size=\"", " syze=\"", $mail['body']);

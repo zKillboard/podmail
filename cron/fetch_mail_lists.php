@@ -17,7 +17,6 @@ while ($minute == date('Hi')) {
     } 
     $guzzler->finish();
     sleep(1);
-    break;
 }
 $guzzler->finish();
 

@@ -5,6 +5,7 @@
 <button class="btn btn-sm btn-secondary" id="unread_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
 {% if mail.is_notifcation != true %}
 <button class="btn btn-sm btn-secondary" id="reply_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Reply"><i class="fas fa-reply"></i></button>
+<button class="btn btn-sm btn-secondary" id="reply_all_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Reply All" disabled><i class="fas fa-reply-all"></i></button>
 <button class="btn btn-sm btn-secondary" id="forward_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Forward"><i class="fas fa-arrow-circle-right"></i></button>
 <button class="btn btn-secondary btn-sm" id="delete_btn" mail_id="{{ mail.mail_id }}" type="submit" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
 {% endif %}
@@ -12,7 +13,8 @@
 <h3><span id="mail-subject">{{ mail.subject|raw }}</span></h3>
 <hr/>
 <span class="float-right">
-<span id="mail-dttm">{{ mail.fancytime }}</span><br/>
+<span id="mail-dttm-fancy">{{ mail.fancytime }}</span><br/>
+<span id="mail-dttm" class="d-none">{{ mail.dttm }}</span><br/>
 <span id="unread" class="float-right">Unread</span>
 </span>
 <span>

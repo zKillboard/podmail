@@ -37,7 +37,7 @@ class SSO
         $json = json_decode($content, true);
         $access_token = $json['access_token'];
         $ttl = $json['expires_in'];
-        $params['config']['db']->insert('access_tokens', ['character_id' => $params['char_id'], 'refresh_token' => $params['refresh_token'], 'access_token' => $access_token, 'expires' => (time() + $ttl - 120)]);
+        $params['config']['db']->insert('access_tokens', ['character_id' => $params['char_id'], 'refresh_token' => $params['refresh_token'], 'access_token' => $access_token, 'expires' => (time() + $ttl - 600)]);
         $params['success']($guzzler, $params, $content);
     }
 
