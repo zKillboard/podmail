@@ -1,12 +1,5 @@
 <div id="folder-id-content" style="display: none;">
 <hr/>
-{% if mails|length == 0 %}
-    {% if iterated == false %}
-        <i>Please wait a moment, your evemails are being loaded...</i>
-    {% else %}
-        <i>{{ folder.name }}: No mails to display...</i>
-    {% endif %}
-{% else %}
 <div class="form-check" id="checkbox-master">
     <input  id="mass-checkbox" type="checkbox" class="form-check-input mail-checkbox"/>
     <button id="mass-read" class="btn btn-sm btn-secondary" disabled="true" data-toggle="tooltip" title="Mark as Read"><i class="fas fa-envelope-open"></i></button>
@@ -18,6 +11,15 @@
 <a href="" id="prevpage"><i class="fas fa-chevron-left"></i></a> {{ start }} - {{ start + mails|length - 1 }} of {{ count }} <a href="" id="nextpage" max="{{ max }}"><i class="fas fa-chevron-right"></i></a>
 </div>
 </div>
+{% if mails|length == 0 %}
+    <hr/><br/><br/><center><strong><i>
+    {% if iterated == false %}
+        Please wait a moment, your evemails are being loaded...
+    {% else %}
+        Nothing to see here...
+    {% endif %}
+    </i></strong></center>
+{% else %}
 {% for mail in mails %}
 <div class="form-check" id="div-mail-{{ mail.mail_id }}">
 <hr/>

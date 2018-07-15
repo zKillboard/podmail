@@ -8,7 +8,6 @@ $db = $config['db'];
 $esi = $config['ccp']['esi'];
 $guzzler = Util::getGuzzler($config, 25);
 
-$chars = [];
 $minute = date('Hi');
 while ($minute == date('Hi')) {
     $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['sort' => ['lastUpdated' => 1], 'limit' => 25]);
@@ -21,9 +20,6 @@ while ($minute == date('Hi')) {
             $db->delete('information', $row);
             continue;
         }
-        if (in_array($char_id, $chars)) { echo ("dupe $char_id\n"); continue; }
-        $chars[] = $char_id;
-
         $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
 
         $params['row'] = $row;

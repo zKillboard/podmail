@@ -20,6 +20,14 @@ class Db
         return false;
     }
 
+    public function command(array $args1, array $args2 = [])
+    {   
+        $command = new \MongoDB\Driver\Command($args1);
+        $cursor = $this->manager->executeCommand($this->namespace, $command);
+        $ret = current($cursor->toArray())->values;
+        return $ret;
+    }
+
     public function count(string $coll, array $filter = [], array $options = [])
     {   
         $command = new \MongoDB\Driver\Command(['count' => $coll, 'query' => $filter]);

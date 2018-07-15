@@ -29,6 +29,7 @@ class Util
         $retVal = [];
         foreach ($labels as $label_id) {
            if ($db->exists('information', ['type' => 'mailing_list_id', 'id' => $label_id])) continue;
+           if ($label_id >= 900000000) continue;
            $retVal[] = $label_id;
         }
         return $retVal;

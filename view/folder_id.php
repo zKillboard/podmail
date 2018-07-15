@@ -17,10 +17,13 @@ if ($folder['name'] == null) {
 }
 
 $filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true]];
-if ($filter == "unread") $filter['is_read'] = false;
 if ($id == 999999998) $filter['labels'] = [];
+else if ($id == 999999997) $filter['is_read'] = false;
 else if ($id != 0) $filter['labels'] = $id;
 else $filter['labels'] = ['$ne' => 999999999];
+
+if ($label_id == 999999997) { print_r($filter); die(); }
+
 $mails =  $db->query('mails', $filter, ['sort' => ['mail_id' => -1], 'limit' => 25, 'skip' => ($page * 25)]);
 $count = $db->count('mails', $filter);
 $max = ceil($count / 25);

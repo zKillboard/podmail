@@ -10,9 +10,11 @@ foreach ($labels as $label) {
     $label_id = $label['label_id'];
     $filter = ['owner' => ['$in' => [$char_id]], 'deleted' => false];
     if ($label_id == 999999998) $filter['labels'] = [];
+    else if ($label_id == 999999997) $filter['is_read'] = false;
     else if ($label_id != 0) $filter['labels'] = $label_id;
     else $filter['labels'] = ['$ne' => 999999999];
 
+    //if (!$db->exists('mails', $filter)) continue;
     $filter['is_read'] = false;
     $label['unread'] = $db->count('mails', $filter);
     $folders[$label_id] = $label;

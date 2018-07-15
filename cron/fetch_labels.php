@@ -14,10 +14,11 @@ while ($minute == date('Hi')) {
     $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastLabelUpdate' => ['$lt' => (time() - 3600)]]);
     if ($row != null) {
         $params = ['row' => $row];
+        $db->update('scopes', $row, ['$set' => ['lastLabelUpdate' => (time() - 3600 + 120)]]);
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
-        $guzzler->finish();
     } 
-    sleep(1);
+    $guzzler->tick();
+    if ($row == null) sleep(1);
 }
 $guzzler->finish();
 
@@ -41,6 +42,7 @@ function mailSuccess(&$guzzler, $params, $content)
     $labels = $labels['labels'];
 
     $labels[] = ['label_id' => 0, 'name' => 'All Mails'];
+    $labels[] = ['label_id' => 999999997, 'name' => 'Unread'];
     $labels[] = ['label_id' => 999999998, 'name' => 'No Label'];
     $labels[] = ['label_id' => 999999999, 'name' => 'Notifications'];
 
