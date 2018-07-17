@@ -15,6 +15,7 @@ $form_body = trim($request->getParsedBodyParam('body'));
 if ($form_recips == "") return sendStatus($app, $response, "Please provide recipient(s)...", true);
 if ($form_subject == "") return sendStatus($app, $response, "Please provide a subject...", true);
 if ($form_body == "") return sendStatus($app, $response, "Please provide a message body...", true);
+if (strlen($form_body) > 8000) return sendStatus($app, $response, "Maximum body size is 8000 characters, you have " . strlen($form_body) . ".", true);
 
 if (strpos($form_body, "PodMail") === false) $form_body .= "<br/><br/>---<br/>Sent using <a href='https://podmail.zzeve.com/'>PodMail</a>.";
 

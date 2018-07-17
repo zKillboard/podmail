@@ -13,7 +13,7 @@ while ($minute == date('Hi')) {
     $rows = $db->query('scopes', ['scope' => 'esi-mail.read_mail.v1', 'lastListUpdate' => ['$lt' => (time() - 3600)]]);
     foreach ($rows as $row) {
         $params = ['row' => $row];
-        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
+        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params, ['etag' => $config['redis']]);
     } 
     $guzzler->finish();
     sleep(1);
@@ -35,6 +35,8 @@ function success(&$guzzler, $params, $content)
 
 function listSuccess(&$guzzler, $params, $content)
 {
+    if ($content == "") return;
+
     $db = $params['config']['db'];
     $lists = json_decode($content, true);
     foreach ($lists as $list) {

@@ -10,7 +10,7 @@ $( document ).ready(function() {
         $('.gre').gre();
         $('#left-hamburger').click(function() { leftBurgerClicked(); } );
         toggleFolders();
-        if (window.location.pathname != '/about') pushState('/folder/0');
+        if (window.location.pathname != '/about') pushState('/folder/1');
         checkSessionStorage();
         });
 
@@ -169,7 +169,7 @@ function markMailUnread(btn)
 {
     mail_id = $(btn).attr('mail_id');
     $("#mail-" + mail_id).addClass('unread');
-    $("#unread").show();
+    $("#unread").fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
     $.ajax('/action/mail/' + mail_id + '/is_read/false', {method: 'post'});
     setTimeout("forceDelta();", 3000);
 }

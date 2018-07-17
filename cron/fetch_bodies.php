@@ -60,7 +60,7 @@ function body_success(&$guzzler, $params, $content)
     $notify = [];
     if ($mail['labels'] != [2] && @$mail['is_read'] != true && strtotime($mail['timestamp']) >= (time() - 120)) {
         $info = $db->queryDoc("information", ['id' => (int) $mail['from']]);
-        $title = isset($info['name']) ? $info['name'] : 'New EveMail';
+        $title = (isset($info['name']) && $info['name'] != "?") ? $info['name'] : 'New EveMail';
         $image = ($info['type'] == 'character_id') ? "https://imageserver.eveonline.com/Character/" . $mail['from'] . "_32.jpg" : "https://podmail.zzeve.com/images/podmail.png";
 
         $notify = ["title" => $title, "image" => $image, "message" => $mail["subject"], 'mail_id' => $params['mail_id'], 'unixtime' => time(), 'uniqid' => uniqid("", true)];

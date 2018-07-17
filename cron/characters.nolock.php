@@ -24,7 +24,7 @@ while ($minute == date('Hi')) {
 
         $params['row'] = $row;
         $params['config'] = $config;
-        $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\fail', $params);
+        $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\fail', $params, ['etag' => $config['redis']]);
     }
     $guzzler->tick();
     if (sizeof($toUpdate) == 0) sleep(1);
@@ -43,6 +43,8 @@ function fail($guzzler, $params, $ex)
 
 function success($guzzler, $params, $content)
 {
+    if ($content == "") return;
+
     $db = $params['config']['db'];
     $character = json_decode($content, true);
     $row = $params['row'];

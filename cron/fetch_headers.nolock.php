@@ -20,7 +20,6 @@ while ($minute == date('Hi')) {
         if ($redis->ttl("podmail:last_seen:$char_id") > (86400 * 6)) {
             // Only iterate people who have been active in the last 24 hours
             if ($redis->set("podmail:iterate:$char_id", "true", ['nx', 'ex' => 10400]) === true) {
-                echo "Iterating $char_id\n";
                 $params['iterate'] = true;
                 $iterated[] = $char_id;
                 $db->update('mails', ['owner' => $char_id, 'labels' => ['$ne' => 999999999]], ['$set' => ['purge' => true]], ['multi' => true]);
@@ -32,6 +31,15 @@ while ($minute == date('Hi')) {
     sleep(1);
 }
 $guzzler->finish();
+
+function fail($guzzler, $params, $ex)
+{
+    SSO::fail($guzzler, $params, $ex);
+    if ($params['iterate']) {
+        $char_id = $params['char_id'];
+        $params['config']['redis']->del("podmail:iterate:$char_id");
+    }
+}
 
 function success(&$guzzler, $params, $content)
 {

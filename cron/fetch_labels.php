@@ -15,7 +15,7 @@ while ($minute == date('Hi')) {
     if ($row != null) {
         $params = ['row' => $row];
         $db->update('scopes', $row, ['$set' => ['lastLabelUpdate' => (time() - 3600 + 120)]]);
-        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
+        SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params, ['etag' => $config['redis']]);
     } 
     $guzzler->tick();
     if ($row == null) sleep(1);
@@ -32,16 +32,18 @@ function success(&$guzzler, $params, $content)
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v3/characters/$char_id/mail/labels/";
-    $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
+    $guzzler->call($url, '\podmail\labelSuccess', '\podmail\ESI::fail', $params, $headers);
 }
 
-function mailSuccess(&$guzzler, $params, $content)
+function labelSuccess(&$guzzler, $params, $content)
 {
+    if ($content == "") return;
+
     $db = $params['config']['db'];
     $labels = json_decode($content, true);
     $labels = $labels['labels'];
 
-    $labels[] = ['label_id' => 0, 'name' => 'All Mails'];
+    $labels[] = ['label_id' => 0, 'name' => 'All Mail'];
     $labels[] = ['label_id' => 999999997, 'name' => 'Unread'];
     $labels[] = ['label_id' => 999999998, 'name' => 'No Label'];
     $labels[] = ['label_id' => 999999999, 'name' => 'Notifications'];

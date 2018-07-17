@@ -48,7 +48,7 @@ function fail($guzzler, $params, $ex)
 {
     $db = $params['config']['db'];
     $row = $params['config']['row'];
-    $db->update('actions', $row, ['status' => 'failed', 'code' => $ex->getCode(), 'message' => $ex->getMessage()]);
+    $db->update('actions', $row, ['$set' => ['status' => 'failed', 'code' => $ex->getCode(), 'message' => $ex->getMessage()]]);
 }
 
 function postSuccess($guzzler, $params, $content)

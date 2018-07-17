@@ -4,29 +4,26 @@ namespace podmail;
 
 class Info
 {
-    public static function addChar(Db $db, int $id, string $name = null)
+    public static function addChar(Db $db, int $id, string $name = "?")
     {
         if ($id <= 0) return;
         if ($db->exists('information', ['type' => 'character_id', 'id' => $id]) === false) {
-            if ($name == null) $name = "character_id $id";
             $db->insert('information', ['type' => 'character_id', 'id' => $id, 'name' => $name, 'lastUpdated' => 0]);
         }
     }
 
-    public static function addCorp(Db $db, int $id, string $name = null)
+    public static function addCorp(Db $db, int $id, string $name = "?")
     {   
         if ($id <= 0) return;
         if ($db->exists('information', ['type' => 'corporation_id', 'id' => $id]) === false) {
-            if ($name == null) $name = "corporation $id";
             $db->insert('information', ['type' => 'corporation_id', 'id' => $id, 'name' => $name, 'lastUpdated' => 0]);
         }
     }
 
-    public static function addAlliance(Db $db, int $id, string $name = null)
+    public static function addAlliance(Db $db, int $id, string $name = "?")
     {   
         if ($id <= 0) return;
         if ($db->exists('information', ['type' => 'alliance_id', 'id' => $id]) === false) {
-            if ($name == null) $name = "alliance $id";
             $db->insert('information', ['type' => 'alliance_id', 'id' => $id, 'name' => $name, 'lastUpdated' => 0]);
         }
     }
@@ -52,7 +49,7 @@ class Info
         }
     }
 
-    public static function addMailingList(Db $db, int $mailing_list_id, string $name = "")
+    public static function addMailingList(Db $db, int $mailing_list_id, string $name = "?")
     {   
         if ($db->exists('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id]) === false) {
             echo "Adding mailing list: $mailing_list_id\n";
