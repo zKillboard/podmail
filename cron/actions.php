@@ -10,7 +10,7 @@ $lastMailSent = 0;
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $row = $db->queryDoc('actions', ['status' => 'pending']);
+    $row = $db->queryDoc('actions', ['status' => 'pending'], ['sort' => ['_id' => 1]]);
     if ($row != null ) {
         $scope = null;
         switch ($row['action']) {
