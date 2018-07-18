@@ -90,4 +90,30 @@ class Db
         $bulk->delete($filter);
         return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getDeletedCount();
     }
+
+    public function get_indexes(string $coll)
+    {   
+        $r = $this->query("system.indexes", ['ns' => $this->namespace . "." . $coll]);
+        return $r;
+    }
+
+    public function add_index(string $coll, array $keys, bool $unique)
+    {
+        $name = "";
+        foreach ($keys as $key => $value) {
+            if (strlen($name) != 0) $name .= "_";
+            $name .= "${key}_${value}";
+        }
+        $command = new \MongoDB\Driver\Command([
+                "createIndexes" => $coll, 
+                "indexes"       => [[
+                "name" => $name,
+                "key"  => $keys,
+                "unique" => $unique,
+                "ns"   => $this->namespace . "." . $coll,
+                ]],
+        ]);
+        $result = $this->manager->executeCommand($this->namespace, $command);
+        return $result->toArray();
+    }
 }
