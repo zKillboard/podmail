@@ -238,6 +238,10 @@ function processDelta(data)
         deltaCount = 1;
         if (data.notification) htmlNotify(data.notification);
     } else if (deltaCount < 30) deltaCount++;
+    if (data.name != $("#char-name").html())  {
+        $("#char-name").html(data.name);
+        $("#char-image").attr("src", "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg");
+    }
 }
 
 $(document).on('submit', '#compose_form', function() {            

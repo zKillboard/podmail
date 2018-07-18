@@ -6,10 +6,10 @@
         {% if character_id %}
             <li class="nav-item dropdown"><div>
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                    <img src='https://imageserver.eveonline.com/Character/{{ character_id }}_32.jpg' width='32' height='32' class='rounded'/>
+                    <img id='char-image' src='https://imageserver.eveonline.com/Character/{{ character_id }}_32.jpg' width='32' height='32' class='rounded'/>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" style='min-width: 100px; max-width: 300px;'>
-                    <span class="dropdown-header right">{{ character_name }}</span>
+                    <span id='char-name' class="dropdown-header right">{{ character_name }}</span>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item right" href="/logout">Logout</a>
                 </div></div>
