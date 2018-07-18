@@ -22,6 +22,7 @@ while ($minute == date('Hi')) {
     }
     $guzzler->tick();
     sleep(1);
+    break;
 }
 $guzzler->finish();
 
@@ -55,12 +56,18 @@ function mailSuccess(&$guzzler, $params, $content)
     $json = json_decode($content, true);
     $char_id = $params['char_id'];
     $count = 0;
+    $max_notif_id = 0;
     foreach ($json as $notif) {
         $notif_mail = ['mail_id' => $notif['notification_id'], 'owner' => $char_id];
+        $unixtime = strtotime($notif['timestamp']);
+        if ($unixtime < (time() - 86400 * 30)) continue;
+        $max_notif_id = max($max_notif_id, $notif['notification_id']);
+
         if (!$db->exists('mails', $notif_mail)) {
             if ($notif['sender_type'] == 'character') Info::addChar($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'corporation') Info::addCorp($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'alliance') Info::addAlliance($db, $notif['sender_id']);
+
 
             if (!isset($notif['is_read'])) $notif['is_read'] = false;
             $notif['is_notifcation'] = true;
@@ -78,8 +85,10 @@ function mailSuccess(&$guzzler, $params, $content)
             unset($notif['text']);
             $db->insert('mails', $notif);
             $set_delta = true;
+            $count++;
         }
     }
-    if ($set_delta) Util::setDelta($db, $char_id);
+    $set_delta |= (bool) $db->delete('mails', ['owner' => $char_id, 'labels' => 999999999, 'mail_id' => ['$lt' => $max_notif_id]]);
+    if ($set_delta) Util::setDelta($params['config'], $char_id);
     if ($count) Log::log("$char_id added $count notifications");
 }
