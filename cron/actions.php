@@ -60,16 +60,16 @@ function postSuccess($guzzler, $params, $content)
 
     switch ($row['action']) {
         case 'send_mail':
-            echo "$char_id sent eve_mail " . $content . "\n";
+            Log::log("$char_id sent eve_mail " . $content);
             break;
         case 'setread':
             $is_read = ($row['is_read'] == true);
             $db->update('mails', ['owner' => $char_id, 'mail_id' => $mail_id], ['$set' => ['is_read' => $is_read]]);
-            echo "$char_id is_read $mail_id " . ($is_read ? "true" : "false") . "\n";
+            Log::log("$char_id is_read $mail_id " . ($is_read ? "true" : "false"));
             break;
         case 'delete':
             $db->delete('mails', ['owner' => $char_id, 'mail_id' => $mail_id]);
-            echo "$char_id deleted $mail_id\n";
+            Log::log("$char_id deleted $mail_id");
             break;
     }
     $db->delete('actions', $row);

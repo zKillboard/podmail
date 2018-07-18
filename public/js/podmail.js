@@ -1,4 +1,4 @@
-var currentFolder = 0;
+var currentFolder = 1;
 var currentPage = 0;
 var currentMail = 0;
 var click = false;
@@ -399,8 +399,9 @@ function htmlNotify (data)
             if (notifsDisplayed.indexOf(data.uniqid) != -1) return;
             if (window.location.pathname == "/about") return;
             if (data.unixtime < (Math.floor(new Date().getTime() / 1000) - 180)) return;
+            notifsDisplayed = []; // prevent tiny memory leak
             notifsDisplayed.push(data.uniqid);
-            var notif = new Notification(data.title, {body: data.message, icon: data.image,});
+            var notif = new Notification(data.title, {body: data.message, icon: data.image});
             setTimeout(function() { notif.close() }, 20000);
             notif.onclick = function () { notif.close(); mailClick({href: '/mail/' + data.mail_id}); window.focus();};
         }

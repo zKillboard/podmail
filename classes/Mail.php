@@ -67,7 +67,6 @@ class Mail
         $db = $params['config']['db'];
         if ($ex->getCode() == 404) { // Mail not found!
             $db->delete('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']]);
-            echo "Mail not found, purging...\n";
             Util::setDelta($params['config'], $params['char_id']);
         } else ESI::fail($guzzler, $params, $ex);
     }

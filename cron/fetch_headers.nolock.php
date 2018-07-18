@@ -100,7 +100,7 @@ function mailSuccess(&$guzzler, $params, $content)
             if ($tcount <= 150 && $cmail['fetched'] === false) $db->update('mails', $cmail, ['$set' => ['fetched' => 'do_fetch']]);
             $filtered = Util::removeMailingLists($db, $cmail['labels']);
             if ($mail['labels'] != $filtered) {
-                //echo $mail['mail_id'] . "\n" . print_r($mail['labels'], true) . print_r($filtered, true);
+                //Log::log($mail['mail_id'] . "\n" . print_r($mail['labels'], true) . print_r($filtered, true));
                 //$db->update('mails', $cmail, ['$set' => ['labels' => $mail['labels']]]);
                 //$set_delta = true;
             }
@@ -122,6 +122,6 @@ function mailSuccess(&$guzzler, $params, $content)
         if ($purgeCount) $set_delta = true;
         $db->update('scopes', $params['config']['row'], ['$set' => ['iterated' => true]]);
     } else $db->update('scopes', $params['config']['row'], ['$set' => ['lastChecked' => time()]]);
-    if ($count > 0) echo $char_id . " Added $count mails\n";
+    if ($count > 0) Log::log($char_id . " Added $count mails");
     if ($set_delta) Util::setDelta($params['config'], $char_id);
 }

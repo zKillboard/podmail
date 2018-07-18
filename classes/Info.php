@@ -44,7 +44,7 @@ class Info
     {
         return;
         if ($db->exists('information', ['type' => 'label_id', 'id' => $label_id]) === false) {
-            echo "Adding label $label_id\n";
+            Log::log("Adding label $label_id");
             $db->insert('information', ['type' => 'label_id', 'id' => $label_id, 'name' => "label $label_id", 'character_id' => $char_id, 'update' => true]);
         }
     }
@@ -52,7 +52,7 @@ class Info
     public static function addMailingList(Db $db, int $mailing_list_id, string $name = "?")
     {   
         if ($db->exists('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id]) === false) {
-            echo "Adding mailing list: $mailing_list_id\n";
+            Log::log("Adding mailing list: $mailing_list_id");
             $db->insert('information', ['type' => 'mailing_list_id', 'id' => $mailing_list_id, 'name' => $name]);
         }
     }
@@ -71,7 +71,7 @@ class Info
                 return; 
                 return self::addMailingList($db, $recipient['recipient_id']);
             default:
-                echo "Unknown recipient type:\n" . print_r($recipient, true) . "\n";
+                Log::log("Unknown recipient type:\n" . print_r($recipient, true));
                 throw new \IllegalArguementException("Unknown recipient type:\n" . print_r($recipient, true));
         }
     }
@@ -95,14 +95,6 @@ class Info
             if (is_array($value)) $element[$key] = self::addInfo($db, $value);
             elseif ($value != 0) {
                 switch ($key) {
-                    case '_id':
-                    case 'mail_id':
-                    case 'owner':
-                    case 'fetched':
-                    case 'unixtime':
-                    case 'is_read':
-                    case 'subject':
-                        break;
                     case "from":
                         $name = self::getInfoField($db, 'character_id', $value, 'name');
                         if ($name == "") $name = self::getInfoField($db, 'corporation_id', $value, 'name');
@@ -131,8 +123,6 @@ class Info
                         }
                         $element['fancytime'] = date('D, F d, Y H:i', $element['unixtime']);
                         break;
-                    default: 
-                        //echo "Unknown key: $key => $value"; die();
                 }
             }
         }

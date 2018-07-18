@@ -13,12 +13,12 @@ class ESI
                 // Can be ignored
                 break;
             case 420:
-                echo "420'ed...\n";
+                Log::log("420'ed...");
                 $guzzler->finish();
                 exit();
                 break;
             default:
-                echo "ESI: " . $ex->getCode() . " " . $ex->getMessage() . "\n";
+                Log::log("ESI: " . $ex->getCode() . " " . $ex->getMessage());
         }
     }
 

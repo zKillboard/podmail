@@ -48,6 +48,8 @@ function doNextCall($params, $access_token, &$guzzler)
 
 function mailSuccess(&$guzzler, $params, $content)
 {
+    if ($content == "") return;
+
     $set_delta = false;
     $db = $params['config']['db'];
     $json = json_decode($content, true);
@@ -79,5 +81,5 @@ function mailSuccess(&$guzzler, $params, $content)
         }
     }
     if ($set_delta) Util::setDelta($db, $char_id);
-    if ($count) echo "$char_id added $count notifications\n";
+    if ($count) Log::log("$char_id added $count notifications");
 }

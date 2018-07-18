@@ -50,9 +50,9 @@ class SSO
             $db->delete('scopes', ['character_id' => $char_id]);
             $db->delete('access_tokens', ['character_id' => $char_id]);
             $db->delete('mails', ['owner' => $char_id]);
-            echo "Purged $char_id for not having a valid refresh_token\n";
+            Log::log("Purged $char_id for not having a valid refresh_token");
         } else {
-            echo "SSO: " . $ex->getCode() . " " . $ex->getMessage() . "\n";
+            Log::log("SSO: " . $ex->getCode() . " " . $ex->getMessage());
         }
     }
 }

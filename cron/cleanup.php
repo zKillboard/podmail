@@ -13,7 +13,7 @@ foreach ($character_ids as $char_id) {
     $last_seen = $redis->get("podmail:last_seen:$char_id");
     if ($last_seen > 0) continue;
     $count = $db->count('mails', ['owner' => $char_id]);
-    echo "Cleaning up $char_id $count\n";
+    Log::log("Cleaning up $char_id $count");
     $db->delete('scopes', ['character_id' => $char_id]);
     $db->delete('access_tokens', ['character_id' => $char_id]);
     $db->delete('mails', ['owner' => $char_id]);

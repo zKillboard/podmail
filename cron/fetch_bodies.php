@@ -20,10 +20,8 @@ while ($minute == date('Hi')) {
 
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
     } 
-    if (sizeof($unFetched) == 0) {
-        $guzzler->tick();
-    }
-    usleep(100000);
+    $guzzler->tick();
+    if (sizeof($unFetched) == 0) sleep(1);
 }
 $guzzler->finish();
 
@@ -47,7 +45,6 @@ function body_fail(&$guzzler, $params, $ex)
     $db = $params['config']['db'];
     if ($ex->getCode() == 404) { // Mail not found!
         $db->delete('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']]);
-        echo "Mail not found, purging...\n";
         Util::setDelta($params['config'], $params['char_id']);
     } else ESI::fail($guzzler, $params, $ex);
 }

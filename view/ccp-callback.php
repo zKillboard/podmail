@@ -40,6 +40,7 @@ $redis->setex("podmail:last_seen:$char_id", 604800, time());
 Info::addChar($config['db'], $char_id, $char_name);
 Info::addScopes($config['db'], $char_id, $scopes, $refresh_token);
 
+Log::log("$char_id - $char_name just logged in.");
 $config['session']->set('char_id', $char_id);
 $config['true_session']->regenerateId();
 return $response->withStatus(302)->withRedirect('/');

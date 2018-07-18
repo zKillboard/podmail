@@ -19,9 +19,11 @@ foreach ($labels as $label) {
     $label['unread'] = $db->count('mails', $filter);
     $folders[$label_id] = $label;
 }
-ksort($folders);
+$allMail = $folders[0];
+unset($folders[0]);
 $notifs = $folders[999999999];
 unset($folders[999999999]);
+ksort($folders);
 
 $lists = $row['mail_lists'];
 $sort = [];
@@ -34,6 +36,7 @@ foreach ($lists as $list) {
 }
 ksort($sort);
 $folders = array_merge($folders, $sort);
+$folders[] = $allMail;
 $folders[] = $notifs;
 
 return $app->view->render($response, 'folders.html', ['folders' => $folders]);
