@@ -8,14 +8,16 @@ $db = $config['db'];
 $esi = $config['ccp']['esi'];
 $guzzler = Util::getGuzzler($config);
 
+$week = 86400 * 7;
+
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $toUpdate = $db->query('information', ['type' => 'corporation_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['limit' => 100]);
+    $toUpdate = $db->query('information', ['type' => 'corporation_id', 'lastUpdated' => ['$lte' => (time() - $week)]], ['limit' => 100]);
     foreach ($toUpdate as $row) {
         $corp_id = $row['id'];
         $params['row'] = $row;
         $params['config'] = $config;
-        $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
+        $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - $week + 120)]]);
         $guzzler->call("$esi/v4/corporations/$corp_id/", '\podmail\success', '\podmail\ESI::fail', $params, ['etag' => $config['redis']]);
     }
     if (sizeof($toUpdate)) $guzzler->finish();

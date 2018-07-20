@@ -4,7 +4,7 @@ namespace podmail;
 
 require_once '../init.php';
 
-$guzzler = Util::getGuzzler($config, 10);
+$guzzler = Util::getGuzzler($config, 20);
 $db = $config['db'];
 $redis = $config['redis'];
 

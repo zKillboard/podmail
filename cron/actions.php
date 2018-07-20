@@ -29,7 +29,7 @@ while ($minute == date('Hi')) {
         SSO::getAccessToken($config, $row['character_id'], $sso['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
     } 
     $guzzler->tick();
-    sleep(1);
+    if ($row == null) sleep(1);
 }
 $guzzler->finish();
 

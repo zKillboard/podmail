@@ -60,7 +60,7 @@ function body_success(&$guzzler, $params, $content)
         $title = (isset($info['name']) && $info['name'] != "?") ? $info['name'] : 'New EveMail';
         $image = ($info['type'] == 'character_id') ? "https://imageserver.eveonline.com/Character/" . $mail['from'] . "_32.jpg" : "https://podmail.zzeve.com/images/podmail.png";
 
-        $notify = ["title" => $title, "image" => $image, "message" => $mail["subject"], 'mail_id' => $params['mail_id'], 'unixtime' => time(), 'uniqid' => uniqid("", true)];
+        $notify = ["title" => $title, "image" => $image, "message" => $mail["subject"], 'mail_id' => $params['mail_id'], 'unixtime' => strtotime($mail['timestamp']), 'uniqid' => uniqid("", true)];
     }
     Util::setDelta($params['config'], (int) $params['char_id'], $notify);
 }

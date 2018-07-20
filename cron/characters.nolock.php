@@ -6,11 +6,14 @@ require_once '../init.php';
 
 $db = $config['db'];
 $esi = $config['ccp']['esi'];
-$guzzler = Util::getGuzzler($config, 25);
+$guzzler = Util::getGuzzler($config, 5);
+$guzzler->setEtagTTL(86400 * 7);
+
+$ttl = 86400 * 6;
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - 86400)]], ['sort' => ['lastUpdated' => 1], 'limit' => 25]);
+    $toUpdate = $db->query('information', ['type' => 'character_id', 'lastUpdated' => ['$lte' => (time() - $ttl)]], ['sort' => ['lastUpdated' => 1], 'limit' => 25]);
     foreach ($toUpdate as $row) {
         $char_id = $row['id'];
 
@@ -20,7 +23,7 @@ while ($minute == date('Hi')) {
             $db->delete('information', $row);
             continue;
         }
-        $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - 86400 + 120)]]);
+        $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - $ttl + 120)]]);
 
         $params['row'] = $row;
         $params['config'] = $config;
@@ -48,7 +51,10 @@ function success($guzzler, $params, $content)
     $db = $params['config']['db'];
     $character = json_decode($content, true);
     $row = $params['row'];
-    $db->update('information', $row, ['$set' => ['name' => $character['name'], 'search' => strtolower($character['name']), 'lastUpdated' => time()]]);
+    $update = ['name' => $character['name'], 'search' => strtolower($character['name']), 'lastUpdated' => time()];
+    $update['corporation_id'] = $character['corporation_id'];
+    $update['alliance_id'] = (int) @$character['alliance_id'];
+    $db->update('information', $row, ['$set' => $update]);
     Info::addCorp($db, $character['corporation_id']);
     $froms = $db->distinct('mails', 'owner', ['from' => $row['id']]);
     foreach ($froms as $char_id) Util::setDelta($params['config'], $char_id);

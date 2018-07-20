@@ -39,7 +39,7 @@ function success(&$guzzler, $params, $content)
 function doNextCall($params, $access_token, &$guzzler)
 {
     $params['access_token'] = $access_token;
-    $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token"];
+    $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token", 'etag' => $params['config']['redis']];
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
     $url = "$esi/v2/characters/$char_id/notifications/";
@@ -56,18 +56,16 @@ function mailSuccess(&$guzzler, $params, $content)
     $json = json_decode($content, true);
     $char_id = $params['char_id'];
     $count = 0;
-    $max_notif_id = 0;
+    $notify = [];
     foreach ($json as $notif) {
         $notif_mail = ['mail_id' => $notif['notification_id'], 'owner' => $char_id];
         $unixtime = strtotime($notif['timestamp']);
-        if ($unixtime < (time() - 86400 * 30)) continue;
-        $max_notif_id = max($max_notif_id, $notif['notification_id']);
+        if ($unixtime < (time() - (86400 * 30))) continue;
 
         if (!$db->exists('mails', $notif_mail)) {
             if ($notif['sender_type'] == 'character') Info::addChar($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'corporation') Info::addCorp($db, $notif['sender_id']);
             if ($notif['sender_type'] == 'alliance') Info::addAlliance($db, $notif['sender_id']);
-
 
             if (!isset($notif['is_read'])) $notif['is_read'] = false;
             $notif['is_notifcation'] = true;
@@ -86,9 +84,12 @@ function mailSuccess(&$guzzler, $params, $content)
             $db->insert('mails', $notif);
             $set_delta = true;
             $count++;
+
+            $image = "https://podmail.zzeve.com/images/podmail.png";
+            if (sizeof($notify) == 0) $notify = ["title" => "EVE Notification", "image" => $image, "message" => $notif["subject"], 'mail_id' => $notif['mail_id'], 'unixtime' => $notif['unixtime'], 'uniqid' => uniqid("", true)];
         }
     }
-    $set_delta |= (bool) $db->delete('mails', ['owner' => $char_id, 'labels' => 999999999, 'mail_id' => ['$lt' => $max_notif_id]]);
-    if ($set_delta) Util::setDelta($params['config'], $char_id);
+    $set_delta |= (bool) $db->delete('mails', ['owner' => $char_id, 'labels' => 999999999, 'unixtime' => ['$lt' => (time() - (86400 * 30))]]);
+    if ($set_delta) Util::setDelta($params['config'], $char_id, $notify);
     if ($count) Log::log("$char_id added $count notifications");
 }
