@@ -19,6 +19,9 @@ $app = new \Slim\App(['settings' => ['displayErrorDetails' => true]]);
 $twig = new \Slim\Views\Twig('templates/', ['cache' => false]);
 $twig->getEnvironment()->addGlobal('character_id', $char_id);
 $twig->getEnvironment()->addGlobal('character_name', Info::getInfoField($config['db'], 'character_id', $char_id, 'name'));
+$char = $config['db']->queryDoc('information', ['type' => 'character_id', 'id' => $char_id]);
+Info::addInfo($config['db'], $char);
+$twig->getEnvironment()->addGlobal('character', $char);
 $app->view = $twig;
 addRoute($app, '/', 'index.php', $config, $char_id);
 addRoute($app, '/about', 'about.php', $config, $char_id);
@@ -41,6 +44,6 @@ function addRoute(\Slim\App &$app, string $url, string $file, array $config, int
     if (!in_array($type, $validTypes)) throw new \IllegalArguementException("Invalid type: $type");
     $app->$type($url, function (\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, array $args) 
             use ($app, $file, $char_id, $config) {
-                return (include "view/" . $file)->withHeader('Access-Control-Allow-Origin', "https://" . $config['domain'])->withHeader('Access-Control-Allow-Methods', 'GET, POST')->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization');
+            return (include "view/" . $file)->withHeader('Access-Control-Allow-Origin', "https://" . $config['domain'])->withHeader('Access-Control-Allow-Methods', 'GET, POST')->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization');
             });
 }

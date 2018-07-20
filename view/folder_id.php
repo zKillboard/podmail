@@ -7,18 +7,23 @@ $id = (int) $args['id'];
 $page = (int) @$args['page'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
+if (!isset($row['labels'])) return $response;
+
 $labels = $row['labels'];
 $lists = $row['mail_lists'];
-$folder = $labels[$id] != null ? $labels[$id]  : $lists[$id];
+$folder = @$labels[$id] != null ? $labels[$id] : $lists[$id];
 $folder['label_id'] = $id;
-if ($folder['name'] == null) {
+if (@$folder['name'] == null) {
     $list = $db->queryDoc('information', ['type' => 'mailing_list_id', 'id' => $id]);
-    $folder['name'] = $list['name'];    
+    $folder['name'] = strlen($list['name']) > 0 ? $list['name'] : "Unknown list $id";  
 }
 
 $filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true]];
 if ($id == 999999998) $filter['labels'] = [];
-else if ($id == 999999997) $filter['is_read'] = false;
+else if ($id == 999999997) {
+    $filter['is_read'] = false;
+    $filter['labels'] = ['$ne' => 999999999];
+}
 else if ($id != 0) $filter['labels'] = $id;
 else $filter['labels'] = ['$ne' => 999999999];
 

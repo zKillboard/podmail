@@ -4,13 +4,17 @@ $db = $config['db'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
 
+if (!isset($row['labels'])) return $response;
 $labels = $row['labels'];
 $folders = [];
 foreach ($labels as $label) {
     $label_id = $label['label_id'];
     $filter = ['owner' => ['$in' => [$char_id]], 'deleted' => false];
     if ($label_id == 999999998) $filter['labels'] = [];
-    else if ($label_id == 999999997) $filter['is_read'] = false;
+    else if ($label_id == 999999997) {
+        $filter['is_read'] = false;
+        $filter['labels'] = ['$ne' => 999999999];
+    }
     else if ($label_id != 0) $filter['labels'] = $label_id;
     else $filter['labels'] = ['$ne' => 999999999];
 

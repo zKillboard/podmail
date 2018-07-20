@@ -9,6 +9,7 @@ class ESI
         $code = $ex->getCode();
         switch ($code) {
             case 0:
+            case 403:
             case ($code >= 500):
                 // Can be ignored
                 break;

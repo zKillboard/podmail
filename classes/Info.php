@@ -114,7 +114,7 @@ class Info
                         break;
                     case 'timestamp':
                         $element['dttm'] = date('Y.m.d H:i', $element['unixtime']);
-                        if (date('d', $element['unixtime']) == date('d', time())) {
+                        if (date('YMd', $element['unixtime']) == date('YMd', time())) {
                             $element['timeago'] = date('g:i A', $element['unixtime']);
                         } else if(date('Y', $element['unixtime']) == date('Y', time())) {
                             $element['timeago'] = date('M d', $element['unixtime']);
@@ -122,6 +122,12 @@ class Info
                             $element['timeago'] = date('M d, Y', $element['unixtime']);
                         }
                         $element['fancytime'] = date('D, F d, Y H:i', $element['unixtime']);
+                        break;
+                    case 'corporation_id':
+                        $element['corporation_name'] = Info::getInfoField($db, 'corporation_id', $value, "name");
+                        break;
+                    case "alliance_id":
+                        $element['alliance_name'] = Info::getInfoField($db, 'alliance_id', $value, 'name');
                         break;
                 }
             }

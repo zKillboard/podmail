@@ -6,7 +6,7 @@ var deltaCount = 1;
 var deltaCurrent = null;
 $( document ).ready(function() {
         loadFolders();
-        setTimeout('checkDelta();', 3000);
+        setTimeout('nextDelta();', 1000);
         $('.gre').gre();
         $('#left-hamburger').click(function() { leftBurgerClicked(); } );
         toggleFolders();
@@ -81,6 +81,7 @@ function folderLoaded()
     $(".subjectrow").click(function() { mailClick(this); return false; } );
     $("#folders").html($("#pre-folders").html());
     $("#compose-start").click(function() { compose(); return false; });
+    $("#compose-target").click(function() { compose_target(); return false; });
     $(".folder-link").click(function (e) { loadFolderClick($(this).attr('folder')); return false; });
     if (click) {
         $("#mail").hide();
@@ -193,8 +194,6 @@ function showListing()
     $("#mail").hide();
     $("#listing").show();
     $("#compose").hide();
-    //pushState('/folder/' + currentFolder);
-
 }
 
 function checkDelta()
@@ -232,16 +231,15 @@ function processDelta(data)
         window.location = '/logout';
         return;
     } else if (deltaCurrent != data.delta) {
-        console.log(data);
         deltaCurrent = data.delta;
         loadFolders();
         deltaCount = 1;
         if (data.notification) htmlNotify(data.notification);
     } else if (deltaCount < 30) deltaCount++;
-    if (data.name != $("#char-name").html())  {
-        $("#char-name").html(data.name);
-        $("#char-image").attr("src", "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg");
-    }
+    if (data.name != $("#char-name").html()) $("#char-name").html(data.name);
+    image = "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg";
+    if ($("#char-image").attr("src") != image) $("#char-image").attr("src", "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg");
+    
 }
 
 $(document).on('submit', '#compose_form', function() {            
@@ -320,6 +318,13 @@ function array_delete(array, element)
     return array;
 }
 
+function compose_target()
+{
+    compose_prepare($("#compose-target").attr("compose-target"), "", "");
+    compose_show();
+    $("#subject").focus();
+}
+
 function reply()
 {
     compose_prepare($("#mail-from").html(), "Re: " + $("#mail-subject").html(), "<br/><br/>--------------------------------<br/>" + $("#mail-subject").html() + "<br/>" + "From: " + $("#mail-from").html() + "<br/>Sent: " + $("#mail-dttm").html() + "<br/>To: " + $("#mail-to").html() + "<br/><br/>" + $("#mail-body").html());
@@ -342,22 +347,25 @@ function forward()
     $("#recipients").focus();
 }
 
-$(window).on("popstate", function(e) {
-        if (e.originalEvent.state !== null) {
-        if (event.state.currentMail != 0) {
+$(window).on("popstate", pop_state);
+function pop_state(e)
+{
+    if (e.originalEvent.state !== null) state = e.originalEvent.state;
+    else state = e.state;
+
+    if (state.currentMail != 0) {
         $("#mail").load(location.href, mailLoaded);
         $("#listing").hide();
         $("#compose").hide();
         $("#mail").show();
-        } else {
-        loadFolder(event.state.currentFolder, event.state.currentPage);
+    } else {
+        loadFolder(state.currentFolder, state.currentPage);
         $("#mail").hide();
         $("#compose").hide();
         $("#listing").show();
-        }
-        return false;
-        }
-        });
+    }
+    return false;
+}
 
 var lastState = null;
 function pushState(newURL)
@@ -392,7 +400,8 @@ function checkSessionStorage()
 var notifsDisplayed = [];
 function htmlNotify (data)
 {
-    if("Notification" in window) {
+    var width = parseInt($("body").css("width"));
+    if("Notification" in window && width > 768) { // Don't bother on mobile devices
         if (Notification.permission !== 'denied' && Notification.permission !== "granted") {
             Notification.requestPermission(function (permission) {
                     if (permission === 'granted') htmlNotify(data);
