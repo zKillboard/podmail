@@ -11,7 +11,7 @@ if (!isset($row['labels'])) return $response;
 
 $labels = $row['labels'];
 $lists = $row['mail_lists'];
-$folder = @$labels[$id] != null ? $labels[$id] : $lists[$id];
+$folder = @$labels[$id] != null ? @$labels[$id] : @$lists[$id];
 $folder['label_id'] = $id;
 if (@$folder['name'] == null) {
     $list = $db->queryDoc('information', ['type' => 'mailing_list_id', 'id' => $id]);

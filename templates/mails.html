@@ -12,7 +12,7 @@
     <button id="mass-unread" class="btn btn-sm btn-secondary" disabled="true" data-toggle="tooltip" title="Mark as Unread"><i class="fas fa-envelope"></i></button>
     <button id="mass-delete" class="btn btn-sm btn-secondary" disabled="true" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
     {% set compose_target = '' %}
-<span style="padding-left: 3.5em;"><strong>{{ folder.name }}{% if folder.label_id == 4 %} {{ character.corporation_name }}{% set compose_target = character.corporation_name %}{% elseif folder.label_id == 8 %} {{ character.alliance_name }}{% set compose_target = character.alliance_name %}{% elseif folder.label_id > 9999999 %}{% set compose_target = folder.name %}{% endif %}</strong>
+<span style="padding-left: 3.5em;"><strong>{{ folder.name }}{% if folder.label_id == 4 %} {{ character.corporation_name }}{% set compose_target = character.corporation_name %}{% elseif folder.label_id == 8 %} {{ character.alliance_name }}{% set compose_target = character.alliance_name %}{% elseif folder.label_id > 9999999 and folder.label_id < 900000000 %}{% set compose_target = folder.name %}{% endif %}</strong>
 {% if compose_target != '' %}
         <button id='compose-target' class="btn btn-sm btn-secondary" data-toggle="tooltip" title="Send EveMail to {{ compose_target }}" compose-target="{{ compose_target }}"><i class="fas fa-arrow-right"></i></button>
 {% endif %}

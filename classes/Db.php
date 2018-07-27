@@ -49,6 +49,12 @@ class Db
         return $ret;
     }
 
+    public function queryField(string $coll, string $field, array $filter = [], array $options = [])
+    {
+        $row = self::queryDoc($coll, $filter, $options);
+        return @$row[$field];
+    }
+
     public function queryDoc(string $coll, array $filter = [], array $options = [])
     {
         $cursor = $this->query($coll, $filter, $options);
@@ -69,6 +75,11 @@ class Db
         $bulk = new \MongoDB\Driver\BulkWrite();
         $bulk->insert($data);
         return $this->manager->executeBulkWrite($this->namespace . ".". $coll, $bulk)->getInsertedCount();
+    }
+
+    public function set(string $coll, array $filter = [], array $values, array $options = [])
+    {
+        return self::update($coll, $filter, ['$set' => $values], $options);
     }
 
     public function update(string $coll, array $filter = [], array $values, array $options = [])

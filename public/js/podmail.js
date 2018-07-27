@@ -420,3 +420,8 @@ function htmlNotify (data)
         }
     }
 }
+
+function applyTheme(theme)
+{
+    $.ajax("/user/theme/" + theme, { complete : function () { window.location = window.location; }});
+}
