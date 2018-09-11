@@ -91,7 +91,7 @@ class Info
     {  
         foreach ($element as $key => $value) {
             $class = is_object($value) ? get_class($value) : null;
-            if ($class == 'MongoDB\BSON\ObjectID') continue;
+            if ($class == 'MongoDB\BSON\ObjectID' || $class == 'MongoDB\BSON\ObjectId') continue;
             if (is_array($value)) $element[$key] = self::addInfo($db, $value);
             elseif ($value != 0) {
                 switch ($key) {
