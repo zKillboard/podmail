@@ -17,6 +17,7 @@ while ($minute == date('Hi')) {
         $alli_id = $row['id'];
         $params['row'] = $row;
         $params['config'] = $config;
+        if ($row['lastUpdated'] != 0) sleep(1); // slow down
         $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - $week + 120)]]);
         $guzzler->call("$esi/v3/alliances/$alli_id/", '\podmail\success', '\podmail\ESI::fail', $params, ['etag' => $config['redis']]);
     }

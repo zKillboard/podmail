@@ -23,6 +23,7 @@ while ($minute == date('Hi')) {
             $db->delete('information', $row);
             continue;
         }
+        if ($row['lastUpdated'] != 0) sleep(1); // slow down
         $db->update('information', $row, ['$set' => ['lastUpdated' => (time() - $ttl + 120)]]);
 
         $params['row'] = $row;
