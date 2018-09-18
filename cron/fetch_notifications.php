@@ -42,7 +42,7 @@ function doNextCall($params, $access_token, &$guzzler)
     $headers = ['Content-Type' => 'application/json', 'Authorization' => "Bearer $access_token", 'etag' => $params['config']['redis']];
     $char_id = $params['char_id'];
     $esi = $params['config']['ccp']['esi'];
-    $url = "$esi/v2/characters/$char_id/notifications/";
+    $url = "$esi/v3/characters/$char_id/notifications/";
     if (isset($params['last_mail_id'])) $url .= "?last_mail_id=" . $params['last_mail_id'];
     $guzzler->call($url, '\podmail\mailSuccess', '\podmail\ESI::fail', $params, $headers);
 }
