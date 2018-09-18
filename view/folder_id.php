@@ -2,6 +2,8 @@
 
 namespace podmail;
 
+if ($char_id == 0) return $response->withStatus(302)->withRedirect('/');
+
 $db = $config['db'];
 $id = (int) $args['id'];
 $page = (int) @$args['page'];
