@@ -19,7 +19,7 @@
 </span>
 <div class="float-right">
 {% set start = (page * 25) - 24 %}
-<a href="" id="prevpage"><i class="fas fa-chevron-left"></i></a> {{ start }} - {{ start + mails|length - 1 }} of {{ count }} <a href="" id="nextpage" max="{{ max }}"><i class="fas fa-chevron-right"></i></a>
+<a href="" id="prevpage"><i class="fas fa-chevron-left"></i></a> {% if mails.length == 0 %}0{%else%}{{ start }}{% endif %} - {{ start + mails|length - 1 }} of {{ count }} <a href="" id="nextpage" max="{{ max }}"><i class="fas fa-chevron-right"></i></a>
 </div>
 </div>
 {% if mails|length == 0 %}
