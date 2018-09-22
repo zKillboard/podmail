@@ -21,6 +21,7 @@ class ESI
             default:
                 Log::log("ESI: " . $ex->getCode() . " " . $ex->getMessage());
         }
+        sleep(1);
     }
 
     public static function curl($config, $url, $fields = [], $accessToken = null, $callType = 'GET')
