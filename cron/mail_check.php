@@ -7,22 +7,19 @@ require_once '../init.php';
 $guzzler = Util::getGuzzler($config, 25);
 $db = $config['db'];
 
-$db->update('mails', ['fetched' => ['$exists' => false]], ['$set' => ['fetched' => false]], ['multi' => true]);
-$db->update('mails', ['fetched' => null], ['$set' => ['fetched' => 'do_fetch']], ['multi' => true]);
-$db->update('mails', ['fetched' => false], ['$set' => ['fetched' => 'do_fetch']], ['multi' => true]);
+$db->update('mails', ['fetched' => true, 'last_checked' => ['$exists' => false]], ['$set' => ['last_checked' => 0]], ['multi' => true]);
 
 $minute = date('Hi');
 while ($minute == date('Hi')) {
-    $unFetched = $db->query('mails', ['fetched' => 'do_fetch'], ['sort' => ['mail_id' => -1], 'limit' => 10]);
-    foreach ($unFetched as $mail) {
+    $unChecked = $db->query('mails', ['fetched' => true, 'last_checked' => ['$lt' => (time() - 86400)], 'labels' => ['$ne' => 999999999]], ['sort' => ['last_checked' => 1], 'limit' => 10]);
+    foreach ($unChecked as $mail) {
         $params = ['mail_id' => $mail['mail_id']];
-        $db->update('mails', ['mail_id' => (int) $mail['mail_id']], ['$set' => ['fetched' => null]], ['multi' => true]);
         $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $mail['owner']]);
 
         SSO::getAccessToken($config, $row['character_id'], $row['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail', $params);
-    } 
-    $guzzler->tick();
-    if (sizeof($unFetched) == 0) sleep(1);
+    }
+    $guzzler->finish();
+    if (sizeof($unChecked) == 0) sleep(1);
 }
 $guzzler->finish();
 
@@ -45,16 +42,23 @@ function body_fail(&$guzzler, $params, $ex)
 {
     $db = $params['config']['db'];
     if ($ex->getCode() == 404) { // Mail not found!
+        Log::log("Removing " . $params['mail_id']);
         $db->delete('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']]);
         Util::setDelta($params['config'], $params['char_id']);
-    } else ESI::fail($guzzler, $params, $ex);
+    } else {
+        Log::log("error " . $params['mail_id']);
+        ESI::fail($guzzler, $params, $ex);
+    }
+    sleep(1);
 }
 
 function body_success(&$guzzler, $params, $content)
 {
-    $mail = json_decode($content, true);
     $db = $params['config']['db'];
-    $db->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'last_checked' => time(), 'purge' => false, 'body' => $mail['body']]], ['multi' => true]);
+    $db->update('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']], ['$set' => ['last_checked' => time()]], ['multi' => true]);
+    /*$mail = json_decode($content, true);
+    $db = $params['config']['db'];
+    $db->update('mails', ['mail_id' => $params['mail_id']], ['$set' => ['fetched' => true, 'purge' => false, 'body' => $mail['body']]], ['multi' => true]);
     $notify = [];
     if ($mail['labels'] != [2] && @$mail['is_read'] != true && strtotime($mail['timestamp']) >= (time() - 120)) {
         $info = $db->queryDoc("information", ['id' => (int) $mail['from']]);
@@ -63,5 +67,5 @@ function body_success(&$guzzler, $params, $content)
 
         $notify = ["title" => $title, "image" => $image, "message" => $mail["subject"], 'mail_id' => $params['mail_id'], 'unixtime' => strtotime($mail['timestamp']), 'uniqid' => uniqid("", true)];
     }
-    Util::setDelta($params['config'], (int) $params['char_id'], $notify);
+    Util::setDelta($params['config'], (int) $params['char_id'], $notify);*/
 }

@@ -79,7 +79,7 @@ function mailSuccess(&$guzzler, $params, $content)
         if (!isset($mail['is_read'])) $mail['is_read'] = false;
         if ($db->exists("mails", ['owner' => $char_id, 'mail_id' => $mail['mail_id']]) == false) {
             $mail['owner'] = $char_id;
-            $mail['fetched'] = ($tcount <= 150 ? 'do_fetch' : false);
+            $mail['fetched'] = 'do_fetch'; //($tcount <= 150 ? 'do_fetch' : false);
             $mail['unixtime'] = strtotime($mail['timestamp']);
             $mail['deleted'] = false;
             $mail['purge'] = false;

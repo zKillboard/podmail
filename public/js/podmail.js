@@ -4,15 +4,19 @@ var currentMail = 0;
 var click = false;
 var deltaCount = 1;
 var deltaCurrent = null;
-$( document ).ready(function() {
-        loadFolders();
-        setTimeout('nextDelta();', 1000);
-        $('.gre').gre();
-        $('#left-hamburger').click(function() { leftBurgerClicked(); } );
-        toggleFolders();
-        if (window.location.pathname != '/about') pushState('/folder/1');
-        checkSessionStorage();
-        });
+$( document ).ready(docReady);
+
+function docReady()
+{
+    loadFolders();
+    setTimeout('nextDelta();', 1000);
+    $('.gre').gre();
+    $('#left-hamburger').click(function() { leftBurgerClicked(); } );
+    toggleFolders();
+    if (window.location.pathname != '/about') pushState('/folder/1');
+    checkSessionStorage();
+    $("#search").on("change", search);
+}
 
 $( window ).resize(function() { toggleFolders(); });
 
@@ -104,7 +108,7 @@ function folderLoaded()
     $("#folder-id-content").css("display", "block");
     $('[data-toggle="tooltip"]').tooltip()
 
-    $("#mass-checkbox").click(function() { $(".mail-checkbox").prop('checked', $(this).prop('checked')); setMassButtons(); });
+        $("#mass-checkbox").click(function() { $(".mail-checkbox").prop('checked', $(this).prop('checked')); setMassButtons(); });
     $(".mail-checkbox").click(function() { setMassButtons(); });
     $("#mass-read").click(function() { massSetRead('true'); $(this).blur(); });
     $("#mass-unread").click(function() { massSetRead('false'); $(this).blur(); });
@@ -161,7 +165,7 @@ function mailLoaded(o)
     $("#mail").show();
     $("#mail-id-content").css("display", "block");
     $('[data-toggle="tooltip"]').tooltip()
-    var mail_id = $("#mail-id").html();
+        var mail_id = $("#mail-id").html();
     currentMail = mail_id;
     pushState('/mail/' + mail_id);
 }
@@ -236,10 +240,11 @@ function processDelta(data)
         deltaCount = 1;
         if (data.notification) htmlNotify(data.notification);
     } else if (deltaCount < 30) deltaCount++;
-    if (data.name != $("#char-name").html()) $("#char-name").html(data.name);
-    image = "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg";
-    if ($("#char-image").attr("src") != image) $("#char-image").attr("src", "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg");
-    
+    if (data.name != $("#char-name").html() && data.id > 0) {
+        $("#char-name").html(data.name);
+        image = "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg";
+        if ($("#char-image").attr("src") != image) $("#char-image").attr("src", "https://imageserver.eveonline.com/Character/" + data.id + "_32.jpg");
+    }
 }
 
 $(document).on('submit', '#compose_form', function() {            
@@ -425,3 +430,23 @@ function applyTheme(theme)
 {
     $.ajax("/user/theme/" + theme, { complete : function () { window.location = window.location; }});
 }
+
+function search()
+{
+    // jQuery.post( url [, data ] [, success ] [, dataType ] )
+    $("#listing").load("/search", { search : $("#search").val() }, noop);
+}
+
+function noop(data)
+{
+    console.log('no op');
+    $("#listing").html(data);
+    console.log(data);
+}
+
+function searchComplete(data)
+{
+    console.log(data);
+}
+
+
