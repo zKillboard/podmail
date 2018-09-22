@@ -40,6 +40,8 @@ addRoute($app, '/folder/{id}[/{page}]', 'folder_id.php', $config, $char_id);
 addRoute($app, '/folders', 'folders.php', $config, $char_id);
 addRoute($app, '/logout', 'logout.php', $config, $char_id);
 addRoute($app, '/mail/{id}', 'mail_id.php', $config, $char_id);
+addRoute($app, '/search', 'search.php', $config, $char_id);
+addRoute($app, '/search', 'search.php', $config, $char_id, 'post');
 addRoute($app, '/user/{key}/{value}', 'user.php', $config, $char_id);
 $app->run();
 

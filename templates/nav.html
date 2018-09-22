@@ -2,6 +2,9 @@
     <button class='btn btn-small' id='left-hamburger'><i class="fas fa-bars"></i></button>&nbsp;&nbsp;&nbsp;
     <a class="navbar-brand" href="/"><img src='/images/podmail.png' height='32' /><span class="hidden-md-down"> PodMail (beta)</span></a>
     <ul class="navbar-nav mr-auto"></ul>
+    {% if character_id == 93382481 %}
+    <ul class="navbar-nav mr-auto"> <input class="form-control mr-sm-2" id='search' type="search" placeholder="Search" aria-label="Search"> </ul>
+    {% endif %}
     <ul class="navbar-nav m1-auto">
         {% if character_id %}
             <li class="nav-item dropdown"><div>
