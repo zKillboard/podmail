@@ -42,7 +42,7 @@ class Db
                 // build the 'distinct' command
                 'distinct' => $coll, // specify the collection name
                 'key' => $key, // specify the field for which we want to get the distinct values
-                'query' => $filter // criteria to filter documents
+                //'query' => $filter // criteria to filter documents TODO 
         ]);
         $cursor = $this->manager->executeCommand($this->namespace, $command);
         $ret = current($cursor->toArray())->values;
