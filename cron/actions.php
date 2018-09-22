@@ -8,6 +8,8 @@ $db = $config['db'];
 $guzzler = Util::getGuzzler(1);
 $lastMailSent = 0;
 
+$db->update('actions', [], ['$set' => ['status' => 'pending']], ['multi' => true]);
+
 $minute = date('Hi');
 while ($minute == date('Hi')) {
     $row = $db->queryDoc('actions', ['status' => 'pending'], ['sort' => ['_id' => 1]]);
@@ -25,6 +27,10 @@ while ($minute == date('Hi')) {
         }
         $db->update('actions', $row, ['$set' => ['status' => 'in progress']]);
         $sso = $db->queryDoc('scopes', ['character_id' => $row['character_id'], 'scope' => $scope]);
+        if ($sso == null) {
+            $db->delete('actions', $row);
+            continue;
+        }
         $config['row'] = $row;
         SSO::getAccessToken($config, $row['character_id'], $sso['refresh_token'], $guzzler, '\podmail\success', '\podmail\SSO::fail');
     } 
