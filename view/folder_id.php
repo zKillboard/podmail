@@ -9,6 +9,7 @@ $id = (int) $args['id'];
 $page = (int) @$args['page'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
+if ($row === null) return $response->withStatus(302)->withRedirect('/logoff');
 if (!isset($row['labels'])) return $response;
 
 $labels = $row['labels'];
@@ -20,7 +21,7 @@ if (@$folder['name'] == null) {
     $folder['name'] = strlen($list['name']) > 0 ? $list['name'] : "Unknown list $id";  
 }
 
-$filter = ['owner' => ['$in' => [$char_id]], 'deleted' => ['$ne' => true]];
+$filter = ['owner' => ['$in' => [$char_id]]/*, 'deleted' => ['$ne' => true]*/];
 if ($id == 999999998) $filter['labels'] = [];
 else if ($id == 999999997) {
     $filter['is_read'] = false;

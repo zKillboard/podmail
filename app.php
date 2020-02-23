@@ -27,6 +27,7 @@ if ($char_id > 0) {
         $twig->getEnvironment()->addGlobal('theme', $config['db']->queryField('users', 'theme', ['character_id' => $char_id]));
     }
 }
+
 $app->view = $twig;
 addRoute($app, '/', 'index.php', $config, $char_id);
 addRoute($app, '/about', 'about.php', $config, $char_id);

@@ -79,7 +79,7 @@ function loadPage(id, page)
 function folderLoaded()
 {
     $(".folder-link").css("font-weight", "");
-    $(".folder-" + currentFolder).css("font-weight", "bold");
+    $(".folder-" + currentFolder).css("color", "#800000");
     $(".tooltip-inner").remove();
 
     $(".subjectrow").click(function() { mailClick(this); return false; } );
@@ -141,10 +141,10 @@ function massDelete()
     $(".mail-checkbox:checked").each(function() {
             mail_id = $(this).attr('mail_id');
             $("#mail-" + mail_id).addClass('strike');
-            $("#div-mail-" + mail_id).hide();
+            //$("#div-mail-" + mail_id).hide();
             $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
             });
-    setTimeout("forceDelta();", 3000);
+    setTimeout("forceDelta();", 1000);
 }
 
 function mailClick(o)
@@ -183,7 +183,7 @@ function deleteMail(btn)
 {
     mail_id = $(btn).attr('mail_id');
     $("#mail-" + mail_id).addClass('strike');
-    $("#div-mail-" + mail_id).hide();
+    //$("#div-mail-" + mail_id).hide();
     $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});
     setTimeout("forceDelta();", 3000);
 }
@@ -222,6 +222,7 @@ function nextDelta()
 
 function forceDelta()
 {
+    return;
     processDelta(JSON.stringify({delta:'0'}));
 }
 

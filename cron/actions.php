@@ -63,6 +63,7 @@ function postSuccess($guzzler, $params, $content)
     $row = $params['config']['row'];
     $mail_id = @$params['config']['row']['mail_id'];
     $char_id = $params['config']['row']['character_id'];
+    $set_delta = true;
 
     switch ($row['action']) {
         case 'send_mail':
@@ -76,8 +77,9 @@ function postSuccess($guzzler, $params, $content)
         case 'delete':
             $db->delete('mails', ['owner' => $char_id, 'mail_id' => $mail_id]);
             Log::log("$char_id deleted $mail_id");
+            $set_delta = true;
             break;
     }
     $db->delete('actions', $row);
-    Util::setDelta($params['config'], $char_id);
+    if ($set_delta) Util::setDelta($params['config'], $char_id);
 }
