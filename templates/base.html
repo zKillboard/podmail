@@ -38,7 +38,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.0/jquery-confirm.min.js"></script>
         <script src="/gre/jquery.gre.js"></script>
         <script type="text/javascript">
-            var character_id = {{ character_id }};
+            var character_id = {{ character_id|round(0) }};
             var character_name = '{{ character_name }}';
         </script>
         <script type="text/javascript" src="/js/podmail.js?v={{ random() }}"></script>

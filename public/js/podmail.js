@@ -64,6 +64,7 @@ function loadFolderClick(id)
 
 function loadFolder(id, page)
 {
+    if ($("input:checked").length > 0) return;
     var url = "/folder/" + id + '/' + page;
     currentFolder = id;
     $("#listing").load(url, folderLoaded);
@@ -128,7 +129,7 @@ function setMassButtons()
 function massSetRead(is_read)
 {
     $(".mail-checkbox:checked").each(function() {
-            mail_id = $(this).attr('mail_id');
+            mail_id = $(this).prop('checked', false).attr('mail_id');
             if (is_read == 'true') $(".mail-" + mail_id).removeClass('unread');
             else $(".mail-" + mail_id).addClass('unread');
             $.ajax('/action/mail/' + mail_id + '/is_read/' + is_read, {method: 'post'});
@@ -139,7 +140,7 @@ function massSetRead(is_read)
 function massDelete()
 {
     $(".mail-checkbox:checked").each(function() {
-            mail_id = $(this).attr('mail_id');
+            mail_id = $(this).prop('checked', false).attr('mail_id');
             $("#mail-" + mail_id).addClass('strike');
             //$("#div-mail-" + mail_id).hide();
             $.ajax('/action/mail/' + mail_id + '/delete/now', {method: 'post', complete: mailDeleted});

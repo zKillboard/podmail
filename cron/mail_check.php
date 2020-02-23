@@ -45,8 +45,11 @@ function body_fail(&$guzzler, $params, $ex)
         Log::log("Removing " . $params['mail_id']);
         $db->delete('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']]);
         Util::setDelta($params['config'], $params['char_id']);
+    } else if ($ex->getCode() == 502) {
+        Log::log("502 error " . $params['mail_id']);
+        $db->update('mails', ['mail_id' => $params['mail_id'], 'owner' => $params['char_id']], ['$set' => ['last_checked' => 0]], ['multi' => true]);
     } else {
-        Log::log("error " . $params['mail_id']);
+        Log::log("error " . $params['mail_id'] . " " . $ex->getCode() . " " . $ex->getMessage());
         ESI::fail($guzzler, $params, $ex);
     }
     sleep(1);
