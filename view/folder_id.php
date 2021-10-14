@@ -9,7 +9,7 @@ $id = (int) $args['id'];
 $page = (int) @$args['page'];
 
 $row = $db->queryDoc('scopes', ['scope' => 'esi-mail.read_mail.v1', 'character_id' => $char_id]);
-if ($row === null) return $response->withStatus(302)->withRedirect('/logoff');
+if ($row === null) return $response->withStatus(302)->withRedirect('/logout');
 if (!isset($row['labels'])) return $response;
 
 $labels = $row['labels'];
