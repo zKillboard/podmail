@@ -28,7 +28,7 @@ while ($minute == date('Hi')) {
 
         $params['row'] = $row;
         $params['config'] = $config;
-        $guzzler->call("$esi/v4/characters/$char_id/", '\podmail\success', '\podmail\fail', $params, ['etag' => $config['redis']]);
+        $guzzler->call("$esi/v5/characters/$char_id/", '\podmail\success', '\podmail\fail', $params, ['etag' => $config['redis']]);
     }
     $guzzler->tick();
     if (sizeof($toUpdate) == 0) sleep(1);
