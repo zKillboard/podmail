@@ -22,7 +22,6 @@ while ($minute == date('Hi')) {
     }
     $guzzler->tick();
     sleep(1);
-    break;
 }
 $guzzler->finish();
 
