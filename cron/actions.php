@@ -18,7 +18,7 @@ while ($minute == date('Hi')) {
         switch ($row['action']) {
             case 'send_evemail':
                 $scope = 'esi-mail.send_mail.v1';
-                if ($lastMailSent >= (time() - 13)) continue;
+                if ($lastMailSent >= (time() - 13)) continue 2;
                 $lastMailSent = time(); // Send mails every 13 seconds...
                 break;
             default:
