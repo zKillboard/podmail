@@ -37,6 +37,7 @@ $scopes = $info['Scopes'];
 
 $redis = $config['redis'];
 $redis->setex("podmail:last_seen:$char_id", 604800, time());
+$redis->setex("podmail:iterate:$char_id", 86400, "true");
 Info::addChar($config['db'], $char_id, $char_name);
 Info::addScopes($config['db'], $char_id, $scopes, $refresh_token);
 
