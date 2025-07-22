@@ -1,0 +1,256 @@
+/* invert filter based dark mode */
+body.dark{
+    background-color: black;
+    font-size: 14px;
+    overflow: hidden;
+}
+
+.inverse {
+    filter: invert(1);
+}
+
+img {
+    filter: invert(1);
+    background-color: #111;
+}
+
+#sitelogo, #charimg {
+    height: 25px;
+    max-height: 25px;
+    margin: 0.25em;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
+
+#content {
+    min-height: calc(100vh - 2.71em);
+    max-height: calc(100vh - 2.71em);
+}
+
+#searchbox {
+    width: 100%;
+    height: 2em;
+}
+
+#itemparent {
+    min-height: calc(100vh - 4.72em);
+    max-height: calc(100vh - 4.72em);
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#orders {
+    min-height: calc(100vh - 2.72em);
+    max-height: calc(100vh - 2.72em);
+}
+
+.ordertable {
+    overflow-y: scroll;
+    padding-right: 0.5em;
+    min-height: calc((100vh - 7em) / 2);
+    max-height: calc((100vh - 7em) / 2);
+}
+
+#orders h6 {
+    border-top: solid 1px #ccc;
+    margin-top: 2px;
+}
+
+.hideit {
+    display: none;
+}
+
+.ordertable tbody tr td {
+    width: 15%;
+}
+
+.ordertable tbody tr td[field='location_name'] {
+    width: 100%;
+}
+
+.mlist a {
+    width: 100%;
+    text-align: left;
+}
+
+.mlist .mlist {
+    margin-left: 1em;
+}
+
+.mlist a[aria-expanded='false']:before {
+    color: black;
+    content: "\2795 ";
+    padding-right: .5em;
+}
+
+.mlist a[aria-expanded='true']:before {
+    content: "\2796 ";
+    padding-right: .5em;
+}
+
+.mlist ul {
+    list-style-type: none;
+    width: 100%;
+    margin: 0.25px;
+}
+
+.mlist ul li {
+    cursor: pointer;
+    width: 100%;
+    padding: 0.25em;
+}
+
+.mlist ul li a {
+    text-decoration: none;
+    border-bottom: #111;
+    width: 100%;
+}
+
+.mlist ul li:hover, .mlist a:hover {
+    background-image: linear-gradient(rgb(0 0 0/10%) 0 0);
+}
+
+.searching .groupname, .searching .itemname {
+    display: none;
+}
+
+.searching .match > .groupname, .searching .match  {
+    display: block;
+}
+
+.searching .groupname:before {
+    content: "\1f784 " !important;
+}
+
+.messages {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+}
+
+.listing[of='buy'] {
+    flex-flow: column-reverse;
+}
+
+.ordersheader {
+    font-weight: bold;
+    border-bottom: solid 1px #eee;
+}
+
+.ordersheader, .order {
+    width: 100%;
+    display: flex;
+}
+
+.ordersheader span, .order span {
+    min-width: 10em;
+    padding-left: 1em;
+}
+
+span[field='location_name'] {
+    width: 100%;
+}
+
+.ordersheader {
+    font-weight: bold;
+    box-shadow: 0px 0px 5px #ccc;
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+}
+
+.order.header span {
+    margin-bottom: 1em;
+    border-bottom: 5px solid white;;
+}
+
+@media (max-width: 575px) {
+    .xs-hideit {
+        display: none;
+        transition: display 1s linear;
+    }
+}
+
+.inserted {
+    color: #ff31ff;
+}
+
+.inserted > span:first-child:before {
+    content: '↻';
+    float: left;
+    color: grey;
+    font-size: 75%;
+}
+
+.modified {
+    color: #ff31ff;
+}
+
+.modified:before {
+    content: '↻';
+    color: grey;
+    font-size: 70%;
+}
+
+.remove {
+    color: #33dfc5;
+}
+
+.remove > span:first-child:before {
+    content: 'X';
+    float: left;
+    color: #999;
+    font-size: 75%;
+}
+
+.order.usersorder {
+    color: black;
+    background-color: #edff08;
+}
+
+.flash {
+    color: white;
+}
+
+span[region_id]:after {
+    font-size: 75%; 
+    margin-left: 1em; 
+    color: #777;
+}
+
+.showRegions span[region_id]:after {
+    display: inline;   
+}
+
+.onlyFirst4Region .order {
+    display: none;
+}
+
+.onlyFirst4Region .order.first4Region {
+    display: inherit;
+}
+
+#tqStatus.offline, #tqStatus.offline::before {
+    color: cyan; /* red */
+    content: "X ";
+}
+
+#tqStatus.online, #tqStatus.online::before {
+    color: magenta; /* green */
+    content: "\2713 ";
+}
+
+.resizable {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 250px;
+}
+
+.panelsearch {
+    min-width: 250px;
+    max-width: 500px;
+}
