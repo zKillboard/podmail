@@ -54,13 +54,13 @@
                             <div class="ordertablecontainer">
                                 <div class="ordertable" id="sellorders">
                                     <div class="orderscontainer" of="sell">
-                                        <div class="ordersheader">
-                                            <span class="text-end">Sender</span>                                            
-                                            <span field="location_name">Subject</span>
+                                        <div class="mail_headers">
+                                            <span class="">Sender</span>                                            
+                                            <span class="subject">Subject</span>
                                             <span class="text-end">Timestamp</span>
-                                            <span class="text-end">Labels</span>
+                                            <!-- <span class="text-end">Labels</span> -->
                                         </div>
-                                        <div class="orders" of="sell">
+                                        <div id="mail_headers"  class="orders" of="sell">
                                         </div>
                                     </div>
                                 </div>
@@ -69,9 +69,9 @@
                         <div id="buy">
                             <h6></h6>
                             <div class="ordertablecontainer">
-                                <div class="ordertable" id="buyorders">
+                                <div class="ordertable" id="message">
                                     <div class="orderscontainer" of="buy">
-                                        <div class="ordersheader">
+                                        <div class="ordersheader d-none">
                                             <span class="text-end">Remaining</span>
                                             <span class="text-end">Price</span>
                                             <span field="location_name">Location</span>

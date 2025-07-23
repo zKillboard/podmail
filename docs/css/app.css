@@ -62,68 +62,6 @@ img {
     display: none;
 }
 
-.ordertable tbody tr td {
-    width: 15%;
-}
-
-.ordertable tbody tr td[field='location_name'] {
-    width: 100%;
-}
-
-.mlist a {
-    width: 100%;
-    text-align: left;
-}
-
-.mlist .mlist {
-    margin-left: 1em;
-}
-
-.mlist a[aria-expanded='false']:before {
-    color: black;
-    content: "\2795 ";
-    padding-right: .5em;
-}
-
-.mlist a[aria-expanded='true']:before {
-    content: "\2796 ";
-    padding-right: .5em;
-}
-
-.mlist ul {
-    list-style-type: none;
-    width: 100%;
-    margin: 0.25px;
-}
-
-.mlist ul li {
-    cursor: pointer;
-    width: 100%;
-    padding: 0.25em;
-}
-
-.mlist ul li a {
-    text-decoration: none;
-    border-bottom: #111;
-    width: 100%;
-}
-
-.mlist ul li:hover, .mlist a:hover {
-    background-image: linear-gradient(rgb(0 0 0/10%) 0 0);
-}
-
-.searching .groupname, .searching .itemname {
-    display: none;
-}
-
-.searching .match > .groupname, .searching .match  {
-    display: block;
-}
-
-.searching .groupname:before {
-    content: "\1f784 " !important;
-}
-
 .messages {
     width: 100%;
     display: flex;
@@ -134,26 +72,33 @@ img {
     flex-flow: column-reverse;
 }
 
-.ordersheader {
+.mail_headers {
     font-weight: bold;
     border-bottom: solid 1px #eee;
 }
 
-.ordersheader, .order {
+.mail_label, .mail_headers, .mail_header {
     width: 100%;
     display: flex;
 }
 
-.ordersheader span, .order span {
+.mail_label, .mail_headers, .mail_header {
+    cursor: pointer;
+}
+.mail_label:hover, .mail_header:hover {
+    background-color: orange;
+}
+
+.mail_headers span, .mail_header span {
     min-width: 10em;
     padding-left: 1em;
 }
 
-span[field='location_name'] {
+.subject {
     width: 100%;
 }
 
-.ordersheader {
+.mail_headers {
     font-weight: bold;
     box-shadow: 0px 0px 5px #ccc;
     position: sticky;
@@ -163,9 +108,9 @@ span[field='location_name'] {
     background-color: white;
 }
 
-.order.header span {
-    margin-bottom: 1em;
-    border-bottom: 5px solid white;;
+
+.unread {
+    font-weight: bold;
 }
 
 @media (max-width: 575px) {
@@ -173,65 +118,6 @@ span[field='location_name'] {
         display: none;
         transition: display 1s linear;
     }
-}
-
-.inserted {
-    color: #ff31ff;
-}
-
-.inserted > span:first-child:before {
-    content: '↻';
-    float: left;
-    color: grey;
-    font-size: 75%;
-}
-
-.modified {
-    color: #ff31ff;
-}
-
-.modified:before {
-    content: '↻';
-    color: grey;
-    font-size: 70%;
-}
-
-.remove {
-    color: #33dfc5;
-}
-
-.remove > span:first-child:before {
-    content: 'X';
-    float: left;
-    color: #999;
-    font-size: 75%;
-}
-
-.order.usersorder {
-    color: black;
-    background-color: #edff08;
-}
-
-.flash {
-    color: white;
-}
-
-span[region_id]:after {
-    font-size: 75%; 
-    margin-left: 1em; 
-    color: #777;
-}
-
-.showRegions span[region_id]:after {
-    display: inline;   
-}
-
-.onlyFirst4Region .order {
-    display: none;
-}
-
-.onlyFirst4Region .order.first4Region {
-    display: inherit;
 }
 
 #tqStatus.offline, #tqStatus.offline::before {

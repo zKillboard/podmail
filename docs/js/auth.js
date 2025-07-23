@@ -79,7 +79,6 @@ function doAuthRequest(url, method = 'GET', headers = null, body = null) {
     }
 
     try {
-        console.log(url, params);
         return fetch(url, params);
     } catch (e) {
         console.log(e);
@@ -149,7 +148,6 @@ async function getAccessToken() {
         let res = await doAuthRequest(eve_sso_token_url, 'POST', mimetype_form, body);
         let json = await res.json();
         
-        console.log(json);
         localStorage.setItem('access_token', json.access_token);
         localStorage.setItem('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
     }
