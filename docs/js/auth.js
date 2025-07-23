@@ -1,7 +1,7 @@
 const localhost = window.location.hostname == 'localhost';
 
 const eve_sso_client_id = localhost ? 'c53caf7892b14b71bd305b1997fe58fb' : '82427996be1a4b23aa65175880599c96';
-const eve_sso_callback_url = window.location.protocol + '//' + window.location.hostname + (window.location.port == 80 || window.location.port == 443 ? '' : ':' + window.location.port) + '/auth.html';
+const eve_sso_callback_url = window.location.protocol + '//' + window.location.hostname + (window.location.port == '' ? '' : ':' + window.location.port) + '/auth.html';
 const eve_sso_scopes_array = ["publicData","esi-mail.organize_mail.v1","esi-mail.read_mail.v1","esi-mail.send_mail.v1"];
 const eve_sso_scopes = eve_sso_scopes_array.join(' ');
 
