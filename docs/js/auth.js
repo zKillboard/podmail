@@ -13,7 +13,8 @@ const eve_mails_labels =  `https://esi.evetech.net/characters/:character_id:/mai
 
 const mimetype_form =  {'Content-Type': 'application/x-www-form-urlencoded'};
 
-let user_agent = 'PodMail (auth in progress)';
+let whoamiinit = localStorage.getItem('whoami') ;
+let whoami = whoamiinit == null ? null : JSON.parse(whoamiinit);
 
 document.addEventListener('DOMContentLoaded', exec);
 
@@ -29,8 +30,7 @@ async function exec() {
 }
 
 function logout() {
-    localStorage.removeItem('whoami');
-    indexedDB.deleteDatabase('podmail');
+    localStorage.clear();
     window.location = '/';  
 }
 
@@ -48,28 +48,31 @@ async function doAuth() {
         code_verifier: localStorage.getItem('code_verifier')
     };
 
-    let res = await doAuthRequest(eve_sso_token_url, 'POST', mimetype_form, body);
+    let res = await doRequest(eve_sso_token_url, 'POST', mimetype_form, body);
     let json = await res.json();
-    localStorage.setItem('authed_json', JSON.stringify(json));
 
-    const whoami = parseJwtPayload(json.access_token);
+    whoami = parseJwtPayload(json.access_token);
+    whoami.character_id = whoami.sub.replace('CHARACTER:EVE:', '');
+    user_agent = `PodMail (Character: ${whoami.name} / ${whoami.character_id})`;
+
     localStorage.setItem('whoami', JSON.stringify(whoami));
+    lsSet('whoami', whoami);
+    lsSet('authed_json', json);
 
     window.location = '/';
 }
 
-async function doGetAuthRequest(url) {
-    let headers = {
-        Authorization: await getAccessToken(),
-        Accept: 'application/json'
-    }
-    let res = await doAuthRequest(url, 'GET', headers)
+async function doAuthRequest(url, method = 'GET', headers = null, body = null) {
+    if (headers == null) headers = {};
+    headers.Authorization = await getAccessToken();
+    headers.Accept = 'application/json';
+    let res = await doRequest(url, method, headers, body)
     return await res.json();
 }
 
-function doAuthRequest(url, method = 'GET', headers = null, body = null) {
+function doRequest(url, method = 'GET', headers = null, body = null) {
     if (headers == null) headers = {};
-    headers['User-Agent'] = user_agent;
+    headers['User-Agent'] = whoami ? `PodMail (Character: ${whoami.name} / ${whoami.character_id})` : 'PodMail (auth in progress)';
 
     let params = {
         method: method,
@@ -138,26 +141,39 @@ function parseJwtPayload(accessToken) {
 }
 
 async function getAccessToken() {
-    if (localStorage.getItem('access_token') == 'undefined') localStorage.removeItem('access_token');
-    let access_token_expires = parseInt(localStorage.getItem('access_token_expires') || '0');
-    if (access_token_expires < Date.now() || localStorage.getItem('access_token') == null) {
+    if (lsGet('access_token') == 'undefined') lsDel('access_token');
+    let access_token_expires = parseInt(lsGet('access_token_expires') || '0');
+    if (access_token_expires < Date.now() || lsGet('access_token') == null) {
+        let authed_json = lsGet('authed_json');
         const body = {
             grant_type: 'refresh_token',
             refresh_token: authed_json.refresh_token,
             client_id: eve_sso_client_id
         };
         console.log('Fetching new access token!');
-        let res = await doAuthRequest(eve_sso_token_url, 'POST', mimetype_form, body);
+        let res = await doRequest(eve_sso_token_url, 'POST', mimetype_form, body);
         let json = await res.json();
         
-        localStorage.setItem('access_token', json.access_token);
-        localStorage.setItem('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
+        lsSet('access_token', json.access_token);
+        lsSet('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
     }
-    return localStorage.getItem('access_token');
+    return lsGet('access_token');
 }
 
 let clear_access_token_id = -1;
 function clearAccessToken() {
     clearTimeout(clear_access_token_id);
     access_token = null;
+}
+
+function lsGet(key) {
+	return JSON.parse(localStorage.getItem(`${whoami.character_id}-${key}`));
+}
+
+function lsSet(key, value) {
+	return localStorage.setItem(`${whoami.character_id}-${key}`, JSON.stringify(value));
+}
+
+function lsDel(key) {
+	return localStorage.removeItem(`${whoami.character_id}-${key}`, value);
 }

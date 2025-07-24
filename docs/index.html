@@ -9,13 +9,32 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 	<link rel="stylesheet" href="/css/app.css">
+    <style id="current_folder">.folder-1.showhide {display: block;}</style>
 
 </head>
 
 <body class="dark" id="body">
-    <div class="inverse container-fluid">
-        <div class="row">
-            <div class="col-xs-12 col-sm-5 col-lg-3 xs-hideit resizable" id="panelsearch">
+    <div class="inverse container-fluid content">
+        <noscript>
+            <div class="row">
+                <div class="col">
+                    <h1>PodMail</h1>
+                    <p>JavaScript must be enabled.</p>
+                </div>
+            </div>
+        </noscript>
+        <div id="about" class="row d-none">
+            <div class="col">
+                <h1>PodMail</h1>
+                <p>A web application for accessing and sending in game evemails.</p>
+                <p>
+                    <a href="/login" onClick="startLogin(); return false;"><img src="/img/ssologin.png" alt="LOG IN with EVE Online"/></a>
+                </p>
+            </div>
+        </div>
+
+        <div id="podmail" class="d-flex flex-row d-none">
+            <div class="xs-hideit resizable-x" id="panelsearch">
                 <div class="d-flex"><span><a href='/'><img id="sitelogo" src="/img/podmail.png" title="PodMail"></a></span><span>
                         <h4>PodMail</h4>
                     </span>
@@ -23,65 +42,38 @@
                         id="btnorders">View PodMails =&gt;</span></div>
                 <div>
                     <input id="searchbox" class="d-none" type="search" placeholder="Search" autocomplete="off">
-                    <div id="itemparent" class="">
-                        <div id="items"></div>
-                        <p class="alert alert-primary m-1 text-center d-none" id="searchMin"><span
-                                id="searchCharsMinimum">3 </span>character(s) minimum for searches<btn
-                                class="btn btn-sm btn-primary" id="searchOverride">Click to Override</btn>
-                        </p>
-                        <p class="d-none alert alert-primary m-1" id="search0Reults">no results</p>
-                    </div>
+                    <div id="folders" class=""></div>
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-7 col-lg-9" id="panelorders">
-                <div class="d-flex">
-                    <span class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse" id="btnsearch">&lt;= Folders</span>
-                    <h4>
-                        <img class="d-inline float-start" id="charimg">
-                        <span id="charname"></span>
-                    </h4>
-                    <small class="m-auto"></small>
-                    <span id="inflight_spinner" class="spinner d-none"></span>
-                    <span style="font-size:80%; text-align: right;">
-                        <span id="utcClock"></span><br />
-                        <span id="tqStatus"></span>
-                    </span>
-                </div>
-                <div>
-                    <div id="orders">
-                        <div id="sell">
-                            <h6></h6>
-                            <div class="ordertablecontainer">
-                                <div class="ordertable" id="sellorders">
-                                    <div class="orderscontainer" of="sell">
-                                        <div class="mail_headers">
-                                            <span class="">Sender</span>                                            
-                                            <span class="subject">Subject</span>
-                                            <span class="text-end">Timestamp</span>
-                                            <!-- <span class="text-end">Labels</span> -->
-                                        </div>
-                                        <div id="mail_headers"  class="orders" of="sell">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="flex-fill" id="panelorders">
+                <div class="d-flex flex-column vh-100">
+                    <div class="">
+                        <div class="d-flex">
+                            <span class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse" id="btnsearch">&lt;= Folders</span>
+                            <h4>
+                                <img class="d-inline float-start" id="charimg">
+                                <span id="charname"></span>
+                            </h4>
+                            <small class="m-auto"></small>
+                            <span id="inflight_spinner" class="spinner d-none"></span>
+                            <span style="font-size:80%; text-align: right;">
+                                <span id="utcClock"></span><br />
+                                <span id="tqStatus"></span>
+                            </span>
                         </div>
-                        <div id="buy">
-                            <h6></h6>
-                            <div class="ordertablecontainer">
-                                <div class="ordertable" id="message">
-                                    <div class="orderscontainer" of="buy">
-                                        <div class="ordersheader d-none">
-                                            <span class="text-end">Remaining</span>
-                                            <span class="text-end">Price</span>
-                                            <span field="location_name">Location</span>
-                                            <span class="text-end">Range</span>
-                                        </div>
-                                        <div class="orders" of="buy">
-
-                                        </div>
-                                    </div>
-                                </div>
+                    </div>
+                    <div class="overflow-auto resizable-y" style="height: 50%;">
+                        <div class="mail_header mail_header_top d-flex">
+                            <span class="">Sender</span>                                            
+                            <span class="subject flex-fill">Subject</span>
+                            <span class="text-end">Timestamp</span>
+                        </div>
+                        <div id="mail_headers" class="mail_headers folder_1 overflow-auto"></div>                           
+                    </div>
+                    <div class="overflow-auto" style="height: 50%;">
+                        <h6>evemail headers here</h6>
+                        <div class="mail_container">
+                            <div id="message">
                             </div>
                         </div>
                     </div>
