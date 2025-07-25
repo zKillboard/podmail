@@ -86,16 +86,16 @@ let last_highest_mail_id = 0;
 let mail_headers = {};
 let folders = {};
 async function pm_fetchHeaders() {
+	let now = Date.now();
+	let total_mails = 0;
 	try {
 		console.log('Fetching evemail headers');
-		let now = Date.now();
 
 		let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
 		let mail_headers = document.getElementsByClassName('mail_header')
 		for (const header of mail_headers) mail_ids.add(header.getAttribute('mail_id'));
 		mail_ids.delete(null); // this is out header row, ignore it
 
-		let total_mails = 0;
 		let mails, last_mail_id = -1, high_mail_id = 0;
 		do {
 			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
@@ -113,6 +113,7 @@ async function pm_fetchHeaders() {
 			}
 			if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
 			total_mails += mails.length;
+
 			if (total_mails >= 500) break;
 		} while (mails.length > 0);
 
@@ -120,7 +121,6 @@ async function pm_fetchHeaders() {
 		localStorage.setItem('mail_headers', JSON.stringify(mail_headers));
 		localStorage.setItem('folders', JSON.stringify(folders));
 
-		console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
 
 		if (mail_ids.size) {
 			// Cleanup removed mails
@@ -129,13 +129,13 @@ async function pm_fetchHeaders() {
 				if (el) el.remove();
 			}
 			console.log('Removed', mail_ids.size, 'mails');
-		}
-
-		updateUnreadCounts();
-		setTimeout(loadNames, 0);
+		}		
 	} catch (e) {
 		console.log(e);
 	} finally {
+		console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
+		setTimeout(loadNames, 0);
+		setTimeout(updateUnreadCounts, 0);
 		setTimeout(pm_fetchHeaders, 61000);
 	}
 }
@@ -199,6 +199,9 @@ async function pm_loadMail(mail) {
 }
 
 async function pm_updateReadStatus(mail, read = true) {
+	if (mail.is_read == read) return; // no need to change anything
+
+	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
 	let res = await doAuthRequest(url, 'PUT', {Accept: 'application/json', 'Content-Type':  'Content-Type: application/json'}, JSON.stringify({labels: mail.labels, read: true}));
 	
