@@ -2,12 +2,12 @@ document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
 	// whoami is defined and handled in auth.js
-    if (whoami == null) return document.getElementById('about').classList.remove('d-none');
+	if (whoami == null) return document.getElementById('about').classList.remove('d-none');
 	document.getElementById('podmail').classList.remove('d-none');
 
-    document.getElementById('charname').innerHTML = whoami.name;
-    document.getElementById('charimg').setAttribute('src', `https://images.evetech.net/characters/${whoami.character_id}/portrait?size=32`);
-    
+	document.getElementById('charname').innerHTML = whoami.name;
+	document.getElementById('charimg').setAttribute('src', `https://images.evetech.net/characters/${whoami.character_id}/portrait?size=32`);
+
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
 
@@ -28,7 +28,7 @@ const _setTimeout = setTimeout;
 setTimeout = addTimeout;
 
 function fail(res) {
-    console.error(res);
+	console.error(res);
 }
 
 let labels = {};
@@ -37,7 +37,7 @@ async function pm_fetchFolders() {
 	try {
 		const labels = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
 		for (const label of labels.labels) pm_addFolder(label, false);
-		
+
 		const subs = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
 		for (const sub of subs) pm_addFolder(sub, true);
 	} catch (e) {
@@ -56,13 +56,13 @@ async function pm_addFolder(label, mailing_list = false) {
 		let el_name = createEl('span', label.name, `$folder-${id}-name`, 'folder-name');
 		let el_count = createEl('span', '', `$folder-${id}-unread`, 'unread_count');
 
-		el = createEl('div', null, id_str, 'folder_label', {folder_id: id}, {click: pm_showMails});
+		el = createEl('div', null, id_str, 'folder_label', { folder_id: id }, { click: pm_showMails });
 		el.appendChild(el_name);
 		el.appendChild(el_count);
 
 		if (id == 1) el.classList.add('folder_selected');
 		document.getElementById('folders').appendChild(el);
-		labels[`label_${id}`] = {esi: label, el: el};
+		labels[`label_${id}`] = { esi: label, el: el };
 	}
 }
 
@@ -84,7 +84,7 @@ async function pm_showMails() {
 	let id = this.getAttribute('folder_id');
 	style.innerText = `.folder-${id}.showhide {display: block;}`;
 
-	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected')});
+	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
 	this.classList.add('folder_selected');
 }
 
@@ -105,9 +105,9 @@ async function pm_fetchHeaders() {
 		let mails, last_mail_id = -1, high_mail_id = 0;
 		do {
 			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
-			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', {Accept: 'application/json'});
-			
-			for(const mail of mails) {
+			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', { Accept: 'application/json' });
+
+			for (const mail of mails) {
 				mail_headers[mail.mail_id] = mail;
 				for (const label_id of mail.labels) {
 					if (folders[label_id] == null) folders[label_id] = {};
@@ -135,7 +135,7 @@ async function pm_fetchHeaders() {
 				if (el) el.remove();
 			}
 			console.log('Removed', mail_ids.size, 'mails');
-		}		
+		}
 	} catch (e) {
 		console.log(e);
 	} finally {
@@ -148,16 +148,16 @@ async function pm_fetchHeaders() {
 async function addMailHeader(mail) {
 	let el = document.getElementById('mail_header_' + mail.mail_id);
 	if (el == null) {
-		
-		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], {mail_id: mail.mail_id}, {click: pm_loadMail});
- 
+
+		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], { mail_id: mail.mail_id }, { click: pm_loadMail });
+
 		let classes = ['showhide'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
 		for (let recip of mail.recipients) if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
 		elp = createEl('div', null, null, classes)
 		elp.appendChild(el);
-		
-		el.appendChild(createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, {from_id: mail.from}));
+
+		el.appendChild(createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
 		el.appendChild(createEl('span', mail.subject, null, 'subject flex-fill'));
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
 		// el.appendChild(createEl('span', mail.labels.join(', '), null, 'mail_labels'));
@@ -179,11 +179,11 @@ async function pm_loadMail(mail) {
 	if (this.getAttribute) {
 		document.getElementById('mail_body').innerHTML = '';
 		await sleep(1); // clear the message, let the browser update visuals
-		
-		let from = createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, {from_id: mail.from});
+
+		let from = createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from });
 		let recips = createEl('span', '');
 		for (let recip of mail.recipients) {
-			recips.appendChild(createEl('span', localStorage.getItem(`name-${recip.recipient_id}`), null, `recipient load_name from-${recip.recipient_id}`, {from_id: recip.recipient_id}));
+			recips.appendChild(createEl('span', localStorage.getItem(`name-${recip.recipient_id}`), null, `recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id }));
 		}
 		let header = `
 			Subject: ${mail.subject}<br/>
@@ -193,10 +193,10 @@ async function pm_loadMail(mail) {
 		`;
 
 		let body = adjustTags(mail.body);
-		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected')});
+		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
 		this.classList.add('selected');
 		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
-		
+
 		mail.mail_id = mail_id;
 		pm_updateReadStatus(mail);
 		setTimeout(loadNames, 10);
@@ -208,8 +208,8 @@ async function pm_updateReadStatus(mail, read = true) {
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
-	let res = await doAuthRequest(url, 'PUT', {Accept: 'application/json', 'Content-Type':  'Content-Type: application/json'}, JSON.stringify({labels: mail.labels, read: true}));
-	
+	let res = await doAuthRequest(url, 'PUT', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify({ labels: mail.labels, read: true }));
+
 	if (res.status == 204) { // Success
 		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
 		if (read) el.classList.remove('unread');
@@ -271,7 +271,7 @@ async function fetchNames(fetch_names) {
 	try {
 		if (fetch_names.length > 0) {
 			console.log('Fetching', fetch_names.length, 'names');
-			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', {Accept: 'application/json', 'Content-Type':  'Content-Type: application/json'}, JSON.stringify(fetch_names))
+			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify(fetch_names))
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {
@@ -302,7 +302,7 @@ function createEl(tag, innerHTML, id = null, classes = [], attributes = {}, even
 	el.innerHTML = innerHTML;
 
 	if (id != null && id.length > 0) el.id = id;
-	
+
 	if (typeof classes == 'string') classes = classes.split(' ');
 	classes.forEach(c => { el.classList.add(c) });
 
@@ -358,7 +358,7 @@ function handleInflight(numInflight) {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function handleEsiIssue() {

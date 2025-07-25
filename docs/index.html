@@ -2,91 +2,96 @@
 <html>
 
 <head>
-    <title>PodMail</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+	<title>PodMail</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 	<link rel="stylesheet" href="/css/app.css">
-    <style id="current_folder">.folder-1.showhide {display: block;}</style>
-
+	<style id="current_folder">
+		.folder-1.showhide {
+			display: block;
+		}
+	</style>
 </head>
 
 <body class="dark" id="body">
-    <div class="inverse container-fluid content">
-        <noscript>
-            <div class="row">
-                <div class="col">
-                    <h1>PodMail</h1>
-                    <p>JavaScript must be enabled.</p>
-                </div>
-            </div>
-        </noscript>
-        <div id="about" class="row d-none">
-            <div class="col">
-                <h1>PodMail <small>β</small></h1>
-                <p>A web application for accessing and sending in game evemails.</p>
-                <p>
-                    <a href="/login" onClick="startLogin(); return false;"><img src="/img/ssologin.png" alt="LOG IN with EVE Online"/></a>
-                </p>
-            </div>
-        </div>
-
-        <div id="podmail" class="d-flex flex-row d-none">
-            <div class="xs-hideit resizable-x" id="panelsearch">
-                <div class="d-flex"><span><a href='/'><img id="sitelogo" src="/img/podmail.png" title="PodMail"></a></span><span>
-                        <h4>PodMail <small>β</small></h4>
-                    </span>
-                    <span class="m-auto"></span><span class="d-block d-sm-none btn btn-default btn-sm inverse"
-                        id="btnorders">View PodMails =&gt;</span></div>
-                <div>
-                    <input id="searchbox" class="d-none" type="search" placeholder="Search" autocomplete="off">
-                    <div id="folders" class=""></div>
-                </div>
-            </div>
-            <div class="flex-fill" id="panelorders">
-                <div class="d-flex flex-column vh-100">
-                    <div class="">
-                        <div class="d-flex">
-                            <span class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse" id="btnsearch">&lt;= Folders</span>
-                            <h4>
-                                <img class="d-inline float-start" id="charimg">
-                                <span id="charname"></span>
-                            </h4>
-                            <small class="m-auto"></small>
-                            <span id="inflight_spinner" class="spinner d-none"></span>
-                            <span id="esi_issue" class="esi-container esi-cross d-none">! ESI !<br/>issues</span>
-                            <span style="font-size:80%; text-align: right;">
-                                <span id="utcClock"></span><br />
-                                <span id="tqStatus"></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="overflow-auto resizable-y" style="height: 50%;">
-                        <div class="mail_header mail_header_top d-flex">
-                            <span class="">Sender</span>                                            
-                            <span class="subject flex-fill">Subject</span>
-                            <span class="text-end">Timestamp</span>
-                        </div>
-                        <div id="mail_headers" class="mail_headers overflow-auto"></div>                           
-                    </div>
-                    <div id="mail_container_full" class="overflow-auto" style="height: 50%;">                        
-                        <div id="mail_container">
-                            <div id="mail_about"></div>
-                            <div id="mail_body">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-        crossorigin="anonymous"></script>
-    <script defer="" data-server_start="1752004823892" src="/js/auth.js"></script>
-    <script defer="" data-server_start="1752004823892" src="/js/app.js"></script>
+	<div class="inverse container-fluid content">
+		<noscript>
+			<div class="row">
+				<div class="col">
+					<h1>PodMail</h1>
+					<p>JavaScript must be enabled.</p>
+				</div>
+			</div>
+		</noscript>
+		<div id="about" class="row d-none">
+			<div class="col">
+				<h1>PodMail <small>β</small></h1>
+				<p>A web application for accessing and sending in game evemails.</p>
+				<p>
+					<a href="/login" onClick="startLogin(); return false;"><img src="/img/ssologin.png"
+							alt="LOG IN with EVE Online" /></a>
+				</p>
+			</div>
+		</div>
+		<div id="podmail" class="d-flex flex-row d-none">
+			<div class="xs-hideit resizable-x" id="panelsearch">
+				<div class="d-flex"><span><a href='/'><img id="sitelogo" src="/img/podmail.png"
+								title="PodMail"></a></span><span>
+						<h4>PodMail <small>β</small></h4>
+					</span>
+					<span class="m-auto"></span><span class="d-block d-sm-none btn btn-default btn-sm inverse"
+						id="btnorders">View PodMails =&gt;</span>
+				</div>
+				<div>
+					<input id="searchbox" class="d-none" type="search" placeholder="Search" autocomplete="off">
+					<div id="folders" class=""></div>
+				</div>
+			</div>
+			<div class="flex-fill" id="panelorders">
+				<div class="d-flex flex-column vh-100">
+					<div class="">
+						<div class="d-flex">
+							<span class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse" id="btnsearch">&lt;=
+								Folders</span>
+							<h4>
+								<img class="d-inline float-start" id="charimg">
+								<span id="charname"></span>
+							</h4>
+							<small class="m-auto"></small>
+							<span id="inflight_spinner" class="spinner d-none"></span>
+							<span id="esi_issue" class="esi-container esi-cross d-none">! ESI !<br />issues</span>
+							<span style="font-size:80%; text-align: right;">
+								<span id="utcClock"></span><br />
+								<span id="tqStatus"></span>
+							</span>
+						</div>
+					</div>
+					<div class="overflow-auto resizable-y" style="height: 50%;">
+						<div class="mail_header mail_header_top d-flex">
+							<span class="">Sender</span>
+							<span class="subject flex-fill">Subject</span>
+							<span class="text-end">Timestamp</span>
+						</div>
+						<div id="mail_headers" class="mail_headers overflow-auto"></div>
+					</div>
+					<div id="mail_container_full" class="overflow-auto" style="height: 50%;">
+						<div id="mail_container">
+							<div id="mail_about"></div>
+							<div id="mail_body">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+		crossorigin="anonymous"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/auth.js"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/app.js"></script>
 </body>
 
 </html>

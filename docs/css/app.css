@@ -1,157 +1,171 @@
 /* invert filter based dark mode */
-body.dark{
-    background-color: black;
-    font-size: 14px;
+body.dark {
+	background-color: black;
+	font-size: 14px;
 }
 
 .inverse {
-    filter: invert(1);
+	filter: invert(1);
 }
 
 img {
-    filter: invert(1);
+	filter: invert(1);
 }
 
-#sitelogo, #charimg {
-    height: 25px;
-    max-height: 25px;
-    margin: 0.25em;
+#sitelogo,
+#charimg {
+	height: 25px;
+	max-height: 25px;
+	margin: 0.25em;
 }
 
 .capitalize {
-    text-transform: capitalize;
+	text-transform: capitalize;
 }
 
-#tqStatus.offline, #tqStatus.offline::before, .red {
-    color: cyan;
-    content: "X ";
+#tqStatus.offline,
+#tqStatus.offline::before,
+.red {
+	color: cyan;
+	content: "X ";
 }
 
-#tqStatus.online, #tqStatus.online::before, .green {
-    color: magenta;
-    content: "\2713 ";
+#tqStatus.online,
+#tqStatus.online::before,
+.green {
+	color: magenta;
+	content: "\2713 ";
 }
 
-.folder_label, .mail_header {
-    cursor: pointer;
+.folder_label,
+.mail_header {
+	cursor: pointer;
 }
-.folder_label:hover, .mail_header:hover, .mail_header.selected, .folder_selected {
-    background-color: #eee;
+
+.folder_label:hover,
+.mail_header:hover,
+.mail_header.selected,
+.folder_selected {
+	background-color: #eee;
 }
 
 .mail_header span {
-    min-width: 10em;
-    padding-left: 1em;
+	min-width: 10em;
+	padding-left: 1em;
 }
 
 .subject {
-    width: 100%;
+	width: 100%;
 }
 
 .showhide {
-    display: none;
+	display: none;
 }
 
 .mail_header_top {
-    display: block;
-    font-weight: bold;
+	display: block;
+	font-weight: bold;
 }
 
 .unread {
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .hideit {
-    display: none;
+	display: none;
 }
 
 
 .messages {
-    width: 100%;
-    display: flex;
-    flex-flow: column;
+	width: 100%;
+	display: flex;
+	flex-flow: column;
 }
 
 @media (max-width: 575px) {
-    .xs-hideit {
-        display: none;
-        transition: display 1s linear;
-    }
+	.xs-hideit {
+		display: none;
+		transition: display 1s linear;
+	}
 }
 
 .resizable-x {
-  resize: horizontal;
-  overflow: auto;
+	resize: horizontal;
+	overflow: auto;
 }
 
 .resizable-y {
-  resize: vertical;
-  overflow: auto;
+	resize: vertical;
+	overflow: auto;
 }
 
 #panelsearch {
-    min-width: 200px;
-    max-width: 500px;
+	min-width: 200px;
+	max-width: 500px;
 }
 
 #mail_container_full {
-    border-top: solid 1px #333;
-    padding-left: 0.25em;
+	border-top: solid 1px #333;
+	padding-left: 0.25em;
 }
 
-.recipient + .recipient::before {
-    content: ', ';
+.recipient+.recipient::before {
+	content: ', ';
 }
 
 .folder-name {
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .folder-name:has(+ .unread_count:empty) {
-    font-weight: normal;
+	font-weight: normal;
 }
 
 .unread_count {
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .unread_count:empty {
-    display: none;
+	display: none;
 }
 
 .unread_count:before {
-    content: ' (';
+	content: ' (';
 }
 
 .unread_count:after {
-    content: ')';
+	content: ')';
 }
 
 .spinner {
-  display: inline-block; /* make span behave like a block */
-  width: 25px;
-  height: 25px;
-  border: 4px solid #ccc;
-  border-top: 4px solid #000;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  vertical-align: middle; /* optional: align with surrounding text */
-  margin-right: 1em;
-  margin-top: 0.25em;
+	display: inline-block;
+	/* make span behave like a block */
+	width: 25px;
+	height: 25px;
+	border: 4px solid #ccc;
+	border-top: 4px solid #000;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	vertical-align: middle;
+	/* optional: align with surrounding text */
+	margin-right: 1em;
+	margin-top: 0.25em;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .esi-container {
-    padding-top: 0.2em;
-    padding-left: 0.25em;
-    padding-right: 0.25em;
-    margin-left: 0.25em;
-    margin-right: 0.25em;
-    text-align: center;
-    background-color: cyan;
-    color: black;
-    line-height: 1.25em;
+	padding-top: 0.2em;
+	padding-left: 0.25em;
+	padding-right: 0.25em;
+	margin-left: 0.25em;
+	margin-right: 0.25em;
+	text-align: center;
+	background-color: cyan;
+	color: black;
+	line-height: 1.25em;
 }
