@@ -72,6 +72,7 @@ async function doAuthRequest(url, method = 'GET', headers = null, body = null) {
     return res;
 }
 
+let inflight = 0;
 function doRequest(url, method = 'GET', headers = null, body = null) {
     if (headers == null) headers = {};
     headers['User-Agent'] = whoami ? `PodMail (Character: ${whoami.name} / ${whoami.character_id})` : 'PodMail (auth in progress)';
@@ -85,10 +86,16 @@ function doRequest(url, method = 'GET', headers = null, body = null) {
         else params.body = body;
     }
 
+    let haveInflightHandler = typeof handleInflight == 'function';
     try {
+        inflight++;
+        if (haveInflightHandler) handleInflight(inflight);
         return fetch(url, params);
     } catch (e) {
         console.log(e);
+    } finally {
+        inflight--;
+        if (haveInflightHandler) handleInflight(inflight);
     }
 }
 

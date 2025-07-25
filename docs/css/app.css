@@ -126,3 +126,20 @@ img {
 .unread_count:after {
     content: ')';
 }
+
+.spinner {
+  display: inline-block; /* make span behave like a block */
+  width: 25px;
+  height: 25px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  vertical-align: middle; /* optional: align with surrounding text */
+  margin-right: 1em;
+  margin-top: 0.25em;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

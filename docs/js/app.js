@@ -33,12 +33,17 @@ function fail(res) {
 let labels = {};
 let current_label = -1;
 async function pm_fetchFolders() {
-	const labels = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
-	for (const label of labels.labels) pm_addFolder(label, false);
-	
-	const subs = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
-	for (const sub of subs) pm_addFolder(sub, true);
-	setTimeout(pm_fetchFolders, 300000);
+	try {
+		const labels = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
+		for (const label of labels.labels) pm_addFolder(label, false);
+		
+		const subs = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
+		for (const sub of subs) pm_addFolder(sub, true);
+	} catch (e) {
+		console.log(e);
+	} finally {
+		setTimeout(pm_fetchFolders, 300000);
+	}
 }
 
 async function pm_addFolder(label, mailing_list = false) {
@@ -318,8 +323,10 @@ function updateTime() {
 	setTimeout(updateTime, 1000 * (60 - seconds));
 }
 
-function updateTqStatus() {
-	doGetJSON('https://esi.evetech.net/status/', setTqStatus);
+async function updateTqStatus() {
+	let status = await doRequest('https://esi.evetech.net/status/');
+	let data = await status.json();
+	setTqStatus(data);
 }
 
 let tqstatusid = -1;
@@ -344,23 +351,10 @@ function setTqStatus(data) {
 	}
 }
 
-let inflight = 0;
-function doGetJSON(path, f, params = {}) {
-	const xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState === 4 && xhr.status < 400) f(JSON.parse(xhr.responseText), path, params);
-		else if (xhr.readyState == 4) {
-			console.log(xhr.status, path);
-		}
-	};
-	xhr.onloadend  = function() { 
-		inflight--;
-		if (inflight == 0) document.getElementById('inflight_spinner').classList.add('d-none');
-	};
-	xhr.open('GET', path);
-	xhr.send();
-	inflight++;
-	document.getElementById('inflight_spinner').classList.remove('d-none');
+function handleInflight(numInflight) {
+	console.log('inflight', numInflight);
+	if (numInflight == 0) document.getElementById('inflight_spinner').classList.add('d-none');
+	else document.getElementById('inflight_spinner').classList.remove('d-none');
 }
 
 function sleep(ms) {
