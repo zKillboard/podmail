@@ -10,7 +10,6 @@ body.dark{
 
 img {
     filter: invert(1);
-    background-color: #111;
 }
 
 #sitelogo, #charimg {
@@ -36,8 +35,8 @@ img {
 .folder_label, .mail_header {
     cursor: pointer;
 }
-.folder_label:hover, .mail_header:hover, .mail_header.selected {
-    background-color: orange;
+.folder_label:hover, .mail_header:hover, .mail_header.selected, .folder-selected {
+    background-color: #eee;
 }
 
 .mail_header span {
@@ -93,5 +92,37 @@ img {
 #panelsearch {
     min-width: 200px;
     max-width: 500px;
-    
+}
+
+#mail_container_full {
+    border-top: solid 1px #333;
+    padding-left: 0.25em;
+}
+
+.recipient + .recipient::before {
+    content: ', ';
+}
+
+.folder-name {
+    font-weight: bold;
+}
+
+.folder-name:has(+ .unread_count:empty) {
+    font-weight: normal;
+}
+
+.unread_count {
+    font-weight: bold;
+}
+
+.unread_count:empty {
+    display: none;
+}
+
+.unread_count:before {
+    content: ' (';
+}
+
+.unread_count:after {
+    content: ')';
 }

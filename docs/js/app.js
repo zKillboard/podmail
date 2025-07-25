@@ -47,11 +47,27 @@ async function pm_addFolder(label, mailing_list = false) {
 	let el = document.getElementById(id_str);
 	localStorage.setItem(`name-${id}`, label.name);
 	if (el == null) {
+		let el_name = createEl('span', label.name, `$folder-${id}-name`, 'folder-name');
+		let el_count = createEl('span', '', `$folder-${id}-unread`, 'unread_count');
+
 		el = createEl('div', null, id_str, 'folder_label', {folder_id: id}, {click: pm_showMails});
+		el.appendChild(el_name);
+		el.appendChild(el_count);
+
+		if (id == 1) el.classList.add('folder_selected');
 		document.getElementById('folders').appendChild(el);
 		labels[`label_${id}`] = {esi: label, el: el};
 	}
-	el.innerHTML = el.innerHTML = label.name + (label.unread_count > 0 ? ` (${label.unread_count})`: '');;
+}
+
+function updateUnreadCounts() {
+	let folders = document.getElementsByClassName('folder_label');
+	for (const folder of folders) {
+		let folder_id = folder.getAttribute('folder_id');
+		let unread = document.querySelectorAll(`.folder-${folder_id} .unread`).length;
+		if (unread == 0) unread = '';
+		document.getElementById(`$folder-${folder_id}-unread`).innerText = unread;
+	}
 }
 
 function pm_showMails() {
@@ -59,6 +75,10 @@ function pm_showMails() {
 	let id = this.getAttribute('folder_id');
 	console.log(this);
 	style.innerText = `.folder-${id}.showhide {display: block;}`;
+
+	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('selected')});
+	this.classList.add('folder_selected');
+
 }
 
 let last_highest_mail_id = 0;
@@ -83,6 +103,7 @@ async function pm_fetchHeaders() {
 		}
 		if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
 		total_mails += mails.length;
+		break;
 		if (total_mails >= 500) break;
 	} while (mails.length > 0);
 
@@ -91,14 +112,15 @@ async function pm_fetchHeaders() {
 	localStorage.setItem('folders', JSON.stringify(folders));
 
 	console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
-	loadNames();
+	setTimeout(loadNames, 0);
+	updateUnreadCounts();
 }
 
 async function addMailHeader(mail) {
 	let el = document.getElementById('mail_header_' + mail.mail_id);
 	if (el == null) {
 		
-		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], {mail_id: mail.mail_id}, {click: loadMail});
+		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], {mail_id: mail.mail_id}, {click: pm_loadMail});
  
 		let classes = ['showhide'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
@@ -117,7 +139,7 @@ async function addMailHeader(mail) {
 	else el.classList.add('unread');
 }
 
-async function loadMail(mail) {
+async function pm_loadMail(mail) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
 	if (mail != null) mail = JSON.parse(mail);
@@ -126,11 +148,31 @@ async function loadMail(mail) {
 		localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
 	if (this.getAttribute) {
+		document.getElementById('mail_body').innerHTML = '';
+		await sleep(1);
+		let from = createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, {from_id: mail.from});
+		let recips = createEl('span', '');
+		for (let recip of mail.recipients) {
+			recips.appendChild(createEl('span', localStorage.getItem(`name-${recip.recipient_id}`), null, `recipient load_name from-${recip.recipient_id}`, {from_id: recip.recipient_id}));
+		}
+		let header = `
+			Subject: ${mail.subject}<br/>
+			From: ${from.innerHTML}<br/>
+			Sent: ${mail.timestamp}<br/>
+			Recipients: ${recips.innerHTML}
+		`;
+
 		let body = adjustTags(mail.body);
 		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected')});
 		this.classList.add('selected');
-		document.getElementById('message').innerHTML = body;
+		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
+
+		await loadNames();
 	}
+}
+
+function pm_updateReadStatus(mail, unread = false) {
+
 }
 
 // [1373, 1374, 1375, 1376, 1377, 1378, 1379, 1380, 1381, 1382, 1383, 1384, 1385, 1386, 34574]
@@ -168,7 +210,10 @@ async function loadNames() {
 	for (const el of els) {
 		let from_id = parseInt(el.getAttribute('from_id'));
 
-		if (localStorage.getItem(`name-${from_id}`) != null) {
+		if (el.innerHTML != null && el.innerHTML.length > 0) {
+			el.classList.remove('load_name');
+		}
+		else if (localStorage.getItem(`name-${from_id}`) != null) {
 			el.innerHTML = localStorage.getItem(`name-${from_id}`);
 			el.classList.remove('load_name');
 		}
