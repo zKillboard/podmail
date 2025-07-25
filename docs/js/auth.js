@@ -92,6 +92,7 @@ function doRequest(url, method = 'GET', headers = null, body = null) {
         if (haveInflightHandler) handleInflight(inflight);
         return fetch(url, params);
     } catch (e) {
+        if (typeof handleEsiIssue == 'function') handleEsiIssue(e);
         console.log(e);
     } finally {
         inflight--;

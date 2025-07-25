@@ -143,3 +143,15 @@ img {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.esi-container {
+    padding-top: 0.2em;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    text-align: center;
+    background-color: cyan;
+    color: black;
+    line-height: 1.25em;
+}

@@ -16,6 +16,7 @@ async function main() {
 
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
+	setTimeout(loadNames, 1);
 }
 
 const timeouts = {};
@@ -139,7 +140,6 @@ async function pm_fetchHeaders() {
 		console.log(e);
 	} finally {
 		console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
-		setTimeout(loadNames, 0);
 		setTimeout(updateUnreadCounts, 0);
 		setTimeout(pm_fetchHeaders, 61000);
 	}
@@ -171,10 +171,10 @@ async function addMailHeader(mail) {
 async function pm_loadMail(mail) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
-	if (mail != null) mail = JSON.parse(mail);
+	if (false && mail != null) mail = JSON.parse(mail);
 	else {
 		mail = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
-		localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
+		//localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
 	if (this.getAttribute) {
 		document.getElementById('mail_body').innerHTML = '';
@@ -196,10 +196,10 @@ async function pm_loadMail(mail) {
 		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected')});
 		this.classList.add('selected');
 		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
-
-		await loadNames();
+		
 		mail.mail_id = mail_id;
 		pm_updateReadStatus(mail);
+		setTimeout(loadNames, 10);
 	}
 }
 
@@ -248,6 +248,7 @@ function adjustTags(html) {
 }
 
 async function loadNames() {
+	await sleep(1); // allow the UI to update
 	let els = document.getElementsByClassName('load_name');
 	let fetch_names = [];
 	for (const el of els) {
@@ -263,7 +264,7 @@ async function loadNames() {
 		else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 	}
 	await fetchNames(fetch_names);
-	if (fetch_names.length > 0) setTimeout(loadNames, 1000);
+	setTimeout(loadNames, 1000);
 }
 
 async function fetchNames(fetch_names) {
@@ -352,11 +353,19 @@ function setTqStatus(data) {
 }
 
 function handleInflight(numInflight) {
-	console.log('inflight', numInflight);
 	if (numInflight == 0) document.getElementById('inflight_spinner').classList.add('d-none');
 	else document.getElementById('inflight_spinner').classList.remove('d-none');
 }
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function handleEsiIssue() {
+	setTimeout(clearEsiIssue, 62000);
+	document.getElementById('esi_issue').classList.remove('d-none');
+}
+
+function clearEsiIssue() {
+	document.getElementById('esi_issue').classList.add('d-none');
 }

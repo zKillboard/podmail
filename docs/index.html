@@ -25,7 +25,7 @@
         </noscript>
         <div id="about" class="row d-none">
             <div class="col">
-                <h1>PodMail</h1>
+                <h1>PodMail <small>β</small></h1>
                 <p>A web application for accessing and sending in game evemails.</p>
                 <p>
                     <a href="/login" onClick="startLogin(); return false;"><img src="/img/ssologin.png" alt="LOG IN with EVE Online"/></a>
@@ -36,7 +36,7 @@
         <div id="podmail" class="d-flex flex-row d-none">
             <div class="xs-hideit resizable-x" id="panelsearch">
                 <div class="d-flex"><span><a href='/'><img id="sitelogo" src="/img/podmail.png" title="PodMail"></a></span><span>
-                        <h4>PodMail</h4>
+                        <h4>PodMail <small>β</small></h4>
                     </span>
                     <span class="m-auto"></span><span class="d-block d-sm-none btn btn-default btn-sm inverse"
                         id="btnorders">View PodMails =&gt;</span></div>
@@ -56,6 +56,7 @@
                             </h4>
                             <small class="m-auto"></small>
                             <span id="inflight_spinner" class="spinner d-none"></span>
+                            <span id="esi_issue" class="esi-container esi-cross d-none">! ESI !<br/>issues</span>
                             <span style="font-size:80%; text-align: right;">
                                 <span id="utcClock"></span><br />
                                 <span id="tqStatus"></span>
