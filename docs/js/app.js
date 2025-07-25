@@ -86,6 +86,12 @@ let mail_headers = {};
 let folders = {};
 async function pm_fetchHeaders() {
 	let now = Date.now();
+
+	let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
+	let mail_headers = document.getElementsByClassName('mail_header')
+	for (const header of mail_headers) mail_ids.add(header.getAttribute('mail_id'));
+	mail_ids.delete(null); // this is out header row, ignore it
+
 	let total_mails = 0;
 	let mails, last_mail_id = -1, high_mail_id = 0;
 	do {
@@ -100,10 +106,10 @@ async function pm_fetchHeaders() {
 				folders[label_id].mail_ids.push(mail.mail_id);
 			}
 			addMailHeader(mail);
+			mail_ids.delete(`${mail.mail_id}`);
 		}
 		if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
 		total_mails += mails.length;
-		break;
 		if (total_mails >= 500) break;
 	} while (mails.length > 0);
 
@@ -112,8 +118,19 @@ async function pm_fetchHeaders() {
 	localStorage.setItem('folders', JSON.stringify(folders));
 
 	console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
-	setTimeout(loadNames, 0);
+
+	if (mail_ids.size) {
+		// Cleanup removed mails
+		for (const mail_id of Array.from(mail_ids)) {
+			const el = document.querySelector(`[mail_id="${mail_id}"]`);
+			if (el) el.remove();
+		}
+		console.log('Removed', mail_ids.size, 'mails');
+	}
+
 	updateUnreadCounts();
+	setTimeout(loadNames, 0);
+	setTimeout(pm_fetchHeaders, 61000);
 }
 
 async function addMailHeader(mail) {
