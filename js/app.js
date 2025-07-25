@@ -156,7 +156,8 @@ async function addMailHeader(mail) {
 		let classes = ['showhide'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
 		for (let recip of mail.recipients) if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
-		elp = createEl('div', null, null, classes)
+		elp = createEl('div', null, null, classes);
+		elp.style.order = mail.mail_id;
 		elp.appendChild(el);
 
 		el.appendChild(createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
