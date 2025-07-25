@@ -70,67 +70,74 @@ function updateUnreadCounts() {
 	}
 }
 
-function pm_showMails() {
+async function pm_showMails() {
 	let style = document.getElementById('current_folder');
+	style.innerText = '';
+	await sleep(1); // clear the folder, let the browser update visuals
+
 	let id = this.getAttribute('folder_id');
-	console.log(this);
 	style.innerText = `.folder-${id}.showhide {display: block;}`;
 
-	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('selected')});
+	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected')});
 	this.classList.add('folder_selected');
-
 }
 
 let last_highest_mail_id = 0;
 let mail_headers = {};
 let folders = {};
 async function pm_fetchHeaders() {
-	let now = Date.now();
+	try {
+		console.log('Fetching evemail headers');
+		let now = Date.now();
 
-	let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
-	let mail_headers = document.getElementsByClassName('mail_header')
-	for (const header of mail_headers) mail_ids.add(header.getAttribute('mail_id'));
-	mail_ids.delete(null); // this is out header row, ignore it
+		let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
+		let mail_headers = document.getElementsByClassName('mail_header')
+		for (const header of mail_headers) mail_ids.add(header.getAttribute('mail_id'));
+		mail_ids.delete(null); // this is out header row, ignore it
 
-	let total_mails = 0;
-	let mails, last_mail_id = -1, high_mail_id = 0;
-	do {
-		let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
-		mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', {Accept: 'application/json'});
-		
-		for(const mail of mails) {
-			mail_headers[mail.mail_id] = mail;
-			for (const label_id of mail.labels) {
-				if (folders[label_id] == null) folders[label_id] = {};
-				if (folders[label_id].mail_ids == null) folders[label_id].mail_ids = [];
-				folders[label_id].mail_ids.push(mail.mail_id);
+		let total_mails = 0;
+		let mails, last_mail_id = -1, high_mail_id = 0;
+		do {
+			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
+			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', {Accept: 'application/json'});
+			
+			for(const mail of mails) {
+				mail_headers[mail.mail_id] = mail;
+				for (const label_id of mail.labels) {
+					if (folders[label_id] == null) folders[label_id] = {};
+					if (folders[label_id].mail_ids == null) folders[label_id].mail_ids = [];
+					folders[label_id].mail_ids.push(mail.mail_id);
+				}
+				addMailHeader(mail);
+				mail_ids.delete(`${mail.mail_id}`);
 			}
-			addMailHeader(mail);
-			mail_ids.delete(`${mail.mail_id}`);
+			if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
+			total_mails += mails.length;
+			if (total_mails >= 500) break;
+		} while (mails.length > 0);
+
+		last_highest_mail_id = high_mail_id;
+		localStorage.setItem('mail_headers', JSON.stringify(mail_headers));
+		localStorage.setItem('folders', JSON.stringify(folders));
+
+		console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
+
+		if (mail_ids.size) {
+			// Cleanup removed mails
+			for (const mail_id of Array.from(mail_ids)) {
+				const el = document.querySelector(`[mail_id="${mail_id}"]`);
+				if (el) el.remove();
+			}
+			console.log('Removed', mail_ids.size, 'mails');
 		}
-		if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
-		total_mails += mails.length;
-		if (total_mails >= 500) break;
-	} while (mails.length > 0);
 
-	last_highest_mail_id = high_mail_id;
-	localStorage.setItem('mail_headers', JSON.stringify(mail_headers));
-	localStorage.setItem('folders', JSON.stringify(folders));
-
-	console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
-
-	if (mail_ids.size) {
-		// Cleanup removed mails
-		for (const mail_id of Array.from(mail_ids)) {
-			const el = document.querySelector(`[mail_id="${mail_id}"]`);
-			if (el) el.remove();
-		}
-		console.log('Removed', mail_ids.size, 'mails');
+		updateUnreadCounts();
+		setTimeout(loadNames, 0);
+	} catch (e) {
+		console.log(e);
+	} finally {
+		setTimeout(pm_fetchHeaders, 61000);
 	}
-
-	updateUnreadCounts();
-	setTimeout(loadNames, 0);
-	setTimeout(pm_fetchHeaders, 61000);
 }
 
 async function addMailHeader(mail) {
@@ -166,7 +173,8 @@ async function pm_loadMail(mail) {
 	}
 	if (this.getAttribute) {
 		document.getElementById('mail_body').innerHTML = '';
-		await sleep(1);
+		await sleep(1); // clear the message, let the browser update visuals
+		
 		let from = createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, {from_id: mail.from});
 		let recips = createEl('span', '');
 		for (let recip of mail.recipients) {
@@ -185,11 +193,21 @@ async function pm_loadMail(mail) {
 		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
 
 		await loadNames();
+		mail.mail_id = mail_id;
+		pm_updateReadStatus(mail);
 	}
 }
 
-function pm_updateReadStatus(mail, unread = false) {
-
+async function pm_updateReadStatus(mail, read = true) {
+	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
+	let res = await doAuthRequest(url, 'PUT', {Accept: 'application/json', 'Content-Type':  'Content-Type: application/json'}, JSON.stringify({labels: mail.labels, read: true}));
+	
+	if (res.status == 204) { // Success
+		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
+		if (read) el.classList.remove('unread');
+		else el.classList.add('unread');
+		updateUnreadCounts();
+	}
 }
 
 // [1373, 1374, 1375, 1376, 1377, 1378, 1379, 1380, 1381, 1382, 1383, 1384, 1385, 1386, 34574]
@@ -244,7 +262,7 @@ async function fetchNames(fetch_names) {
 	try {
 		if (fetch_names.length > 0) {
 			console.log('Fetching', fetch_names.length, 'names');
-			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', {Accept: 'application/json', 'Content-Type':  'Content-Type: application/json' }, JSON.stringify(fetch_names))
+			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', {Accept: 'application/json', 'Content-Type':  'Content-Type: application/json'}, JSON.stringify(fetch_names))
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {

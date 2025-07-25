@@ -66,8 +66,10 @@ async function doAuthRequest(url, method = 'GET', headers = null, body = null) {
     if (headers == null) headers = {};
     headers.Authorization = await getAccessToken();
     headers.Accept = 'application/json';
-    let res = await doRequest(url, method, headers, body)
-    return await res.json();
+    let res = await doRequest(url, method, headers, body);
+
+    if ((res.headers.get('content-type') || '').includes('application/json')) return res.json();
+    return res;
 }
 
 function doRequest(url, method = 'GET', headers = null, body = null) {
@@ -145,6 +147,7 @@ async function getAccessToken() {
     let access_token_expires = parseInt(lsGet('access_token_expires') || '0');
     if (access_token_expires < Date.now() || lsGet('access_token') == null) {
         let authed_json = lsGet('authed_json');
+        if (authed_json == null) return logout();
         const body = {
             grant_type: 'refresh_token',
             refresh_token: authed_json.refresh_token,

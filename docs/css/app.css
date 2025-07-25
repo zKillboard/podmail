@@ -35,7 +35,7 @@ img {
 .folder_label, .mail_header {
     cursor: pointer;
 }
-.folder_label:hover, .mail_header:hover, .mail_header.selected, .folder-selected {
+.folder_label:hover, .mail_header:hover, .mail_header.selected, .folder_selected {
     background-color: #eee;
 }
 
