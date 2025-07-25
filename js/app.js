@@ -14,6 +14,8 @@ async function main() {
 	mail_headers = localStorage.getItem('mail_headers') == null ? {} : JSON.parse(localStorage.getItem('mail_headers'));
 	folders = localStorage.getItem('folders') == null ? {} : JSON.parse(localStorage.getItem('folders'));
 
+	document.getElementById('logout').addEventListener('click', logout);
+
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
 	setTimeout(loadNames, 1);

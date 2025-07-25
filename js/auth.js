@@ -32,6 +32,7 @@ async function exec() {
 function logout() {
 	localStorage.clear();
 	window.location = '/';
+	return false;
 }
 
 async function doAuth() {

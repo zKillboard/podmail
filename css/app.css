@@ -169,3 +169,12 @@ img {
 	color: black;
 	line-height: 1.25em;
 }
+
+#about {
+	margin: 0.25em;
+}
+
+.btn {
+	background-color: #eee;
+	margin-bottom: 0.3em;
+}

@@ -36,7 +36,7 @@
 			</div>
 		</div>
 		<div id="podmail" class="d-flex flex-row d-none">
-			<div class="xs-hideit resizable-x" id="panelsearch">
+			<div class="xs-hideit resizable-x d-flex flex-column vh-100" id="panelsearch">
 				<div class="d-flex"><span><a href='/'><img id="sitelogo" src="/img/podmail.png"
 								title="PodMail"></a></span><span>
 						<h4>PodMail <small>β</small></h4>
@@ -44,9 +44,15 @@
 					<span class="m-auto"></span><span class="d-block d-sm-none btn btn-default btn-sm inverse"
 						id="btnorders">View PodMails =&gt;</span>
 				</div>
-				<div>
-					<input id="searchbox" class="d-none" type="search" placeholder="Search" autocomplete="off">
-					<div id="folders" class=""></div>
+				<div class="d-flex flex-column h-100">
+					<div id="folders" class="flex-fill"></div>
+					<div id="about" class="d-flex flex-row">
+						<div class="flex-fill"><a class="btn" href='https://github.com/zkillboard/podmail'
+								target="'">GitHub</a>
+						</div>
+						<div class="flex-fill"><a id="logout" class="btn">Logout</a>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="flex-fill" id="panelorders">
