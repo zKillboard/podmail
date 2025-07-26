@@ -227,7 +227,9 @@ function adjustTags(html) {
 	return html
 		.replace(/ style="/gi, ' stile="')
 		.replace(/ size="/gi, ' syze="')
-		.replace(/ color="/gi, ' colour="')
+		//.replace(/ color="/gi, ' colour="')
+		.replace(/ color="#ff/gi, ' color="')
+		.replace(/ color="#000000/gi, ' color="#222222')
 		.replace(/\n/g, '<br/>')
 		.replace(/href="killReport:/g, 'target=\'_blank\' href="https://zkillboard.com/kill/')
 		.replace(/href="showinfo:2\/\//g, 'href="https://evewho.com/corporation/')

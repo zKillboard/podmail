@@ -1,5 +1,14 @@
 /* invert filter based dark mode */
-body.dark {
+
+body {
+	font-size: 14px;
+}
+
+.overflow-auto {
+	overflow-y: scroll;
+}
+
+/*body.dark {
 	background-color: black;
 	font-size: 14px;
 }
@@ -10,6 +19,29 @@ body.dark {
 
 img {
 	filter: invert(1);
+}
+*/
+
+@media (prefers-color-scheme: dark) {
+	body {
+		--bs-body-bg: black;
+		--bs-body-color: white;
+	}
+
+	/* Dark scrollbar */
+	::-webkit-scrollbar {
+		width: 12px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: #222;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: #555;
+		border-radius: 6px;
+		border: 2px solid #222;
+	}
 }
 
 #sitelogo,
@@ -26,14 +58,14 @@ img {
 #tqStatus.offline,
 #tqStatus.offline::before,
 .red {
-	color: cyan;
+	color: red;
 	content: "X ";
 }
 
 #tqStatus.online,
 #tqStatus.online::before,
 .green {
-	color: magenta;
+	color: green;
 	content: "\2713 ";
 }
 
@@ -46,7 +78,7 @@ img {
 .mail_header:hover,
 .mail_header.selected,
 .folder_selected {
-	background-color: #eee;
+	background-color: #111;
 }
 
 .mail_header span {
@@ -105,7 +137,7 @@ img {
 }
 
 #mail_container_full {
-	border-top: solid 1px #333;
+	border-top: solid 1px #ccc;
 	padding-left: 0.25em;
 }
 
@@ -165,8 +197,8 @@ img {
 	margin-left: 0.25em;
 	margin-right: 0.25em;
 	text-align: center;
-	background-color: cyan;
-	color: black;
+	background-color: red;
+	color: white;
 	line-height: 1.25em;
 }
 
@@ -175,6 +207,7 @@ img {
 }
 
 .btn {
-	background-color: #eee;
+	background-color: #222;
+	color: white;
 	margin-bottom: 0.3em;
 }
