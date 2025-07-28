@@ -1,26 +1,10 @@
-/* invert filter based dark mode */
+html {
+	font-size: 14px;
+}
 
 body {
-	font-size: 14px;
+	font-size: 1rem;
 }
-
-.overflow-auto {
-	overflow-y: scroll;
-}
-
-/*body.dark {
-	background-color: black;
-	font-size: 14px;
-}
-
-.inverse {
-	filter: invert(1);
-}
-
-img {
-	filter: invert(1);
-}
-*/
 
 @media (prefers-color-scheme: dark) {
 	body {
@@ -42,6 +26,44 @@ img {
 		border-radius: 6px;
 		border: 2px solid #222;
 	}
+
+	a,
+	a:visited {
+		color: yellow;
+	}
+
+	a:hover {
+		color: #e6cc00;
+	}
+
+	/* no black on black */
+	*[style*="color: #000000"] {
+		color: #111111 !important;
+	}
+
+	.btn {
+		background-color: #222;
+		color: white;
+		margin-bottom: 0.3em;
+	}
+
+	a.btn,
+	a.btn:hover,
+	a.btn:visited {
+		color: white;
+	}
+
+	.folder_label:hover,
+	.mail_header:hover,
+	.mail_header.selected,
+	.folder_selected {
+		background-color: #111;
+	}
+}
+
+/* no white on white */
+*[style*="color: #ffffff"] {
+	color: #eeeeee !important;
 }
 
 #sitelogo,
@@ -74,12 +96,6 @@ img {
 	cursor: pointer;
 }
 
-.folder_label:hover,
-.mail_header:hover,
-.mail_header.selected,
-.folder_selected {
-	background-color: #111;
-}
 
 .mail_header span {
 	min-width: 10em;
@@ -131,9 +147,15 @@ img {
 	overflow: auto;
 }
 
-#panelsearch {
+#mail_container_full {
+	margin-bottom: 0.5em;
+
+}
+
+#leftpanel {
 	min-width: 200px;
 	max-width: 500px;
+	padding-left: 0.25em;
 }
 
 #mail_container_full {
@@ -206,8 +228,11 @@ img {
 	margin: 0.25em;
 }
 
-.btn {
-	background-color: #222;
-	color: white;
-	margin-bottom: 0.3em;
+hr.vertical-hr {
+	width: 1px;
+	transform-origin: right;
+	background-color: #ccc;
+	border: none;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 }
