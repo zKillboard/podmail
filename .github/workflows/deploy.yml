@@ -18,10 +18,10 @@ jobs:
 
     - name: Inject cache-busting into HTML and JS
       run: |
-        sed -i "s|\(src=\"/js/.*\.js\)\(\"|\)?v=${HASH}\2|g" index.html
-        sed -i "s|\(href=\"/css/.*\.css\)\(\"|\)?v=${HASH}\2|g" index.html
-        sed -i "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" index.html
-        sed -i "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" js/app.js
+        sed -i -E "s|(src=\"/js/.*\.js)(\")|\1?v=${HASH}\2|g" index.html
+        sed -i -E "s|(href=\"/css/.*\.css)(\")|\1?v=${HASH}\2|g" index.html
+        sed -i -E "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" index.html
+        sed -i -E "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" js/app.js
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
