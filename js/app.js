@@ -1,10 +1,12 @@
-const githubhash = "b51f18b";
+const githubhash = "f96025d";
 
 document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
+	let docgithubhash = document.getElementById('html').getAttribute('githubhash');
+	let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim()
 	// Check the hash, if they don't match, we need to cache-bust
-	if (githubhash != document.getElementById('html').getAttribute('githubhash')) return window.location = `/?githubhash=${githubhash}`;
+	if (githubhash != docgithubhash || githubhash != podmail_version) return window.location = `/?githubhash=${githubhash}`;
 
 	// whoami is defined and handled in auth.js
 	if (whoami == null) {
@@ -28,6 +30,38 @@ async function main() {
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
 	setTimeout(loadNames, 1);
+
+	window.addEventListener('popstate', updateRoute);
+
+	let referrer = decodeURIComponent(new URLSearchParams(window.location.search).get('referrer') || '/folder/1');
+	if (referrer != '/') updateRoute(null, referrer);
+}
+
+function pushState(new_route) {
+	if (new_route == window.location.pathname) return;
+	history.pushState({}, '', new_route);
+}
+
+function updateRoute(e, route = null) {
+	console.log(e, route);
+	const path = route ?? window.location.pathname;
+	console.log('Handling route for:', path);
+	const split = path.split('/').filter(Boolean);
+	console.log(split);
+	switch (split[0]) {
+		case '':
+		case 'folder':
+			const new_folder_id = split.length == 1 ? 1 : split[1];
+			showFolder(null, new_folder_id);
+			break;
+		case 'mail':
+			const new_mail = split.length == 1 ? 1 : split[1];
+			showMail(null, { mail_id: new_mail }, true);
+			break;
+		default:
+			console.log('unknown route');
+			showFolder(null, '1');
+	}
 }
 
 async function loadReadme(id) {
@@ -48,7 +82,7 @@ function fail(res) {
 }
 
 let labels = {};
-let current_label = -1;
+let current_folder = 1;
 async function pm_fetchFolders() {
 	try {
 		const labels = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
@@ -69,10 +103,10 @@ async function pm_addFolder(label, mailing_list = false) {
 	let el = document.getElementById(id_str);
 	localStorage.setItem(`name-${id}`, label.name);
 	if (el == null) {
-		let el_name = createEl('span', label.name, `$folder-${id}-name`, 'folder-name');
-		let el_count = createEl('span', '', `$folder-${id}-unread`, 'unread_count');
+		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
+		let el_count = createEl('span', '', `folder-${id}-unread`, 'unread_count');
 
-		el = createEl('div', null, id_str, 'folder_label', { folder_id: id }, { click: pm_showMails });
+		el = createEl('div', null, id_str, 'folder_label', { folder_id: id }, { click: showFolder });
 		el.appendChild(el_name);
 		el.appendChild(el_count);
 
@@ -88,27 +122,34 @@ function updateUnreadCounts() {
 		let folder_id = folder.getAttribute('folder_id');
 		let unread = document.querySelectorAll(`.folder-${folder_id} .unread`).length;
 		if (unread == 0) unread = '';
-		document.getElementById(`$folder-${folder_id}-unread`).innerText = unread;
+		document.getElementById(`folder-${folder_id}-unread`).innerText = unread;
 	}
 }
 
-async function pm_showMails() {
-	showSection('headers_container_full');
+async function showFolder(e, folder_id = null) {
+	try {
+		showSection('headers_container_full');
 
-	let style = document.getElementById('current_folder');
-	style.innerText = '';
-	await sleep(1); // clear the displayed folder and then  let the browser update visuals
+		let style = document.getElementById('current_folder');
+		style.innerText = '';
+		document.getElementById('mail_headers').scrollTo({ top: 0 });
 
-	let id = this.getAttribute('folder_id');
-	style.innerText = `.folder-${id}.showhide {display: block;}`;
+		let id = folder_id ?? this.getAttribute('folder_id');
+		style.innerText = `.folder-${id}.showhide {display: block;}`;
 
-	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
-	this.classList.add('folder_selected');
+		Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
+		document.getElementById(`folder_${id}`).classList.add('folder_selected');
+		pushState(`/folder/${id}`);
+		current_folder = id;
+	} catch (e) {
+		console.log(e);
+	}
 }
 
 function backToFolder() {
 	console.log('showing folder')
 	showSection('headers_container_full');
+	showFolder(null, current_folder);
 }
 
 let last_highest_mail_id = 0;
@@ -172,7 +213,7 @@ async function addMailHeader(mail) {
 	let el = document.getElementById('mail_header_' + mail.mail_id);
 	if (el == null) {
 
-		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], { mail_id: mail.mail_id }, { click: pm_loadMail });
+		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], { mail_id: mail.mail_id }, { click: showMail });
 
 		let classes = ['showhide'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
@@ -197,7 +238,6 @@ function showSection(id) {
 }
 
 function setDisplayBlock(id, visible) {
-	console.log(id, visible);
 	let el = document.getElementById(id);
 	if (el) {
 		if (visible) el.classList.remove('d-none');
@@ -205,7 +245,7 @@ function setDisplayBlock(id, visible) {
 	} else console.error('no such element:', `#${id}`);
 }
 
-async function pm_loadMail(mail) {
+async function showMail(e, mail, forceShow = false) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
 	if (false && mail != null) mail = JSON.parse(mail);
@@ -213,7 +253,7 @@ async function pm_loadMail(mail) {
 		mail = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
 		//localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
-	if (this.getAttribute) {
+	if (this.getAttribute || forceShow) {
 		showSection('mail_container_full')
 
 		document.getElementById('mail_body').innerHTML = '';
@@ -233,12 +273,14 @@ async function pm_loadMail(mail) {
 
 		let body = adjustTags(mail.body);
 		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
-		this.classList.add('selected');
+		if (this?.classList) this.classList.add('selected');
 		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
 
 		mail.mail_id = mail_id;
 		pm_updateReadStatus(mail);
 		setTimeout(loadNames, 10);
+
+		pushState(`/mail/${mail_id}`);
 	}
 }
 
