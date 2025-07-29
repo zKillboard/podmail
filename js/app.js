@@ -236,7 +236,7 @@ async function addMailHeader(mail) {
 	else el.classList.add('unread');
 }
 
-const sections = ['headers_container_full', 'mail_container_full']
+const sections = ['headers_container_full', 'mail_container_full', 'compose_container_full']
 function showSection(id) {
 	for (const section of sections) setDisplayBlock(section, id == section);
 }
