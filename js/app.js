@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
 	// whoami is defined and handled in auth.js
-	if (whoami == null) return document.getElementById('about').classList.remove('d-none');
+	if (whoami == null) {
+		loadReadme('readme');
+		return document.getElementById('about').classList.remove('d-none');
+	}
 	document.getElementById('podmail').classList.remove('d-none');
 
 	document.getElementById('charname').innerHTML = whoami.name;
@@ -19,6 +22,11 @@ async function main() {
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
 	setTimeout(loadNames, 1);
+}
+
+async function loadReadme(id) {
+	let res = await fetch('/README.md');
+	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
 const timeouts = {};
