@@ -6,15 +6,26 @@ body {
 	font-size: 1rem;
 }
 
+::-webkit-scrollbar {
+	width: 12px;
+}
+
+::-webkit-scrollbar {
+	width: 12px;
+}
+
+#mail_header_timestamp {
+	margin-right: 12px;
+}
+
+.timestamp {
+	padding-right: 1em;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		--bs-body-bg: black;
 		--bs-body-color: white;
-	}
-
-	/* Dark scrollbar */
-	::-webkit-scrollbar {
-		width: 12px;
 	}
 
 	::-webkit-scrollbar-track {
@@ -123,7 +134,6 @@ body {
 	display: none;
 }
 
-
 .messages {
 	width: 100%;
 	display: flex;
@@ -149,17 +159,12 @@ body {
 
 #mail_container_full {
 	margin-bottom: 0.5em;
-
+	padding-left: 0.25em;
 }
 
 #leftpanel {
 	min-width: 200px;
 	max-width: 500px;
-	padding-left: 0.25em;
-}
-
-#mail_container_full {
-	border-top: solid 1px #ccc;
 	padding-left: 0.25em;
 }
 

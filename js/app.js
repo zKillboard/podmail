@@ -18,6 +18,7 @@ async function main() {
 	folders = localStorage.getItem('folders') == null ? {} : JSON.parse(localStorage.getItem('folders'));
 
 	document.getElementById('logout').addEventListener('click', logout);
+	document.getElementById('backToFolder').addEventListener('click', backToFolder);
 
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
@@ -87,6 +88,8 @@ function updateUnreadCounts() {
 }
 
 async function pm_showMails() {
+	showSection('headers_container_full');
+
 	let style = document.getElementById('current_folder');
 	style.innerText = '';
 	await sleep(1); // clear the folder, let the browser update visuals
@@ -96,6 +99,11 @@ async function pm_showMails() {
 
 	Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
 	this.classList.add('folder_selected');
+}
+
+function backToFolder() {
+	console.log('showing folder')
+	showSection('headers_container_full');
 }
 
 let last_highest_mail_id = 0;
@@ -171,12 +179,25 @@ async function addMailHeader(mail) {
 		el.appendChild(createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
 		el.appendChild(createEl('span', mail.subject, null, 'subject flex-fill'));
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
-		// el.appendChild(createEl('span', mail.labels.join(', '), null, 'mail_labels'));
 
 		document.getElementById('mail_headers').appendChild(elp);
 	}
 	if (mail.is_read == true) el.classList.remove('unread');
 	else el.classList.add('unread');
+}
+
+const sections = ['headers_container_full', 'mail_container_full']
+function showSection(id) {
+	for (const section of sections) setDisplayBlock(section, id == section);
+}
+
+function setDisplayBlock(id, visible) {
+	console.log(id, visible);
+	let el = document.getElementById(id);
+	if (el) {
+		if (visible) el.classList.remove('d-none');
+		else el.classList.add('d-none');
+	} else console.error('no such element:', `#${id}`);
 }
 
 async function pm_loadMail(mail) {
@@ -188,6 +209,8 @@ async function pm_loadMail(mail) {
 		//localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
 	if (this.getAttribute) {
+		showSection('mail_container_full')
+
 		document.getElementById('mail_body').innerHTML = '';
 		await sleep(1); // clear the message, let the browser update visuals
 
