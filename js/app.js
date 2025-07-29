@@ -97,7 +97,7 @@ async function pm_showMails() {
 
 	let style = document.getElementById('current_folder');
 	style.innerText = '';
-	await sleep(1); // clear the folder, let the browser update visuals
+	await sleep(1); // clear the displayed folder and then  let the browser update visuals
 
 	let id = this.getAttribute('folder_id');
 	style.innerText = `.folder-${id}.showhide {display: block;}`;
