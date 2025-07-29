@@ -86,10 +86,10 @@ let current_folder = 1;
 async function pm_fetchFolders() {
 	try {
 		const labels = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
-		for (const label of labels.labels) pm_addFolder(label, false);
+		for (const label of labels.labels) addFolder(label, false);
 
 		const subs = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
-		for (const sub of subs) pm_addFolder(sub, true);
+		for (const sub of subs) addFolder(sub, true);
 	} catch (e) {
 		console.log(e);
 	} finally {
@@ -97,14 +97,18 @@ async function pm_fetchFolders() {
 	}
 }
 
-async function pm_addFolder(label, mailing_list = false) {
+async function addFolder(label, mailing_list = false) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
 	localStorage.setItem(`name-${id}`, label.name);
 	if (el == null) {
+		if (label.name == '[Corp]') label.name = 'Corp';
+		else if (label.name == '[Alliance') label.name = 'Alliance';
+
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
 		let el_count = createEl('span', '', `folder-${id}-unread`, 'unread_count');
+		if (label.name == 'Sent') el_count.classList.add('d-none'); // never show unread count in sent
 
 		el = createEl('div', null, id_str, 'folder_label', { folder_id: id }, { click: showFolder });
 		el.appendChild(el_name);
