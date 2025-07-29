@@ -233,10 +233,14 @@ body {
 	margin: 0.25em;
 }
 
+hr {
+	color: #ccc;
+	background-color: #ccc;
+}
+
 hr.vertical-hr {
 	width: 1px;
 	transform-origin: right;
-	background-color: #ccc;
 	border: none;
 	margin-left: 0.5em;
 	margin-right: 0.5em;
