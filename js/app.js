@@ -1,6 +1,11 @@
+const githubhash = "";
+
 document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
+	// Check the hash, if they don't match, we need to cache-bust
+	if (githubhash != document.getElementById('html').getAttribute('githubhash')) return window.location = `/?githubhash=${githubhash}`;
+
 	// whoami is defined and handled in auth.js
 	if (whoami == null) {
 		loadReadme('readme');

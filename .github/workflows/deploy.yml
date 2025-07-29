@@ -1,0 +1,30 @@
+name: Deploy with Cache Busting
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    - name: Generate cache-busting hash
+      run: echo "HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+    - name: Inject cache-busting into HTML and JS
+      run: |
+        sed -i "s|\(src=\"/js/.*\.js\)\(\"|\)?v=${HASH}\2|g" index.html
+        sed -i "s|\(href=\"/css/.*\.css\)\(\"|\)?v=${HASH}\2|g" index.html
+        sed -i "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" index.html
+        sed -i "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" js/app.js
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .
+        publish_branch: gh-pages
