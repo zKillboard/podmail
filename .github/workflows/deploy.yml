@@ -2,7 +2,7 @@ name: Deploy with Cache Busting
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
