@@ -1,4 +1,4 @@
-const githubhash = "d2f3781";
+const githubhash = "ddf6065";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -24,13 +24,8 @@ async function main() {
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
 
-	document.getElementById('logout').addEventListener('click', logout);
-	document.getElementById('backToFolder').addEventListener('click', backToFolder);
-	document.getElementById('compose_btn').addEventListener('click', doCompose);
-
 	await pm_fetchFolders();
-	await pm_fetchHeaders();
-	setTimeout(loadNames, 1);
+	pm_fetchHeaders();
 
 	window.addEventListener('popstate', updateRoute);
 
@@ -39,9 +34,14 @@ async function main() {
 
 	document.getElementsByName('compose_recipients')[0].addEventListener('blur', updateComposeRecipients);
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
-	document.getElementById('btn_send').addEventListener('click', btn_send);
-	document.getElementById('btn_deleteMail').addEventListener('click', btn_deleteMail);
-	btn_deleteMail
+
+	// bind buttons with class btn-bind to a function equivalent to the button's id
+	Array.from(document.getElementsByClassName('btn-bind')).forEach((el) => {
+		const id = el.id;
+		if (id == null || id.trim().length == 0) return console.error('this btn-bind does not have an id', el);
+		if (!window[id] || typeof window[id] != 'function') return console.error('button', id, 'does not have a matching function');
+		el.addEventListener('click', window[id]); // assign the function with the same name
+	});
 }
 
 function pushState(new_route) {
@@ -64,11 +64,17 @@ function updateRoute(e, route = null) {
 			showMail(null, { mail_id: new_mail }, true);
 			break;
 		case 'compose':
-			return doCompose();
+			return btn_compose();
 		default:
 			console.log('unknown route');
 			showFolder(null, '1');
 	}
+}
+
+btn_logout = auth_logout;
+
+function btn_mails() {
+	// TODO, for mobile, show evemails
 }
 
 async function loadReadme(id) {
@@ -86,6 +92,15 @@ setTimeout = addTimeout;
 
 function fail(res) {
 	console.error(res);
+}
+
+function doAffiliation() {
+	try {
+		if (whoami == null) return;
+
+	} finally {
+		setTimeout(doAffiliation, 300);
+	}
 }
 
 let labels = {};
@@ -162,7 +177,7 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 	}
 }
 
-function backToFolder(replaceState = false) {
+function btn_backToFolder(replaceState = false) {
 	if (replaceState) history.replaceState({}, '', `/folder/${current_folder}`);
 	showFolder(null, current_folder, false);
 }
@@ -173,11 +188,15 @@ async function pm_fetchHeaders() {
 	let mail_headers_stored = {};
 	try {
 		if (headers_first_load) {
-			mail_headers = Array.from(Object.values(JSON.parse(lsGet('mail_headers'))));
-			if (mail_headers) {
-				for (const mail of Object.values(mail_headers)) addMail(mail);
+			let json_str = JSON.parse(lsGet('mail_headers'));
+			if (json_str) {
+				mail_headers = Array.from(Object.values(json_str));
+				if (mail_headers) {
+					for (const mail of Object.values(mail_headers)) addMail(mail);
+					setTimeout(loadNames, 1);
+				}
+				return setTimeout(pm_fetchHeaders, 1); // load actual headers next
 			}
-			return setTimeout(pm_fetchHeaders, 1); // load actual headers next
 		}
 	} catch (e) {
 		console.log(e);
@@ -199,7 +218,7 @@ async function pm_fetchHeaders() {
 		let mails, last_mail_id = -1, high_mail_id = 0;
 		do {
 			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
-			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', { Accept: 'application/json' });
+			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', mimetype_json);
 
 			for (const mail of mails) {
 				addMail(mail);
@@ -211,6 +230,7 @@ async function pm_fetchHeaders() {
 
 			if (total_mails >= 500) break;
 		} while (mails.length > 0);
+		setTimeout(loadNames, 1);
 
 		lsSet('mail_headers', JSON.stringify(mail_headers_stored));
 		lsGet('folders', JSON.stringify(folders));
@@ -326,7 +346,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
-	let res = await doAuthRequest(url, 'PUT', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify({ labels: mail.labels, read: true }));
+	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: true }));
 
 	if (res.status == 204) { // Success
 		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
@@ -368,30 +388,32 @@ function adjustTags(html) {
 }
 
 async function loadNames() {
-	await sleep(1); // allow the UI to update
-	let els = document.getElementsByClassName('load_name');
-	let fetch_names = [];
-	for (const el of els) {
-		let from_id = parseInt(el.getAttribute('from_id'));
+	try {
+		let els = document.getElementsByClassName('load_name');
+		let fetch_names = [];
+		for (const el of els) {
+			let from_id = parseInt(el.getAttribute('from_id'));
 
-		if (el.innerHTML != null && el.innerHTML.length > 0) {
-			el.classList.remove('load_name');
+			if (el.innerHTML != null && el.innerHTML.length > 0) {
+				el.classList.remove('load_name');
+			}
+			else if (localStorage.getItem(`name-${from_id}`) != null) {
+				el.innerHTML = localStorage.getItem(`name-${from_id}`);
+				el.classList.remove('load_name');
+			}
+			else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
-		else if (localStorage.getItem(`name-${from_id}`) != null) {
-			el.innerHTML = localStorage.getItem(`name-${from_id}`);
-			el.classList.remove('load_name');
-		}
-		else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
+		await fetchNames(fetch_names);
+	} finally {
+		setTimeout(loadNames, 1000);
 	}
-	await fetchNames(fetch_names);
-	setTimeout(loadNames, 1000);
 }
 
 async function fetchNames(fetch_names) {
 	try {
 		if (fetch_names.length > 0) {
 			console.log('Fetching', fetch_names.length, 'names');
-			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify(fetch_names))
+			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', mimetype_json, JSON.stringify(fetch_names))
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {
@@ -409,7 +431,7 @@ async function fetchNames(fetch_names) {
 
 async function fetchIDFromName(the_name) {
 	try {
-		return await doAuthRequest('https://esi.evetech.net/universe/ids', 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify([the_name]));
+		return await doAuthRequest('https://esi.evetech.net/universe/ids', 'POST', mimetype_json, JSON.stringify([the_name]));
 	} catch (e) {
 		return {};
 	}
@@ -498,7 +520,7 @@ function clearEsiIssue() {
 	document.getElementById('esi_issue').classList.add('d-none');
 }
 
-function doCompose(subject = '', body = '', recipients = []) {
+function btn_compose(subject = '', body = '', recipients = []) {
 	pushState('/compose');
 	showSection('compose_container_full');
 }
@@ -509,7 +531,7 @@ async function updateComposeRecipients(e) {
 	let val = composeInput.value;
 	let unmatched_names = [];
 
-	if (typing == false || val.indexOf(',') >= 0) {
+	if (typing == false) {
 		let split = val.split(',').filter(Boolean);
 		for (let value of split) {
 			value = value.trim();
@@ -521,7 +543,7 @@ async function updateComposeRecipients(e) {
 			}
 			if (!matched) unmatched_names.push(value);
 		}
-		if (unmatched_names.length > 0) alert('Could not find matches for:<br/><br/>' + unmatched_names.join('\n') + '<br/><br/>(these name(s) have been rejected)');
+		if (unmatched_names.length > 0) alert('The following character names have been rejected because of no exact matches:<br/><br/>' + unmatched_names.join('<br/>'));
 		document.getElementsByName('compose_recipients')[0].value = '';
 	}
 }
@@ -576,13 +598,13 @@ async function btn_send(e) {
 			subject,
 		};
 
-		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify(msg));
+		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
 		if (typeof res == 'number' && res > 0) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
 			document.getElementsByName('compose_subject')[0].value = '';
 			document.getElementById('compose_body_textarea').value = '';
-			return backToFolder();
+			return btn_backToFolder();
 		}
 		alert('there was an error sending your evemail');
 	} finally {
@@ -594,13 +616,13 @@ async function btn_deleteMail(e) {
 	if (! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
 
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${current_mail_id}`;
-	let res = await doAuthRequest(url, 'DELETE', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' });
+	let res = await doAuthRequest(url, 'DELETE', mimetype_json);
 	if (res.status == 204) {
 		let mail_header = document.getElementById(`mail_header_${current_mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
 		localStorage.removeItem(`mail-${current_mail_id}`);
-		backToFolder();
+		btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
 }
@@ -618,8 +640,8 @@ window.confirm = async function (message) {
 			cancelBtn.onclick = null;
 		};
 
-		okBtn.onclick = () => { cleanup(); modal.hide(); resolve(true); };
-		cancelBtn.onclick = () => { cleanup(); modal.hide(); resolve(false); };
+		okBtn.onclick = () => { cleanup(); document.activeElement.blur(); modal.hide(); resolve(true); };
+		cancelBtn.onclick = () => { cleanup(); document.activeElement.blur(); modal.hide(); resolve(false); };
 
 		modal.show();
 	});
@@ -638,6 +660,7 @@ window.alert = async function (message) {
 		okButton.parentNode.replaceChild(newButton, okButton);
 
 		newButton.addEventListener('click', () => {
+			document.activeElement.blur();
 			modal.hide();
 			resolve();
 		});

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="html" githubhash="d2f3781" data-bs-theme="dark">
+<html lang="en" id="html" githubhash="ddf6065" data-bs-theme="dark">
 
 <head>
 	<title>PodMail</title>
@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-	<link rel="stylesheet" href="/css/app.css?v=d2f3781">
+	<link rel="stylesheet" href="/css/app.css?v=ddf6065">
 	<style id="current_folder">
 		.folder-1.showhide {
 			display: block;
@@ -46,11 +46,11 @@
 						<h4>PodMail <small>β</small></h4>
 					</span>
 					<span class="m-auto"></span><span class="d-block d-sm-none btn btn-default btn-sm inverse"
-						id="btnorders">View PodMails =&gt;</span>
+						id="btn_mails">View PodMails =&gt;</span>
 				</div>
 				<div class="d-flex flex-column h-100">
 					<dvi id="compose_btn_parent" class="m-2">
-						<span id="compose_btn" class="btn btn-primary w-100">Compose</span>
+						<span id="btn_compose" class="btn btn-bind btn-primary w-100">Compose</span>
 					</dvi>
 					<div id="folders" class="flex-fill"></div>
 					<hr />
@@ -60,7 +60,7 @@
 								target="_blank">GitHub</a>
 						</div>
 						<div class="flex-fill d-flex justify-content-center">
-							<a id="logout" class="btn btn-danger">Logout</a>
+							<a id="btn_logout" class="btn btn-bind btn-danger">Logout</a>
 						</div>
 					</div>
 				</div>
@@ -102,9 +102,9 @@
 						</div>
 						<div id="mail_container" class="d-flex flex-column h-100 w-100">
 							<div id="mail_about" class="d-flex flex-row">
-								<span id="backToFolder" class="btn btn-primary" folder_id="1">Back</span>
+								<span id="btn_backToFolder" class="btn btn-bind btn-primary" folder_id="1">Back</span>
 								<hr class="vertical-hr" />
-								<span id="btn_deleteMail" class="btn btn-danger" folder_id="1">Delete</span>
+								<span id="btn_deleteMail" class="btn btn-bind btn-danger" folder_id="1">Delete</span>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="mail_body" class="overflow-auto h-100"></div>
@@ -112,8 +112,12 @@
 					</div>
 					<div id="compose_container_full" class="overflow-auto h-100 d-flex d-none">
 						<div id="compose_container" class="d-flex flex-column h-100 w-100">
-							<div id="compose_options" class="w-100">
-								<span id="btn_send" class="btn btn-primary" folder_id="1">Send</span>
+							<div id="compose_options" class="w-100 d-flex ">
+								<span id="btn_send" class="btn btn-bind btn-primary">Send</span>
+								<hr class="vertical-hr">
+								<span id="btn_addCorp" class="btn btn-bind btn-success">Add Corp</span>
+								<hr class="vertical-hr">
+								<span id="btn_addAlli" class="btn btn-bind btn-success">Add Alli</span>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="compose_recipients" class="w-100">
@@ -170,8 +174,8 @@
 	<script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
 		crossorigin="anonymous"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=d2f3781"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=d2f3781"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=ddf6065"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=ddf6065"></script>
 </body>
 
 </html>
