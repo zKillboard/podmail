@@ -40,6 +40,8 @@ async function main() {
 	document.getElementsByName('compose_recipients')[0].addEventListener('blur', updateComposeRecipients);
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
 	document.getElementById('btn_send').addEventListener('click', btn_send);
+	document.getElementById('btn_deleteMail').addEventListener('click', btn_deleteMail);
+	btn_deleteMail
 }
 
 function pushState(new_route) {
@@ -126,13 +128,18 @@ async function addFolder(label, mailing_list = false) {
 }
 
 function updateUnreadCounts() {
+	let total_unread = 0;
 	let folders = document.getElementsByClassName('folder_label');
 	for (const folder of folders) {
 		let folder_id = folder.getAttribute('folder_id');
+		if (folder_id == '2') continue;
+
 		let unread = document.querySelectorAll(`.folder-${folder_id} .unread`).length;
+		total_unread += unread;
 		if (unread == 0) unread = '';
 		document.getElementById(`folder-${folder_id}-unread`).innerText = unread;
 	}
+	document.title = (total_unread == 0 ? '' : '(' + total_unread + ') ') + 'PodMail';
 }
 
 async function showFolder(e, folder_id = null) {
@@ -155,7 +162,8 @@ async function showFolder(e, folder_id = null) {
 	}
 }
 
-function backToFolder() {
+function backToFolder(replaceState = false) {
+	if (replaceState) history.replaceState({}, '', `/folder/${current_folder}`);
 	showFolder(null, current_folder);
 }
 
@@ -270,6 +278,7 @@ function setDisplayBlock(id, visible) {
 	} else console.error('no such element:', `#${id}`);
 }
 
+let current_mail_id = -1;
 async function showMail(e, mail, forceShow = false) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
@@ -308,6 +317,7 @@ async function showMail(e, mail, forceShow = false) {
 		setTimeout(loadNames, 10);
 
 		pushState(`/mail/${mail_id}`);
+		current_mail_id = mail_id;
 	}
 }
 
@@ -578,4 +588,15 @@ async function btn_send(e) {
 	} catch (err) {
 		sending_evemail = false;
 	}
+}
+
+async function btn_deleteMail(e) {
+	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${current_mail_id}`;
+	let res = await doAuthRequest(url, 'DELETE', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' });
+	if (res.status == 204) {
+		document.getElementById(`mail_header_${current_mail_id}`).remove();
+		localStorage.removeItem(`mail-${current_mail_id}`);
+		backToFolder();
+	}
+	else alert('Error Code: ' + res.status);
 }
