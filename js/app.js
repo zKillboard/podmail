@@ -1,4 +1,4 @@
-const githubhash = "edf82f1";
+const githubhash = "e0eabc0";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -7,6 +7,9 @@ async function main() {
 	let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim()
 	// Check the hash, if they don't match, we need to cache-bust
 	if (githubhash != docgithubhash || githubhash != podmail_version) return window.location = `/?githubhash=${githubhash}`;
+
+	// This is for localhost testing
+	if (githubhash == '') document.getElementById('podmailLink').setAttribute('href', '/?' + Date.now());
 
 	// whoami is defined and handled in auth.js
 	if (whoami == null) {
@@ -21,11 +24,9 @@ async function main() {
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
 
-	mail_headers = localStorage.getItem('mail_headers') == null ? {} : JSON.parse(localStorage.getItem('mail_headers'));
-	folders = localStorage.getItem('folders') == null ? {} : JSON.parse(localStorage.getItem('folders'));
-
 	document.getElementById('logout').addEventListener('click', logout);
 	document.getElementById('backToFolder').addEventListener('click', backToFolder);
+	document.getElementById('compose_btn').addEventListener('click', doCompose);
 
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
@@ -35,6 +36,10 @@ async function main() {
 
 	let referrer = decodeURIComponent(new URLSearchParams(window.location.search).get('referrer') || '/folder/1');
 	if (referrer != '/') updateRoute(null, referrer);
+
+	document.getElementsByName('compose_recipients')[0].addEventListener('blur', updateComposeRecipients);
+	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
+	document.getElementById('btn_send').addEventListener('click', btn_send);
 }
 
 function pushState(new_route) {
@@ -56,6 +61,8 @@ function updateRoute(e, route = null) {
 			const new_mail = split.length == 1 ? 1 : split[1];
 			showMail(null, { mail_id: new_mail }, true);
 			break;
+		case 'compose':
+			return doCompose();
 		default:
 			console.log('unknown route');
 			showFolder(null, '1');
@@ -99,7 +106,7 @@ async function addFolder(label, mailing_list = false) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
-	localStorage.setItem(`name-${id}`, label.name);
+	lsSet(`name-${id}`, label.name);
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp';
 		else if (label.name == '[Alliance') label.name = 'Alliance';
@@ -149,27 +156,25 @@ async function showFolder(e, folder_id = null) {
 }
 
 function backToFolder() {
-	console.log('showing folder')
-	showSection('headers_container_full');
 	showFolder(null, current_folder);
 }
 
 let headers_first_load = true;
-let mail_headers_stored = {};
 let folders = {};
 async function pm_fetchHeaders() {
+	let mail_headers_stored = {};
 	try {
 		if (headers_first_load) {
-			mail_headers = Array.from(Object.values(JSON.parse(localStorage.getItem('mail_headers'))));
+			mail_headers = Array.from(Object.values(JSON.parse(lsGet('mail_headers'))));
 			if (mail_headers) {
 				for (const mail of Object.values(mail_headers)) addMail(mail);
 			}
-			headers_first_load = false;
-			setTimeout(pm_fetchHeaders, 1); // load actual headers next
-			return;
+			return setTimeout(pm_fetchHeaders, 1); // load actual headers next
 		}
 	} catch (e) {
 		console.log(e);
+	} finally {
+		headers_first_load = false;
 	}
 
 	mail_headers_stored = {};
@@ -199,8 +204,8 @@ async function pm_fetchHeaders() {
 			if (total_mails >= 500) break;
 		} while (mails.length > 0);
 
-		localStorage.setItem('mail_headers', JSON.stringify(mail_headers_stored));
-		localStorage.setItem('folders', JSON.stringify(folders));
+		lsSet('mail_headers', JSON.stringify(mail_headers_stored));
+		lsGet('folders', JSON.stringify(folders));
 
 		if (mail_ids.size) {
 			// Cleanup removed mails
@@ -268,10 +273,12 @@ function setDisplayBlock(id, visible) {
 async function showMail(e, mail, forceShow = false) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
-	if (false && mail != null) mail = JSON.parse(mail);
-	else {
+	if (mail != null) {
+		mail = JSON.parse(mail);
+	} else {
+		console.log('Fetching mail', mail_id);
 		mail = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
-		//localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
+		localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
 	if (this.getAttribute || forceShow) {
 		showSection('mail_container_full')
@@ -292,8 +299,8 @@ async function showMail(e, mail, forceShow = false) {
 		`;
 
 		let body = adjustTags(mail.body);
-		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
-		if (this?.classList) this.classList.add('selected');
+		//Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
+		//if (this?.classList) this.classList.add('selected');
 		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
 
 		mail.mail_id = mail_id;
@@ -305,7 +312,7 @@ async function showMail(e, mail, forceShow = false) {
 }
 
 async function pm_updateReadStatus(mail, read = true) {
-	if (mail.is_read == read) return; // no need to change anything
+	if (mail.read == read) return; // no need to change anything
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
@@ -390,6 +397,14 @@ async function fetchNames(fetch_names) {
 	}
 }
 
+async function fetchIDFromName(the_name) {
+	try {
+		return await doAuthRequest('https://esi.evetech.net/universe/ids', 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify([the_name]));
+	} catch (e) {
+		return {};
+	}
+}
+
 function applyNameToId(name_record) {
 	let id = name_record.id;
 	let from_els = document.getElementsByClassName(`from-${id}`);
@@ -471,4 +486,98 @@ function handleEsiIssue() {
 
 function clearEsiIssue() {
 	document.getElementById('esi_issue').classList.add('d-none');
+}
+
+function doCompose(subject = '', body = '', recipients = []) {
+	pushState('/compose');
+	showSection('compose_container_full');
+}
+
+async function updateComposeRecipients(e) {
+	let typing = e.inputType == 'insertText';
+	let val = document.getElementsByName('compose_recipients')[0].value;
+	let unmatched_names = [];
+
+	if (typing == false || val.indexOf(',') >= 0) {
+		let split = val.split(',').filter(Boolean);
+		for (let value of split) {
+			value = value.trim();
+			let matched = false;
+			let result = await fetchIDFromName(value);
+			for (const [type, matches] of Object.entries(result)) {
+				for (const match of matches)
+					matched |= addComposeRecipient(type, match);
+			}
+			if (!matched) unmatched_names.push(value);
+		}
+		//alert('Could not find matches for:\n\n' + unmatched_names.join('\n') + '\n\n(these name(s) have been rejected)');
+		document.getElementsByName('compose_recipients')[0].value = '';
+	}
+}
+
+function addComposeRecipient(type, info) {
+	if (document.getElementById(`recip_id_${info.id}`)) return true;
+	console.log(type, info);
+	let span;
+	switch (type) {
+		case 'characters':
+			span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient', { recip_id: info.id, recip_type: type });
+			span.addEventListener('click', removeSelf);
+			console.log(span);
+			break;
+	}
+	if (span) {
+		document.getElementById('compose_recipients_calculated').appendChild(span);
+		return true;
+	}
+	return false;
+}
+
+function removeSelf() {
+	this.remove();
+}
+
+let sending_evemail = false;
+async function btn_send(e) {
+	if (sending_evemail) return; // stops double clickers
+
+	try {
+		sending_evemail = true;
+
+		// Validation first
+		let recips = document.getElementsByClassName('compose_recipient');
+		if (recips.length == 0) return alert('no recipients...');
+
+		let subject = document.getElementsByName('compose_subject')[0].value;
+		if (subject.length == 0) return alert('please fill in the subject...');
+
+		let body = document.getElementById('compose_body_textarea').value;
+		if (body.length == 0) return alert('please fill in the message body...');
+
+		let recipients = [];
+		for (const r of recips) {
+			recipients.push({ recipient_type: r.getAttribute('recip_type'), recipient_id: parseInt(r.getAttribute('recip_id')) });
+		}
+
+		// OK validation is done
+		let msg = {
+			approved_cost: 0,
+			recipients: recipients,
+			body,
+			subject,
+		}
+		console.log(msg);
+
+		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify(msg));
+		if (typeof res == 'number' && res > 0) {
+			// success!
+			document.getElementById('compose_recipients_calculated').innerHTML = '';
+			document.getElementsByName('compose_subject')[0].value = '';
+			document.getElementById('compose_body_textarea').value = '';
+			return backToFolder();
+		}
+		alert('there was an error sending your evemail');
+	} catch (err) {
+		sending_evemail = false;
+	}
 }

@@ -18,6 +18,10 @@ body {
 	margin-right: 12px;
 }
 
+#mail_headers_parent {
+	overflow-y: scroll;
+}
+
 .timestamp {
 	padding-right: 1em;
 }
@@ -70,6 +74,22 @@ body {
 	.folder_selected {
 		background-color: #111;
 	}
+
+	.mail_header_top:hover {
+		background-color: black;
+	}
+
+	input,
+	textarea {
+		background-color: black;
+		border: solid 1px whtie;
+		color: white;
+	}
+
+	input::placeholder,
+	textarea::placeholder {
+		color: #888;
+	}
 }
 
 /* no white on white */
@@ -105,6 +125,10 @@ body {
 .folder_label,
 .mail_header {
 	cursor: pointer;
+}
+
+.mail_header_top {
+	cursor: default;
 }
 
 
@@ -168,7 +192,8 @@ body {
 	padding-left: 0.25em;
 }
 
-.recipient+.recipient::before {
+.recipient+.recipient::before,
+.compose_recipient+.compose_recipient::before {
 	content: ', ';
 }
 
@@ -244,4 +269,27 @@ hr.vertical-hr {
 	border: none;
 	margin-left: 0.5em;
 	margin-right: 0.5em;
+}
+
+#compose_body_textarea {
+	margin: 0px;
+	height: calc(100% - 2em);
+	margin-bottom: -1em;
+	padding-bottom: 10em;
+}
+
+.folder-name:has(+ .unread_count:empty) {
+	font-weight: normal;
+}
+
+.compose_recipient {
+	cursor: pointer;
+}
+
+#compose_recipients_calculated:not(:empty):after {
+	height: 100%;
+	margin-left: 1rem;
+	padding-top: 0.3rem;
+	font-size: 70%;
+	content: '(tap name to remove)';
 }
