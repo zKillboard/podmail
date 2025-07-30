@@ -1,4 +1,4 @@
-const githubhash = "78b4272";
+const githubhash = "edf82f1";
 
 document.addEventListener('DOMContentLoaded', main);
 
