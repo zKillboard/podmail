@@ -105,22 +105,28 @@
 							<div id="mail_body" class="overflow-auto h-100"></div>
 						</div>
 					</div>
-					<div id="compose_container_full" class="overflow-auto h-100 d-flex d-none mb-5">
+					<div id="compose_container_full" class="overflow-auto h-100 d-flex d-none">
 						<div id="compose_container" class="d-flex flex-column h-100 w-100">
 							<div id="compose_options" class="w-100">
 								<span id="btn_send" class="btn" folder_id="1">Send</span>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="compose_recipients" class="w-100">
-								<input name="compose_recipients" type="text" class="w-100" placeholder="Recipients">
+								<input name="compose_recipients" type="text" class="w-100"
+									placeholder="Enter comma delimited recipients names here, they will be parsed and added below.">
+							</div>
+							<div id="compose_recipients_container" class="w-100 d-flex">
+								<span>Recipients:&nbsp;&nbsp;</span>
+								<div id="compose_recipients_calculated" class="w-100 d-flex"></div>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="compose_subject" class="w-100">
 								<input name="compose_subject" type="text" class="w-100" placeholder="Subject">
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
-							<div id="compose_body" class="overflow-auto w-100 h-100"><input name="compose_body"
-									type="text" class="w-100 h-100" placeholder=""></div>
+							<div id="compose_body" class="overflow-auto w-100 h-100"><textarea
+									id="compose_body_textarea" name="compose_body" type="text"
+									class="overflow-auto w-100" placeholder="content here"></textarea></div>
 						</div>
 					</div>
 				</div>
