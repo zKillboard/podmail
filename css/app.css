@@ -18,6 +18,10 @@ body {
 	margin-right: 12px;
 }
 
+#mail_headers_parent {
+	overflow-y: scroll;
+}
+
 .timestamp {
 	padding-right: 1em;
 }
@@ -70,6 +74,10 @@ body {
 	.folder_selected {
 		background-color: #111;
 	}
+
+	.mail_header_top:hover {
+		background-color: black;
+	}
 }
 
 /* no white on white */
@@ -105,6 +113,10 @@ body {
 .folder_label,
 .mail_header {
 	cursor: pointer;
+}
+
+.mail_header_top {
+	cursor: default;
 }
 
 

@@ -26,6 +26,7 @@ async function main() {
 
 	document.getElementById('logout').addEventListener('click', logout);
 	document.getElementById('backToFolder').addEventListener('click', backToFolder);
+	document.getElementById('compose_btn').addEventListener('click', doCompose);
 
 	await pm_fetchFolders();
 	await pm_fetchHeaders();
@@ -56,6 +57,8 @@ function updateRoute(e, route = null) {
 			const new_mail = split.length == 1 ? 1 : split[1];
 			showMail(null, { mail_id: new_mail }, true);
 			break;
+		case 'compose':
+			return doCompose();
 		default:
 			console.log('unknown route');
 			showFolder(null, '1');
@@ -149,15 +152,14 @@ async function showFolder(e, folder_id = null) {
 }
 
 function backToFolder() {
-	console.log('showing folder')
-	showSection('headers_container_full');
 	showFolder(null, current_folder);
 }
 
 let headers_first_load = true;
-let mail_headers_stored = {};
+
 let folders = {};
 async function pm_fetchHeaders() {
+	let mail_headers_stored = {};
 	try {
 		if (headers_first_load) {
 			mail_headers = Array.from(Object.values(JSON.parse(localStorage.getItem('mail_headers'))));
@@ -292,8 +294,8 @@ async function showMail(e, mail, forceShow = false) {
 		`;
 
 		let body = adjustTags(mail.body);
-		Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
-		if (this?.classList) this.classList.add('selected');
+		//Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
+		//if (this?.classList) this.classList.add('selected');
 		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
 
 		mail.mail_id = mail_id;
@@ -471,4 +473,9 @@ function handleEsiIssue() {
 
 function clearEsiIssue() {
 	document.getElementById('esi_issue').classList.add('d-none');
+}
+
+function doCompose(subject = '', body = '', recipients = []) {
+	pushState('/compose');
+	showSection('compose_container_full');
 }
