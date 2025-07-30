@@ -142,13 +142,13 @@ function updateUnreadCounts() {
 	document.title = (total_unread == 0 ? '' : '(' + total_unread + ') ') + 'PodMail';
 }
 
-async function showFolder(e, folder_id = null) {
+async function showFolder(e, folder_id = null, scrollToTop = true) {
 	try {
 		showSection('headers_container_full');
 
 		let style = document.getElementById('current_folder');
 		style.innerText = '';
-		document.getElementById('mail_headers').scrollTo({ top: 0 });
+		if (scrollToTop) document.getElementById('mail_headers').scrollTo({ top: 0 });
 
 		let id = folder_id ?? this.getAttribute('folder_id');
 		style.innerText = `.folder-${id}.showhide {display: block;}`;
@@ -164,7 +164,7 @@ async function showFolder(e, folder_id = null) {
 
 function backToFolder(replaceState = false) {
 	if (replaceState) history.replaceState({}, '', `/folder/${current_folder}`);
-	showFolder(null, current_folder);
+	showFolder(null, current_folder, false);
 }
 
 let headers_first_load = true;
@@ -521,7 +521,7 @@ async function updateComposeRecipients(e) {
 			}
 			if (!matched) unmatched_names.push(value);
 		}
-		//alert('Could not find matches for:\n\n' + unmatched_names.join('\n') + '\n\n(these name(s) have been rejected)');
+		if (unmatched_names.length > 0) alert('Could not find matches for:<br/><br/>' + unmatched_names.join('\n') + '<br/><br/>(these name(s) have been rejected)');
 		document.getElementsByName('compose_recipients')[0].value = '';
 	}
 }
@@ -555,13 +555,13 @@ async function btn_send(e) {
 
 		// Validation first
 		let recips = document.getElementsByClassName('compose_recipient');
-		if (recips.length == 0) return alert('no recipients...');
+		if (recips.length == 0) return alert('You have not added any recipients.');
 
 		let subject = document.getElementsByName('compose_subject')[0].value;
-		if (subject.length == 0) return alert('please fill in the subject...');
+		if (subject.length == 0) return alert('You have not added a subject.');
 
 		let body = document.getElementById('compose_body_textarea').value;
-		if (body.length == 0) return alert('please fill in the message body...');
+		if (body.length == 0) return alert('You have not added any content.');
 
 		let recipients = [];
 		for (const r of recips) {
@@ -585,18 +585,63 @@ async function btn_send(e) {
 			return backToFolder();
 		}
 		alert('there was an error sending your evemail');
-	} catch (err) {
+	} finally {
 		sending_evemail = false;
 	}
 }
 
 async function btn_deleteMail(e) {
+	if (! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
+
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${current_mail_id}`;
 	let res = await doAuthRequest(url, 'DELETE', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' });
 	if (res.status == 204) {
-		document.getElementById(`mail_header_${current_mail_id}`).remove();
+		let mail_header = document.getElementById(`mail_header_${current_mail_id}`)
+		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
+
 		localStorage.removeItem(`mail-${current_mail_id}`);
 		backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
 }
+
+window.confirm = async function (message) {
+	return new Promise(resolve => {
+		const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+		document.querySelector('#confirmModal .modal-body').textContent = message;
+
+		const okBtn = document.getElementById('confirmOk');
+		const cancelBtn = document.getElementById('confirmCancel');
+
+		const cleanup = () => {
+			okBtn.onclick = null;
+			cancelBtn.onclick = null;
+		};
+
+		okBtn.onclick = () => { cleanup(); modal.hide(); resolve(true); };
+		cancelBtn.onclick = () => { cleanup(); modal.hide(); resolve(false); };
+
+		modal.show();
+	});
+};
+
+window.alert = async function (message) {
+	return new Promise(resolve => {
+		const modalEl = document.getElementById('alertModal');
+		const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+		const messageEl = document.getElementById('alertModalMessage');
+		const okButton = document.getElementById('alertModalOk');
+
+		messageEl.innerHTML = message;
+
+		const newButton = okButton.cloneNode(true);
+		okButton.parentNode.replaceChild(newButton, okButton);
+
+		newButton.addEventListener('click', () => {
+			modal.hide();
+			resolve();
+		});
+
+		modal.show();
+	});
+};
