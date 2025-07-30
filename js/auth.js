@@ -12,6 +12,7 @@ const eve_mails_labels = `https://esi.evetech.net/characters/:character_id:/mail
 
 
 const mimetype_form = { 'Content-Type': 'application/x-www-form-urlencoded' };
+const mimetype_json = { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' };
 
 let whoamiinit = localStorage.getItem('whoami');
 let whoami = whoamiinit == null ? null : JSON.parse(whoamiinit);
@@ -25,11 +26,11 @@ async function exec() {
 		case '/auth.html':
 			return doAuth();
 		case '/logout.html':
-			return logout();
+			return auth_logout();
 	}
 }
 
-function logout() {
+function auth_logout() {
 	localStorage.clear();
 	window.location = '/';
 	return false;
