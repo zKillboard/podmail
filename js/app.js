@@ -43,11 +43,9 @@ function pushState(new_route) {
 }
 
 function updateRoute(e, route = null) {
-	console.log(e, route);
 	const path = route ?? window.location.pathname;
-	console.log('Handling route for:', path);
 	const split = path.split('/').filter(Boolean);
-	console.log(split);
+
 	switch (split[0]) {
 		case '':
 		case 'folder':
@@ -156,17 +154,32 @@ function backToFolder() {
 	showFolder(null, current_folder);
 }
 
-let last_highest_mail_id = 0;
-let mail_headers = {};
+let headers_first_load = true;
+let mail_headers_stored = {};
 let folders = {};
 async function pm_fetchHeaders() {
+	try {
+		if (headers_first_load) {
+			mail_headers = Array.from(Object.values(JSON.parse(localStorage.getItem('mail_headers'))));
+			if (mail_headers) {
+				for (const mail of Object.values(mail_headers)) addMail(mail);
+			}
+			headers_first_load = false;
+			setTimeout(pm_fetchHeaders, 1); // load actual headers next
+			return;
+		}
+	} catch (e) {
+		console.log(e);
+	}
+
+	mail_headers_stored = {};
 	let now = Date.now();
 	let total_mails = 0;
 	try {
 		console.log('Fetching evemail headers');
 
 		let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
-		let mail_headers = document.getElementsByClassName('mail_header')
+		let mail_headers = document.getElementsByClassName('mail_header');
 		for (const header of mail_headers) mail_ids.add(header.getAttribute('mail_id'));
 		mail_ids.delete(null); // this is out header row, ignore it
 
@@ -176,14 +189,9 @@ async function pm_fetchHeaders() {
 			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', { Accept: 'application/json' });
 
 			for (const mail of mails) {
-				mail_headers[mail.mail_id] = mail;
-				for (const label_id of mail.labels) {
-					if (folders[label_id] == null) folders[label_id] = {};
-					if (folders[label_id].mail_ids == null) folders[label_id].mail_ids = [];
-					folders[label_id].mail_ids.push(mail.mail_id);
-				}
-				addMailHeader(mail);
+				addMail(mail);
 				mail_ids.delete(`${mail.mail_id}`);
+				mail_headers_stored[mail.mail_id] = mail;
 			}
 			if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
 			total_mails += mails.length;
@@ -191,10 +199,8 @@ async function pm_fetchHeaders() {
 			if (total_mails >= 500) break;
 		} while (mails.length > 0);
 
-		last_highest_mail_id = high_mail_id;
-		localStorage.setItem('mail_headers', JSON.stringify(mail_headers));
+		localStorage.setItem('mail_headers', JSON.stringify(mail_headers_stored));
 		localStorage.setItem('folders', JSON.stringify(folders));
-
 
 		if (mail_ids.size) {
 			// Cleanup removed mails
@@ -211,6 +217,16 @@ async function pm_fetchHeaders() {
 		setTimeout(updateUnreadCounts, 0);
 		setTimeout(pm_fetchHeaders, 61000);
 	}
+}
+
+function addMail(mail) {
+	if (!mail.labels) return;
+	for (const label_id of mail.labels) {
+		if (folders[label_id] == null) folders[label_id] = {};
+		if (folders[label_id].mail_ids == null) folders[label_id].mail_ids = [];
+		folders[label_id].mail_ids.push(mail.mail_id);
+	}
+	addMailHeader(mail);
 }
 
 async function addMailHeader(mail) {
