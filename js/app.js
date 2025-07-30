@@ -109,7 +109,7 @@ async function addFolder(label, mailing_list = false) {
 	lsSet(`name-${id}`, label.name);
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp';
-		else if (label.name == '[Alliance') label.name = 'Alliance';
+		else if (label.name == '[Alliance]') label.name = 'Alliance';
 
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
 		let el_count = createEl('span', '', `folder-${id}-unread`, 'unread_count');
@@ -281,10 +281,10 @@ async function showMail(e, mail, forceShow = false) {
 		localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
 	if (this.getAttribute || forceShow) {
-		showSection('mail_container_full')
+		showSection('mail_container_full');
 
 		document.getElementById('mail_body').innerHTML = '';
-		await sleep(1); // clear the message, let the browser update visuals
+		document.getElementById('mail_body').scrollTo({ top: 0 });
 
 		let from = createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from });
 		let recips = createEl('span', '');
@@ -494,8 +494,9 @@ function doCompose(subject = '', body = '', recipients = []) {
 }
 
 async function updateComposeRecipients(e) {
-	let typing = e.inputType == 'insertText';
-	let val = document.getElementsByName('compose_recipients')[0].value;
+	let composeInput = document.getElementsByName('compose_recipients')[0];
+	let typing = document.activeElement === composeInput;
+	let val = composeInput.value;
 	let unmatched_names = [];
 
 	if (typing == false || val.indexOf(',') >= 0) {
@@ -517,13 +518,11 @@ async function updateComposeRecipients(e) {
 
 function addComposeRecipient(type, info) {
 	if (document.getElementById(`recip_id_${info.id}`)) return true;
-	console.log(type, info);
 	let span;
 	switch (type) {
 		case 'characters':
 			span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient', { recip_id: info.id, recip_type: type });
 			span.addEventListener('click', removeSelf);
-			console.log(span);
 			break;
 	}
 	if (span) {
@@ -565,8 +564,7 @@ async function btn_send(e) {
 			recipients: recipients,
 			body,
 			subject,
-		}
-		console.log(msg);
+		};
 
 		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', { Accept: 'application/json', 'Content-Type': 'Content-Type: application/json' }, JSON.stringify(msg));
 		if (typeof res == 'number' && res > 0) {

@@ -4,6 +4,8 @@ html {
 
 body {
 	font-size: 1rem;
+	background-color: #0a0a0a !important;
+	color: #f8f9fa;
 }
 
 ::-webkit-scrollbar {
@@ -23,85 +25,28 @@ body {
 }
 
 .timestamp {
-	padding-right: 1em;
+	padding-right: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-	body {
-		--bs-body-bg: black;
-		--bs-body-color: white;
-	}
-
-	::-webkit-scrollbar-track {
-		background: #222;
-	}
-
-	::-webkit-scrollbar-thumb {
-		background-color: #555;
-		border-radius: 6px;
-		border: 2px solid #222;
-	}
-
-	a,
-	a:visited {
-		color: yellow;
-	}
-
-	a:hover {
-		color: #e6cc00;
-	}
-
-	/* no black on black */
-	*[style*="color: #000000"] {
-		color: #111111 !important;
-	}
-
-	.btn {
-		background-color: #222;
-		color: white;
-		margin-bottom: 0.3em;
-	}
-
-	a.btn,
-	a.btn:hover,
-	a.btn:visited {
-		color: white;
-	}
-
-	.folder_label:hover,
-	.mail_header:hover,
-	.mail_header.selected,
-	.folder_selected {
-		background-color: #111;
-	}
-
-	.mail_header_top:hover {
-		background-color: black;
-	}
-
-	input,
-	textarea {
-		background-color: black;
-		border: solid 1px whtie;
-		color: white;
-	}
-
-	input::placeholder,
-	textarea::placeholder {
-		color: #888;
-	}
+::-webkit-scrollbar-track {
+	background: #222;
 }
 
-/* no white on white */
-*[style*="color: #ffffff"] {
-	color: #eeeeee !important;
+::-webkit-scrollbar-thumb {
+	background-color: #555;
+	border-radius: 6px;
+	border: 2px solid #222;
 }
 
 #sitelogo,
 #charimg {
-	height: 25px;
-	max-height: 25px;
+	height: 32px;
+	max-height: 32px;
 	margin: 0.25em;
+}
+
+h4 {
+	line-height: 32px;
 }
 
 .capitalize {
@@ -292,4 +237,16 @@ hr.vertical-hr {
 	padding-top: 0.3rem;
 	font-size: 70%;
 	content: '(tap name to remove)';
+}
+
+input,
+textarea {
+	background-color: #1e1e1e;
+	color: #ffffff;
+	border: 1px solid #444;
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: #aaa;
 }
