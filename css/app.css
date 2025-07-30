@@ -257,3 +257,13 @@ hr.vertical-hr {
 	margin-left: 0.5em;
 	margin-right: 0.5em;
 }
+
+input {
+	background-color: black;
+	border: solid 1px whtie;
+	color: white;
+}
+
+input::placeholder {
+	color: white;
+}

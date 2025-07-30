@@ -8,6 +8,9 @@ async function main() {
 	// Check the hash, if they don't match, we need to cache-bust
 	if (githubhash != docgithubhash || githubhash != podmail_version) return window.location = `/?githubhash=${githubhash}`;
 
+	// This is for localhost testing
+	if (githubhash == '') document.getElementById('podmailLink').setAttribute('href', '/?' + Date.now());
+
 	// whoami is defined and handled in auth.js
 	if (whoami == null) {
 		loadReadme('readme');
@@ -20,9 +23,6 @@ async function main() {
 
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
-
-	mail_headers = localStorage.getItem('mail_headers') == null ? {} : JSON.parse(localStorage.getItem('mail_headers'));
-	folders = localStorage.getItem('folders') == null ? {} : JSON.parse(localStorage.getItem('folders'));
 
 	document.getElementById('logout').addEventListener('click', logout);
 	document.getElementById('backToFolder').addEventListener('click', backToFolder);
@@ -156,7 +156,6 @@ function backToFolder() {
 }
 
 let headers_first_load = true;
-
 let folders = {};
 async function pm_fetchHeaders() {
 	let mail_headers_stored = {};
@@ -166,12 +165,12 @@ async function pm_fetchHeaders() {
 			if (mail_headers) {
 				for (const mail of Object.values(mail_headers)) addMail(mail);
 			}
-			headers_first_load = false;
-			setTimeout(pm_fetchHeaders, 1); // load actual headers next
-			return;
+			return setTimeout(pm_fetchHeaders, 1); // load actual headers next
 		}
 	} catch (e) {
 		console.log(e);
+	} finally {
+		headers_first_load = false;
 	}
 
 	mail_headers_stored = {};
@@ -270,10 +269,12 @@ function setDisplayBlock(id, visible) {
 async function showMail(e, mail, forceShow = false) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
-	if (false && mail != null) mail = JSON.parse(mail);
-	else {
+	if (mail != null) {
+		mail = JSON.parse(mail);
+	} else {
+		console.log('Fetching mail', mail_id);
 		mail = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
-		//localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
+		localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
 	if (this.getAttribute || forceShow) {
 		showSection('mail_container_full')
@@ -307,7 +308,7 @@ async function showMail(e, mail, forceShow = false) {
 }
 
 async function pm_updateReadStatus(mail, read = true) {
-	if (mail.is_read == read) return; // no need to change anything
+	if (mail.read == read) return; // no need to change anything
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
