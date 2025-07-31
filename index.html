@@ -112,7 +112,28 @@
 									folder_id="1">Delete</button>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
-							<div id="mail_body" class="overflow-auto h-100"></div>
+							<div id="mail_all" class="h-100 w-100 overflow-auto">
+								<div id="mail_about" class="w-100">
+									<div class="w-100 d-flex flex-wrap">
+										<div>
+											<h4 id="mail_about_subject"></h4>
+										</div>
+										<div class="m-auto"></div>
+										<div id="mail_about_timestamp"></div>
+									</div>
+									<div class="w-100 d-flex flex-wrap">
+										<div class="w-100">From:</div>
+										<div id="mail_about_from" class="w-100"></div>
+									</div>
+									<hr class="m-1" />
+									<div class="w-100 d-flex flex-wrap">
+										<div class="w-100">Recipients:</div>
+										<div id="mail_about_recipients" class="w-100"></div>
+									</div>
+								</div>
+								<hr class="m-1" />
+								<div id="mail_body" class="w-100 h-100"></div>
+							</div>
 						</div>
 					</div>
 					<div id="compose_container_full" class="overflow-auto h-100 d-flex d-none">
@@ -130,9 +151,12 @@
 								<input name="compose_recipients" type="text" class="w-100"
 									placeholder="Enter comma delimited character names here, they will be parsed and added below.">
 							</div>
-							<div id="compose_recipients_container" class="w-100 d-flex">
-								<span>Recipients:&nbsp;&nbsp;</span>
-								<div id="compose_recipients_calculated" class="w-100 d-flex"></div>
+							<div id="compose_recipients_container" class="w-100 d-flex flex-column">
+								<div id="compose_recipients_title" class="w-100">Recipients: <span
+										style="font-size: 70%; font-style: italic; margin-top: 8px;">(tap to
+										remove)</span></span></div>
+								<div id="compose_recipients_calculated" class="w-100 d-flex flex-wrap overflow-auto">
+								</div>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="compose_subject" class="w-100">
@@ -145,8 +169,9 @@
 									class="form-control">
 								</div>
 							</div>
-							<div class="mb-2 d-flex">
+							<div id="compose_final_options" class="mb-2 d-flex">
 								<div class="m-auto"></div>
+								<button type="button" id="btn_reset" class="btn btn-bind btn-warning">Reset</button>
 								<button type="button" id="btn_send" class="btn btn-bind btn-primary">Send</button>
 							</div>
 						</div>
