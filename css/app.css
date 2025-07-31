@@ -237,6 +237,7 @@ hr.vertical-hr {
 
 #compose_body_textarea {
 	margin: 0px;
+	min-height: 300px;
 	height: calc(100% - 1em);
 }
 
@@ -246,30 +247,42 @@ hr.vertical-hr {
 
 .compose_recipient {
 	cursor: pointer;
+	margin-right: 0.75rem;
 }
 
-#compose_recipients_calculated:not(:empty):after {
-	height: 100%;
-	margin-left: 1rem;
-	padding-top: 0.3rem;
-	font-size: 70%;
-	content: '(tap name to remove)';
-}
+
 
 input,
-textarea {
+textarea,
+#compose_body_textarea,
+#compose_body_textarea:focus {
 	background-color: #1e1e1e;
 	color: #ffffff;
 	border: 1px solid #444;
+	padding: 0.25em;
+}
+
+[contenteditable]:focus,
+input:focus,
+textarea:focus,
+button:focus {
+	outline: none;
+	box-shadow: none;
 }
 
 input::placeholder,
-textarea::placeholder {
+textarea::placeholder,
+[contenteditable]:empty::before {
 	color: #aaa;
 }
 
+[contenteditable]:empty::before {
+	content: attr(data-placeholder);
+}
+
 #mail_options .btn:not(:last-of-type),
-#compose_options .btn:not(:last-of-type) {
+#compose_options .btn:not(:last-of-type),
+#compose_final_options .btn:not(:last-of-type) {
 	margin-right: 1rem;
 }
 
@@ -283,4 +296,29 @@ textarea::placeholder {
 
 [contenteditable="true"]::-webkit-scrollbar-thumb:hover {
 	cursor: default;
+}
+
+
+.left-img[style*="--left-img"]::before {
+	content: "";
+	display: inline-block;
+	width: 32px;
+	height: 32px;
+	background-image: var(--left-img);
+	background-size: contain;
+	background-repeat: no-repeat;
+	margin-right: 0.5em;
+	vertical-align: middle;
+}
+
+#compose_recipients_calculated {
+	min-height: 35px;
+	height: 32px;
+}
+
+#compose_recipients_calculated:empty:after {
+	content: 'no recipients selected';
+	font-size: 70%;
+	font-style: italic;
+	padding-top: 8px;
 }

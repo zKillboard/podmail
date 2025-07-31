@@ -1,4 +1,4 @@
-const githubhash = "0a83db3";
+const githubhash = "27bd86a";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -101,7 +101,19 @@ async function doAffiliation() {
 		const aff = await doAuthRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
 		if (aff.length) {
 			whoami.corporation_id = aff[0].corporation_id;
+			whoami.corporation_name = 'Corp ' + aff[0].corporation_id;
 			whoami.alliance_id = aff[0].alliance_id || 0;
+			whoami.alliance_name = 'Alli ' + whoami.alliance_id;
+
+			let res = await doRequest(`https://esi.evetech.net/corporations/${whoami.corporation_id}`);
+			const corp = await res.json();
+			whoami.corporation_name = corp.name;
+
+			if (whoami.alliance_id > 0) {
+				res = await doRequest(`https://esi.evetech.net/alliances/${whoami.alliance_id}`);
+				const alli = await res.json();
+				whoami.alliance_name = alli.name;
+			}
 		}
 	} finally {
 		setTimeout(doAffiliation, 3600000);
@@ -321,22 +333,23 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_body').innerHTML = '';
 		document.getElementById('mail_body').scrollTo({ top: 0 });
 
-		let from = createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from });
-		let recips = createEl('span', '');
-		for (let recip of mail.recipients) {
-			recips.appendChild(createEl('span', localStorage.getItem(`name-${recip.recipient_id}`), null, `recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id }));
-		}
-		let header = `
-			Subject: ${mail.subject}<br/>
-			From: ${from.innerHTML}<br/>
-			Sent: ${mail.timestamp}<br/>
-			Recipients: ${recips.innerHTML}
-		`;
+		document.getElementById('mail_about_subject').innerHTML = mail.subject;
+		document.getElementById('mail_about_timestamp').innerHTML = mail.timestamp.replace('T', ' ').replace(':00Z', '')
 
-		let body = adjustTags(mail.body);
-		//Array.from(document.getElementsByClassName('selected')).forEach(el => { el.classList.remove('selected') });
-		//if (this?.classList) this.classList.add('selected');
-		document.getElementById('mail_body').innerHTML = `${header}<hr/>${body}`;
+		// <span id="recip_id_91565688" class="compose_recipient left-img" recip_id="91565688" recip_type="character" style="order: 1117110107; --left-img: url('https://images.evetech.net/characters/91565688/portrait?size=32');">Unknown ID 91565688</span>
+		let span = createEl('span', localStorage.getItem(`name-${mail.from}`) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
+		applyLeftImage(span, 'character', mail.from);
+		document.getElementById('mail_about_from').innerHTML = '';
+		document.getElementById('mail_about_from').appendChild(span);
+
+		document.getElementById('mail_about_recipients').innerHTML = '';
+		for (let recip of mail.recipients) {
+			span = createEl('span', localStorage.getItem(`name-${recip.recipient_id}`), null, `left-img recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			applyLeftImage(span, recip.recipient_type, recip.recipient_id, recip.recipient_id, recip.recipient_id);
+			document.getElementById('mail_about_recipients').appendChild(span);
+		}
+
+		document.getElementById('mail_body').innerHTML = adjustTags(mail.body.trim());
 
 		mail.mail_id = mail_id;
 		pm_updateReadStatus(mail);
@@ -582,8 +595,9 @@ async function updateComposeRecipients(e) {
 			let matched = false;
 			let result = await fetchIDFromName(value);
 			for (const [type, matches] of Object.entries(result)) {
+				if (type != 'characters') continue;
 				for (const match of matches)
-					matched |= addComposeRecipient(type, match);
+					matched |= addComposeRecipient('character', match);
 			}
 			if (!matched) unmatched_names.push(value);
 		}
@@ -594,11 +608,11 @@ async function updateComposeRecipients(e) {
 
 
 function btn_addCorp() {
-	addComposeRecipient('corporation', { id: whoami.corporation_id, name: 'Corp' });
+	addComposeRecipient('corporation', { id: whoami.corporation_id, name: whoami.corporation_name });
 }
 
 function btn_addAlli() {
-	addComposeRecipient('alliance', { id: whoami.corporation_id, name: 'Alliance' });
+	addComposeRecipient('alliance', { id: whoami.alliance_id, name: whoami.alliance_name });
 }
 
 function btn_addML() {
@@ -606,9 +620,10 @@ function btn_addML() {
 }
 
 function addComposeRecipient(type, info) {
+	console.log(type);
 	if (document.getElementById(`recip_id_${info.id}`)) return true;
-	let span;
-	span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient', { recip_id: info.id, recip_type: type });
+	let span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient left-img', { recip_id: info.id, recip_type: type });
+	applyLeftImage(span, type, info.id, whoami.corporation_id, whoami.alliance_id);
 	span.addEventListener('click', removeSelf);
 
 	if (span) {
@@ -618,8 +633,23 @@ function addComposeRecipient(type, info) {
 	return false;
 }
 
+function applyLeftImage(span, type, character_id, corporation_id, alliance_id) {
+	span.style.order = getStrOrder(span.innerText);
+	if (type == 'character') span.style.setProperty('--left-img', `url('https://images.evetech.net/characters/${character_id}/portrait?size=32')`);
+	else if (type == 'corporation') span.style.setProperty('--left-img', `url('https://images.evetech.net/corporations/${corporation_id}/logo?size=32')`);
+	else if (type == 'alliance') span.style.setProperty('--left-img', `url('https://images.evetech.net/alliances/${alliance_id}/logo?size=32')`);
+	else if (type == 'mailing_list') span.style.setProperty('--left-img', `url('/img/mailing_list.png')`);
+	else if (type == 'mailing_list') span.style.setProperty('--left-img', `url('/img/qyuestion.png')`);
+}
+
 function removeSelf() {
 	this.remove();
+}
+
+function btn_reset(e) {
+	document.getElementsByName('compose_subject')[0].value = '';
+	document.getElementById('compose_body_textarea').innerHTML = '';
+	document.getElementById('compose_recipients_calculated').innerHTML = '';
 }
 
 let sending_evemail = false;
@@ -727,3 +757,7 @@ window.alert = async function (message) {
 		modal.show();
 	});
 };
+
+function getStrOrder(str) {
+	return '1' + str.toLowerCase().slice(0, 3).split('').map(c => c.charCodeAt(0).toString().padStart(3, '0')).join('');
+}
