@@ -1,4 +1,4 @@
-const githubhash = "ddf6065";
+const githubhash = "81ff41f";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -24,6 +24,7 @@ async function main() {
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
 
+	setTimeout(doAffiliation, 0);
 	await pm_fetchFolders();
 	pm_fetchHeaders();
 
@@ -94,12 +95,16 @@ function fail(res) {
 	console.error(res);
 }
 
-function doAffiliation() {
+async function doAffiliation() {
 	try {
 		if (whoami == null) return;
-
+		const aff = await doAuthRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
+		if (aff.length) {
+			whoami.corporation_id = aff[0].corporation_id;
+			whoami.alliance_id = aff[0].alliance_id || 0;
+		}
 	} finally {
-		setTimeout(doAffiliation, 300);
+		setTimeout(doAffiliation, 3600000);
 	}
 }
 
@@ -123,7 +128,7 @@ async function addFolder(label, mailing_list = false) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
-	lsSet(`name-${id}`, label.name);
+	localStorage.setItem(`name-${id}`, label.name);
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp';
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
@@ -299,6 +304,7 @@ function setDisplayBlock(id, visible) {
 }
 
 let current_mail_id = -1;
+let current_mail = null;
 async function showMail(e, mail, forceShow = false) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
 	mail = localStorage.getItem(`mail-${mail_id}`);
@@ -338,6 +344,7 @@ async function showMail(e, mail, forceShow = false) {
 
 		pushState(`/mail/${mail_id}`);
 		current_mail_id = mail_id;
+		current_mail = mail;
 	}
 }
 
@@ -520,7 +527,44 @@ function clearEsiIssue() {
 	document.getElementById('esi_issue').classList.add('d-none');
 }
 
+function btn_reply() {
+	btn_replyAll(e, false);
+}
+
+function btn_replyAll(e, all_recips = true) {
+	let recipients = [{ type: 'character', info: { id: current_mail.from, name: localStorage.getItem(`name-${current_mail.from}`) || 'Unknown Name' } }];
+
+	console.log(current_mail)
+	if (all_recips) {
+		for (const recip of current_mail.recipients) {
+			if (recip.recipient_id != whoami.character_id) { // don't include ourselves
+				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: localStorage.getItem(`name-${recip.recipient_id}`) || 'Unknown Name' } });
+			}
+		}
+		console.log(current_mail);
+	}
+
+	btn_compose('Re: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, recipients);
+}
+
 function btn_compose(subject = '', body = '', recipients = []) {
+	document.getElementById('btn_addAlli').disabled = (whoami.alliance_id == 0);
+	document.getElementById('btn_group_ml').innerHTML = '';
+	for (const [id, label] of Object.entries(labels)) {
+		if (label.esi.mailing_list_id > 0) {
+			let btn = createEl('button', label.esi.name, null, 'btn btn-info', { type: 'button', ml_id: label.esi.mailing_list_id }, { click: btn_addML });
+			document.getElementById('btn_group_ml').appendChild(btn);
+		}
+	}
+
+	if (subject.length > 0) document.getElementsByName('compose_subject')[0].value = subject;
+	if (body.length > 0) document.getElementById('compose_body_textarea').value = body;
+
+	if (recipients.length > 0) {
+		document.getElementById('compose_recipients_calculated').innerHTML = '';
+		for (const recip of recipients) addComposeRecipient(recip.type, recip.info);
+	}
+
 	pushState('/compose');
 	showSection('compose_container_full');
 }
@@ -548,15 +592,25 @@ async function updateComposeRecipients(e) {
 	}
 }
 
+
+function btn_addCorp() {
+	addComposeRecipient('corporation', { id: whoami.corporation_id, name: 'Corp' });
+}
+
+function btn_addAlli() {
+	addComposeRecipient('alliance', { id: whoami.corporation_id, name: 'Alliance' });
+}
+
+function btn_addML() {
+	addComposeRecipient('mailing_list', { id: this.getAttribute('ml_id'), name: this.innerText });
+}
+
 function addComposeRecipient(type, info) {
 	if (document.getElementById(`recip_id_${info.id}`)) return true;
 	let span;
-	switch (type) {
-		case 'characters':
-			span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient', { recip_id: info.id, recip_type: type });
-			span.addEventListener('click', removeSelf);
-			break;
-	}
+	span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient', { recip_id: info.id, recip_type: type });
+	span.addEventListener('click', removeSelf);
+
 	if (span) {
 		document.getElementById('compose_recipients_calculated').appendChild(span);
 		return true;
@@ -592,11 +646,13 @@ async function btn_send(e) {
 
 		// OK validation is done
 		let msg = {
-			approved_cost: 0,
+			approved_cost: 10001,
 			recipients: recipients,
 			body,
 			subject,
 		};
+
+		console.log('Sending eve mail', msg);
 
 		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
 		if (typeof res == 'number' && res > 0) {
@@ -606,7 +662,8 @@ async function btn_send(e) {
 			document.getElementById('compose_body_textarea').value = '';
 			return btn_backToFolder();
 		}
-		alert('there was an error sending your evemail');
+		console.log(res);
+		alert('There was an error sending your evemail' + (res.error ? ':<br/><br/>' + res.error : ''));
 	} finally {
 		sending_evemail = false;
 	}
@@ -626,6 +683,7 @@ async function btn_deleteMail(e) {
 	}
 	else alert('Error Code: ' + res.status);
 }
+
 
 window.confirm = async function (message) {
 	return new Promise(resolve => {

@@ -1,11 +1,22 @@
+* {
+	--podmail_bg_color: #0a0a0a;
+	--podmail_bg_hover: #1f1f1f;
+}
+
 html {
 	font-size: 14px;
 }
 
 body {
 	font-size: 1rem;
-	background-color: #0a0a0a !important;
-	color: #f8f9fa;
+	background-color: var(--podmail_bg_color) !important;
+}
+
+#mail_body a,
+#mail_body a:active,
+#mail_body a:hover,
+#mail_body a:visited {
+	color: #ffff00;
 }
 
 ::-webkit-scrollbar {
@@ -70,6 +81,15 @@ h4 {
 .folder_label,
 .mail_header {
 	cursor: pointer;
+	border: solid 1px transparent;
+	background-color: inherit;
+}
+
+.folder_selected,
+.folder_label:hover,
+.mail_header:hover {
+	background: var(--podmail_bg_hover);
+	transition: filter 0.2s ease;
 }
 
 .mail_header_top {
@@ -218,9 +238,7 @@ hr.vertical-hr {
 
 #compose_body_textarea {
 	margin: 0px;
-	height: calc(100% - 2em);
-	margin-bottom: -1em;
-	padding-bottom: 10em;
+	height: calc(100% - 1em);
 }
 
 .folder-name:has(+ .unread_count:empty) {
@@ -251,6 +269,15 @@ textarea::placeholder {
 	color: #aaa;
 }
 
-.modal.fade .modal-dialog {
-	transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+#mail_options .btn:not(:last-of-type),
+#compose_options .btn:not(:last-of-type) {
+	margin-right: 1rem;
+}
+
+#btn_backToFolder {
+	margin-right: 2rem;
+}
+
+#compose_options .btn:before {
+	content: '+ ';
 }
