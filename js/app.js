@@ -558,7 +558,7 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	}
 
 	if (subject.length > 0) document.getElementsByName('compose_subject')[0].value = subject;
-	if (body.length > 0) document.getElementById('compose_body_textarea').value = body;
+	if (body.length > 0) document.getElementById('compose_body_textarea').innerHTML = adjustTags(body);
 
 	if (recipients.length > 0) {
 		document.getElementById('compose_recipients_calculated').innerHTML = '';
@@ -636,7 +636,7 @@ async function btn_send(e) {
 		let subject = document.getElementsByName('compose_subject')[0].value;
 		if (subject.length == 0) return alert('You have not added a subject.');
 
-		let body = document.getElementById('compose_body_textarea').value;
+		let body = document.getElementById('compose_body_textarea').innerHTML;
 		if (body.length == 0) return alert('You have not added any content.');
 
 		let recipients = [];
@@ -652,7 +652,8 @@ async function btn_send(e) {
 			subject,
 		};
 
-		console.log('Sending eve mail', msg);
+		console.log('Sending eve mail')
+		console.log(msg);
 
 		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
 		if (typeof res == 'number' && res > 0) {
