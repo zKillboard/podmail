@@ -98,6 +98,7 @@ h4 {
 
 .mail_header span.from,
 .mail_header span.timestamp {
+	min-width: 11em;
 	width: 11em;
 }
 
@@ -249,8 +250,6 @@ hr.vertical-hr {
 	cursor: pointer;
 	margin-right: 0.75rem;
 }
-
-
 
 input,
 textarea,

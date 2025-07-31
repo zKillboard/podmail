@@ -358,6 +358,9 @@ async function showMail(e, mail, forceShow = false) {
 		pushState(`/mail/${mail_id}`);
 		current_mail_id = mail_id;
 		current_mail = mail;
+		setTimeout(loadNames, 1);
+
+		document.querySelectorAll('#mail_body').forEach(adjustTextContrast);
 	}
 }
 
@@ -414,14 +417,11 @@ async function loadNames() {
 		for (const el of els) {
 			let from_id = parseInt(el.getAttribute('from_id'));
 
-			if (el.innerHTML != null && el.innerHTML.length > 0) {
-				el.classList.remove('load_name');
-			}
-			else if (localStorage.getItem(`name-${from_id}`) != null) {
+			let saved_name = localStorage.getItem(`name-${from_id}`);
+			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
 				el.innerHTML = localStorage.getItem(`name-${from_id}`);
 				el.classList.remove('load_name');
-			}
-			else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
+			} else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
 		await fetchNames(fetch_names);
 	} finally {
@@ -432,21 +432,38 @@ async function loadNames() {
 async function fetchNames(fetch_names) {
 	try {
 		if (fetch_names.length > 0) {
-			console.log('Fetching', fetch_names.length, 'names');
-			let names = await doAuthRequest('https://esi.evetech.net/universe/names', 'POST', mimetype_json, JSON.stringify(fetch_names))
+			console.log('Fetching', fetch_names.length, 'names', fetch_names);
+			let names = await doRequest('https://esi.evetech.net/universe/names', 'POST', mimetype_json, JSON.stringify(fetch_names))
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {
-		await sleep(2500);
+		await sleep(1000);
 		if (fetch_names.length > 1) {
 			const middle = Math.ceil(fetch_names.length / 2);
 			await fetchNames(fetch_names.slice(0, middle));
 			await fetchNames(fetch_names.slice(middle));
 		} else {
 			console.log('error fetching name for', fetch_names[0]);
-			localStorage.setItem('name-' + fetch_names[0], 'Unknown ID ' + fetch_names[0]);
+
+			// well ok... let's try loading the character's public data
+			let name;
+			try {
+				name = await getPublicCharacterName(fetch_names[0]);
+				if (! typeof name == 'string') name = 'Unknown ID ' + fetch_names[0];
+			} catch (e) {
+				name = 'Unknown ID ' + fetch_names[0];
+			}
+			applyNameToId({
+				"category": "character", "id": fetch_names[0], "name": name
+			});
 		}
 	}
+}
+
+async function getPublicCharacterName(character_id) {
+	let res = await doRequest(`https://esi.evetech.net/characters/${character_id}`);
+	let char = await res.json();
+	return char.name;
 }
 
 async function fetchIDFromName(the_name) {
@@ -547,15 +564,14 @@ function btn_reply(e) {
 function btn_replyAll(e, all_recips = true) {
 	let recipients = [{ type: 'character', info: { id: current_mail.from, name: localStorage.getItem(`name-${current_mail.from}`) || 'Unknown Name' } }];
 
-	console.log(current_mail)
 	if (all_recips) {
 		for (const recip of current_mail.recipients) {
 			if (recip.recipient_id != whoami.character_id) { // don't include ourselves
 				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: localStorage.getItem(`name-${recip.recipient_id}`) || 'Unknown Name' } });
 			}
 		}
-		console.log(current_mail);
 	}
+	console.log(recipients);
 
 	btn_compose('Re: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, recipients);
 }
@@ -620,9 +636,8 @@ function btn_addML() {
 }
 
 function addComposeRecipient(type, info) {
-	console.log(type);
-	if (document.getElementById(`recip_id_${info.id}`)) return true;
-	let span = createEl('span', info.name, `recip_id_${info.id}`, 'compose_recipient left-img', { recip_id: info.id, recip_type: type });
+	if (document.getElementById(`#compose_recipients_calculated .recip_id_${info.id}`)) return true;
+	let span = createEl('span', info.name, null, 'recip_id_${info.id} compose_recipient left-img', { recip_id: info.id, recip_type: type });
 	applyLeftImage(span, type, info.id, whoami.corporation_id, whoami.alliance_id);
 	span.addEventListener('click', removeSelf);
 
@@ -760,4 +775,45 @@ window.alert = async function (message) {
 
 function getStrOrder(str) {
 	return '1' + str.toLowerCase().slice(0, 3).split('').map(c => c.charCodeAt(0).toString().padStart(3, '0')).join('');
+}
+
+function getLuminance(r, g, b) {
+	const a = [r, g, b].map(v => {
+		v /= 255;
+		return v <= 0.03928
+			? v / 12.92
+			: Math.pow((v + 0.055) / 1.055, 2.4);
+	});
+	return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+}
+
+function getContrast(rgb1, rgb2) {
+	const L1 = getLuminance(...rgb1);
+	const L2 = getLuminance(...rgb2);
+	return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+}
+
+function parseRGB(str) {
+	const match = str.match(/\d+/g);
+	return match ? match.map(Number) : [0, 0, 0];
+}
+
+function adjustTextContrast(el, includeChildren = true) {
+	const style = getComputedStyle(el);
+	const fg = parseRGB(style.color);
+	const bg = parseRGB(style.backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(el.parentElement).backgroundColor : style.backgroundColor);
+
+	let contrast = getContrast(fg, bg);
+
+	// Lighten text until contrast is at least 4.5:1
+	let [r, g, b] = fg;
+	while (contrast < 4.5 && (r < 255 || g < 255 || b < 255)) {
+		r = Math.min(255, r + 10);
+		g = Math.min(255, g + 10);
+		b = Math.min(255, b + 10);
+		contrast = getContrast([r, g, b], bg);
+	}
+
+	el.style.color = `rgb(${r}, ${g}, ${b})`;
+	if (includeChildren) Array.from(el.children).forEach(adjustTextContrast);
 }
