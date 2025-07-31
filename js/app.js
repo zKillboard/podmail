@@ -527,7 +527,7 @@ function clearEsiIssue() {
 	document.getElementById('esi_issue').classList.add('d-none');
 }
 
-function btn_reply() {
+function btn_reply(e) {
 	btn_replyAll(e, false);
 }
 
