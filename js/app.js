@@ -1,4 +1,4 @@
-const githubhash = "ca891b3";
+const githubhash = "7713cfe";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -527,7 +527,7 @@ function clearEsiIssue() {
 	document.getElementById('esi_issue').classList.add('d-none');
 }
 
-function btn_reply() {
+function btn_reply(e) {
 	btn_replyAll(e, false);
 }
 
