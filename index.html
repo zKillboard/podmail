@@ -45,12 +45,13 @@
 								title="PodMail"></a></span><span>
 						<h4>PodMail <small>β</small></h4>
 					</span>
-					<span class="m-auto"></span><span class="d-block d-sm-none btn btn-default btn-sm inverse"
-						id="btn_mails">View PodMails =&gt;</span>
+					<span class="m-auto"></span><button type="button"
+						class="d-block d-sm-none btn btn-default btn-sm inverse" id="btn_mails">View PodMails
+						=&gt;</button>
 				</div>
 				<div class="d-flex flex-column h-100">
 					<dvi id="compose_btn_parent" class="m-2">
-						<span id="btn_compose" class="btn btn-bind btn-primary w-100">Compose</span>
+						<button type="button" id="btn_compose" class="btn btn-bind btn-primary w-100">Compose</button>
 					</dvi>
 					<div id="folders" class="flex-fill"></div>
 					<hr />
@@ -70,8 +71,8 @@
 				<div class="d-flex flex-column vh-100">
 					<div class="">
 						<div class="d-flex">
-							<span class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse" id="btnsearch">&lt;=
-								Folders</span>
+							<button type="button" class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse"
+								id="btnsearch">&lt;= Folders</button>
 							<h4>
 								<img class="d-inline float-start" id="charimg">
 								<h4 id="charname"></h4>
@@ -101,10 +102,15 @@
 						<div id="mail_options">
 						</div>
 						<div id="mail_container" class="d-flex flex-column h-100 w-100">
-							<div id="mail_about" class="d-flex flex-row">
-								<span id="btn_backToFolder" class="btn btn-bind btn-primary" folder_id="1">Back</span>
-								<hr class="vertical-hr" />
-								<span id="btn_deleteMail" class="btn btn-bind btn-danger" folder_id="1">Delete</span>
+							<div id="mail_options" class="d-flex flex-row w-100">
+								<button type="button" id="btn_backToFolder" class="btn btn-bind btn-primary"
+									folder_id="1">Back</button>
+								<button type="button" id="btn_reply" class="btn btn-bind btn-primary">Reply</button>
+								<button type="button" id="btn_replyAll" class="btn btn-bind btn-primary">Reply
+									All</button>
+								<div class="m-auto"></div>
+								<button type="button" id="btn_deleteMail" class="btn btn-bind btn-danger"
+									folder_id="1">Delete</button>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="mail_body" class="overflow-auto h-100"></div>
@@ -113,16 +119,17 @@
 					<div id="compose_container_full" class="overflow-auto h-100 d-flex d-none">
 						<div id="compose_container" class="d-flex flex-column h-100 w-100">
 							<div id="compose_options" class="w-100 d-flex ">
-								<span id="btn_send" class="btn btn-bind btn-primary">Send</span>
-								<hr class="vertical-hr">
-								<span id="btn_addCorp" class="btn btn-bind btn-success">Add Corp</span>
-								<hr class="vertical-hr">
-								<span id="btn_addAlli" class="btn btn-bind btn-success">Add Alli</span>
+								<button type="button" id="btn_addCorp" class="btn btn-bind btn-success">Corp</button>
+								<button type="button" id="btn_addAlli" class="btn btn-bind btn-success">
+									Alliance</button>
+								<div class="m-auto"></div>
+								<div id="btn_group_ml">
+								</div>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="compose_recipients" class="w-100">
 								<input name="compose_recipients" type="text" class="w-100"
-									placeholder="Enter comma delimited recipients names here, they will be parsed and added below.">
+									placeholder="Enter comma delimited character names here, they will be parsed and added below.">
 							</div>
 							<div id="compose_recipients_container" class="w-100 d-flex">
 								<span>Recipients:&nbsp;&nbsp;</span>
@@ -136,6 +143,10 @@
 							<div id="compose_body" class="overflow-auto w-100 h-100"><textarea
 									id="compose_body_textarea" name="compose_body" type="text"
 									class="overflow-auto w-100" placeholder="content here"></textarea></div>
+							<div class="mb-2 d-flex">
+								<div class="m-auto"></div>
+								<button type="button" id="btn_send" class="btn btn-bind btn-primary">Send</button>
+							</div>
 						</div>
 					</div>
 				</div>
