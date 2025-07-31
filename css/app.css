@@ -53,7 +53,7 @@ body {
 #charimg {
 	height: 32px;
 	max-height: 32px;
-	margin: 0.25em;
+	margin: 0.25rem;
 }
 
 h4 {
@@ -96,14 +96,13 @@ h4 {
 	cursor: default;
 }
 
-
-.mail_header span {
-	min-width: 10em;
-	padding-left: 1em;
+.mail_header span.from,
+.mail_header span.timestamp {
+	width: 11em;
 }
 
-.subject {
-	width: 100%;
+.mail_header span.from {
+	padding-right: 0.5em;
 }
 
 .showhide {
@@ -280,4 +279,8 @@ textarea::placeholder {
 
 #compose_options .btn:before {
 	content: '+ ';
+}
+
+[contenteditable="true"]::-webkit-scrollbar-thumb:hover {
+	cursor: default;
 }

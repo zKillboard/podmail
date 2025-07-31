@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="html" githubhash="81ff41f" data-bs-theme="dark">
+<html lang="en" id="html" githubhash="ca891b3" data-bs-theme="dark">
 
 <head>
 	<title>PodMail</title>
@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-	<link rel="stylesheet" href="/css/app.css?v=81ff41f">
+	<link rel="stylesheet" href="/css/app.css?v=ca891b3">
 	<style id="current_folder">
 		.folder-1.showhide {
 			display: block;
@@ -45,9 +45,8 @@
 								title="PodMail"></a></span><span>
 						<h4>PodMail <small>β</small></h4>
 					</span>
-					<span class="m-auto"></span><button type="button"
-						class="d-block d-sm-none btn btn-default btn-sm inverse" id="btn_mails">View PodMails
-						=&gt;</button>
+					<button type="button" class="d-block d-sm-none btn btn-default btn-sm inverse" id="btn_mails">View
+						PodMails =&gt;</button>
 				</div>
 				<div class="d-flex flex-column h-100">
 					<dvi id="compose_btn_parent" class="m-2">
@@ -88,7 +87,7 @@
 					</div>
 					<div id='headers_container_full' class="overflow-auto h-100 d-flex flex-column mb-2">
 						<div class="mail_header mail_header_top d-flex">
-							<span class="">Sender</span>
+							<span class="from">Sender</span>
 							<span class="subject flex-fill">Subject</span>
 							<span id="mail_header_timestamp" class="timestamp text-end">Timestamp</span>
 						</div>
@@ -140,9 +139,12 @@
 								<input name="compose_subject" type="text" class="w-100" placeholder="Subject">
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
-							<div id="compose_body" class="overflow-auto w-100 h-100"><textarea
-									id="compose_body_textarea" name="compose_body" type="text"
-									class="overflow-auto w-100" placeholder="content here"></textarea></div>
+							<div id="compose_body" class="overflow-auto w-100 h-100">
+								<div id="compose_body_textarea" name="compose_body" type="text"
+									class="overflow-auto w-100" placeholder="content here" contenteditable="true"
+									class="form-control">
+								</div>
+							</div>
 							<div class="mb-2 d-flex">
 								<div class="m-auto"></div>
 								<button type="button" id="btn_send" class="btn btn-bind btn-primary">Send</button>
@@ -185,8 +187,8 @@
 	<script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
 		crossorigin="anonymous"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=81ff41f"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=81ff41f"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=ca891b3"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=ca891b3"></script>
 </body>
 
 </html>
