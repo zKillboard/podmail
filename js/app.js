@@ -1,4 +1,4 @@
-const githubhash = "7713cfe";
+const githubhash = "0a83db3";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -159,7 +159,7 @@ function updateUnreadCounts() {
 		if (unread == 0) unread = '';
 		document.getElementById(`folder-${folder_id}-unread`).innerText = unread;
 	}
-	document.title = (total_unread == 0 ? '' : '(' + total_unread + ') ') + 'PodMail';
+	document.title = (total_unread == 0 ? '' : '(' + total_unread + ') 🔴 ') + 'PodMail';
 }
 
 async function showFolder(e, folder_id = null, scrollToTop = true) {
