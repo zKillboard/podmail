@@ -192,7 +192,9 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 		document.getElementById(`folder_${id}`).classList.add('folder_selected');
 		pushState(`/folder/${id}`);
 		current_folder = id;
+
 		checkMulti();
+		btn_viewRight();
 	} catch (e) {
 		console.log(e);
 	}
@@ -433,6 +435,7 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('btn_markReadStatus').dataset.read = true;
 
 		checkContrast(document.getElementById('mail_body'));
+		btn_viewRight();
 	}
 }
 
@@ -696,6 +699,7 @@ function btn_compose(subject = '', body = '', recipients = []) {
 
 	pushState('/compose');
 	showSection('compose_container_full');
+	btn_viewRight();
 }
 
 async function updateComposeRecipients(e) {
@@ -931,4 +935,25 @@ function adjustTextContrast(el) {
 
 	el.style.color = `rgb(${r}, ${g}, ${b})`;
 	Array.from(el.children).forEach(adjustTextContrast);
+}
+
+function panel_view(el_id, visible) {
+	const el = document.getElementById(el_id);
+	if (visible) el.classList.remove('xs-hideit');
+	else el.classList.add('xs-hideit');
+}
+
+function btn_viewRight() {
+	console.log('showing rightpanel')
+	panel_view('leftpanel', false);
+	panel_view('rightpanel', true);
+}
+
+function btn_viewLeft() {
+	// if we're viewing an evemail, just go back to the folder
+	if (!document.getElementById('mail_container_full').classList.contains('d-none')) return btn_backToFolder();
+
+	console.log('showing leftpanel')
+	panel_view('leftpanel', true);
+	panel_view('rightpanel', false);
 }

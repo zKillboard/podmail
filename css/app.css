@@ -10,6 +10,11 @@ html {
 body {
 	font-size: 1rem;
 	background-color: var(--podmail_bg_color) !important;
+
+	word-break: break-word;
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	white-space: normal;
 }
 
 #mail_body a,
@@ -130,10 +135,42 @@ h4 {
 	flex-flow: column;
 }
 
-@media (max-width: 575px) {
+@media (max-width: 600px) {
+	body {
+		width: 100% !important;
+		max-width: 100% !important;
+	}
+
+	.overflow-auto {
+		overflow: visible !important;
+	}
+
+	.mail_header.d-flex {
+		flex-direction: column;
+		border-bottom: solid 1px #ccc;
+		padding-bottom: 1rem;
+	}
+
+	.mail_header span {
+		text-align: left !important;
+	}
+
 	.xs-hideit {
-		display: none;
+		display: none !important;
 		transition: display 1s linear;
+	}
+
+	.xs-showit {
+		display: block !important;
+	}
+
+	#leftpanel,
+	#rightpanel {
+		width: 100% !important;
+	}
+
+	#mail_container_full {
+		word-break: break-all;
 	}
 }
 
