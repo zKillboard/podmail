@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="html" githubhash="5e910c9" data-bs-theme="dark">
+<html lang="en" id="html" githubhash="1aecd81" data-bs-theme="dark">
 
 <head>
 	<title>PodMail</title>
@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-	<link rel="stylesheet" href="/css/app.css?v=5e910c9">
+	<link rel="stylesheet" href="/css/app.css?v=1aecd81">
 	<style id="current_folder">
 		.folder-1.showhide {
 			display: block;
@@ -45,9 +45,11 @@
 								title="PodMail"></a></span><span>
 						<h4>PodMail <small>β</small></h4>
 					</span>
-					<button type="button" class="d-block d-sm-none btn btn-default btn-sm inverse" id="btn_mails">View
-						PodMails =&gt;</button>
+					<div class="m-auto"></div>
+					<button type="button" class="d-block d-sm-none btn btn-primary btn-sm btn-bind"
+						id="btn_viewRight">⟶</button>
 				</div>
+				<hr class="xs-showit d-none" />
 				<div class="d-flex flex-column h-100">
 					<dvi id="compose_btn_parent" class="m-2">
 						<button type="button" id="btn_compose" class="btn btn-bind btn-primary w-100">Compose</button>
@@ -65,13 +67,13 @@
 					</div>
 				</div>
 			</div>
-			<hr class="vertical-hr">
-			<div class="flex-fill" id="messages_container">
+			<hr class="xs-hideit vertical-hr">
+			<div class="flex-fill" id="rightpanel">
 				<div class="d-flex flex-column vh-100">
 					<div class="">
 						<div class="d-flex">
-							<button type="button" class="d-block d-sm-none btn btn-default btn-sm mr-3 inverse"
-								id="btnsearch">&lt;= Folders</button>
+							<button type="button" class="d-block d-sm-none btn btn-primary btn-sm btn-bind mr-3"
+								id="btn_viewLeft">⟵</button>
 							<h4>
 								<img class="d-inline float-start" id="charimg">
 								<h4 id="charname"></h4>
@@ -85,6 +87,7 @@
 							</span>
 						</div>
 					</div>
+					<hr class="xs-showit d-none" />
 					<div id='headers_container_full' class="overflow-auto h-100 d-flex flex-column mb-2">
 						<div id="multi_mail_options" class="d-flex flex-row w-100">
 							<div class="m-auto"></div>
@@ -93,7 +96,7 @@
 							<button type="button" id="btn_multi_deleteMail" class="btn btn-bind btn-danger"
 								disabled>Delete</button>
 						</div>
-						<div class="mail_header mail_header_top d-flex">
+						<div class="mail_header mail_header_top d-flex xs-hideit">
 							<span id="span-chk" class="span_chk form-check" mail_id="399254359">
 								<input id="mail_headers_checkbox" class="mail_checkbox form_check_input"
 									type="checkbox">
@@ -102,7 +105,8 @@
 							<span class="subject flex-fill">Subject</span>
 							<span id="mail_header_timestamp" class="timestamp text-end">Timestamp</span>
 						</div>
-						<hr class="m-0" />
+						<hr class="xs-showit" />
+						<hr class="m-0 xs-hideit" />
 						<div id="mail_headers_parent" class="h-100">
 							<div id="mail_headers" class="flex-fill d-flex flex-column-reverse">
 							</div>
@@ -113,7 +117,7 @@
 						</div>
 						<div id="mail_container" class="d-flex flex-column h-100 w-100">
 							<div id="mail_options" class="d-flex flex-row w-100">
-								<button type="button" id="btn_backToFolder" class="btn btn-bind btn-primary"
+								<button type="button" id="btn_backToFolder" class="xs-hideit btn btn-bind btn-primary"
 									folder_id="1">Back</button>
 								<button type="button" id="btn_reply" class="btn btn-bind btn-primary">Reply</button>
 								<button type="button" id="btn_replyAll" class="btn btn-bind btn-primary">Reply
@@ -228,8 +232,8 @@
 	<script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
 		crossorigin="anonymous"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=5e910c9"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=5e910c9"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=1aecd81"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=1aecd81"></script>
 </body>
 
 </html>
