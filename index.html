@@ -86,7 +86,18 @@
 						</div>
 					</div>
 					<div id='headers_container_full' class="overflow-auto h-100 d-flex flex-column mb-2">
+						<div id="multi_mail_options" class="d-flex flex-row w-100">
+							<div class="m-auto"></div>
+							<button type="button" id="btn_multi_markReadStatus" class="btn btn-bind btn-info"
+								data-read="true" disabled>Mark </button>
+							<button type="button" id="btn_multi_deleteMail" class="btn btn-bind btn-danger"
+								disabled>Delete</button>
+						</div>
 						<div class="mail_header mail_header_top d-flex">
+							<span id="span-chk" class="span_chk form-check" mail_id="399254359">
+								<input id="mail_headers_checkbox" class="mail_checkbox form_check_input"
+									type="checkbox">
+							</span>
 							<span class="from">Sender</span>
 							<span class="subject flex-fill">Subject</span>
 							<span id="mail_header_timestamp" class="timestamp text-end">Timestamp</span>
@@ -108,8 +119,10 @@
 								<button type="button" id="btn_replyAll" class="btn btn-bind btn-primary">Reply
 									All</button>
 								<div class="m-auto"></div>
-								<button type="button" id="btn_deleteMail" class="btn btn-bind btn-danger"
-									folder_id="1">Delete</button>
+								<button type="button" id="btn_markReadStatus" class="btn btn-bind btn-info"
+									data-read="true">Mark </button>
+								<button type="button" id="btn_deleteMail"
+									class="btn btn-bind btn-danger">Delete</button>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="mail_all" class="h-100 w-100 overflow-auto">

@@ -87,6 +87,7 @@ h4 {
 
 .folder_selected,
 .folder_label:hover,
+.mail_header.selected,
 .mail_header:hover {
 	background: var(--podmail_bg_hover);
 	transition: filter 0.2s ease;
@@ -288,6 +289,7 @@ textarea::placeholder,
 }
 
 #mail_options .btn:not(:last-of-type),
+#multi_mail_options .btn:not(:last-of-type),
 #compose_options .btn:not(:last-of-type),
 #compose_final_options .btn:not(:last-of-type) {
 	margin-right: 1rem;
@@ -336,4 +338,20 @@ textarea::placeholder,
 
 #mail_body_adjusted[data-contrast="false"] {
 	display: none;
+}
+
+.span_chk {
+	padding: 0px;
+	padding-right: 0.5rem;
+	padding-top: 2px;
+}
+
+#btn_markReadStatus:after,
+#btn_multi_markReadStatus:after {
+	content: 'Read';
+}
+
+#btn_markReadStatus[data-read="true"]:after,
+#btn_multi_markReadStatus[data-read="true"]:after {
+	content: 'Unread';
 }
