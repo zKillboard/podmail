@@ -1,4 +1,4 @@
-const githubhash = "e1d20da";
+const githubhash = "5e910c9";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -289,7 +289,7 @@ async function addMailHeader(mail) {
 
 		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], { mail_id: mail.mail_id }, { click: showMail });
 
-		let classes = ['showhide'];
+		let classes = ['showhide', 'ordered'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
 		for (let recip of mail.recipients) if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
 		elp = createEl('div', null, null, classes);
@@ -351,6 +351,7 @@ function mail_headers_checkbox_changed(e) {
 
 	Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']`)).forEach((el) =>
 		mailCheckboxClick({ type: 'change' }, el, this.checked));
+	checkMulti();
 }
 
 async function btn_multi_markReadStatus(e) {
@@ -368,9 +369,11 @@ async function btn_multi_deleteMail(e) {
 
 	if (! await confirm('Are you sure you wwant to PERMANENTLY delete these evemails?')) return;
 
-	for (const el of checked) {
-		await btn_deleteMail(null, el.getAttribute('mail_id'), true);
-	}
+	let mail_ids = [];
+	for (const el of checked) mail_ids.push(el.getAttribute('mail_id'));
+	mail_ids = mail_ids.sort();
+	while (mail_ids.length) await btn_deleteMail(null, mail_ids.pop(), true);
+
 	checkMulti();
 	updateUnreadCounts();
 }
@@ -575,7 +578,7 @@ function applyNameToId(name_record) {
 	for (const from_el of from_els) {
 		from_el.innerHTML = name_record.name;
 		from_el.classList.remove('load_name');
-		from_el.style.order = getStrOrder(name_record.name);
+		if (from_el.classList.contains('left-img')) from_el.style.order = getStrOrder(name_record.name);
 	}
 	localStorage.setItem(`name-${id}`, name_record.name);
 }
@@ -820,6 +823,8 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 	if (no_prrompt == false && ! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
 
 	mail_id = mail_id ?? current_mail_id;
+
+	console.log('DELETING', mail_id);
 
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`;
 	let res = await doAuthRequest(url, 'DELETE', mimetype_json);
