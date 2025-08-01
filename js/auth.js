@@ -64,14 +64,21 @@ async function doAuth() {
 	window.location = '/';
 }
 
+async function doJsonAuthRequest(url, method = 'GET', headers = null, body = null) {
+	let res = await doAuthRequest(url, method, headers, body);
+	return await res.json();
+}
+
 async function doAuthRequest(url, method = 'GET', headers = null, body = null) {
 	if (headers == null) headers = {};
 	headers.Authorization = await getAccessToken();
 	headers.Accept = 'application/json';
-	let res = await doRequest(url, method, headers, body);
+	return await doRequest(url, method, headers, body);
+}
 
-	if ((res.headers.get('content-type') || '').includes('application/json')) return res.json();
-	return res;
+async function doJsonRequest(url, method = 'GET', headers = null, body = null) {
+	let res = await doRequest(url, method, headers, body);
+	return await res.json();
 }
 
 let inflight = 0;

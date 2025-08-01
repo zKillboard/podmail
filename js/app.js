@@ -98,7 +98,7 @@ function fail(res) {
 async function doAffiliation() {
 	try {
 		if (whoami == null) return;
-		const aff = await doAuthRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
+		const aff = await doJsonAuthRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
 		if (aff.length) {
 			whoami.corporation_id = aff[0].corporation_id;
 			whoami.corporation_name = 'Corp ' + aff[0].corporation_id;
@@ -124,10 +124,10 @@ let labels = {};
 let current_folder = 1;
 async function pm_fetchFolders() {
 	try {
-		const labels = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
+		const labels = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
 		for (const label of labels.labels) addFolder(label, false);
 
-		const subs = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
+		const subs = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
 		for (const sub of subs) addFolder(sub, true);
 	} catch (e) {
 		console.log(e);
@@ -235,7 +235,7 @@ async function pm_fetchHeaders() {
 		let mails, last_mail_id = -1, high_mail_id = 0;
 		do {
 			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
-			mails = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', mimetype_json);
+			mails = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', mimetype_json);
 
 			for (const mail of mails) {
 				addMail(mail);
@@ -324,10 +324,11 @@ async function showMail(e, mail, forceShow = false) {
 		mail = JSON.parse(mail);
 	} else {
 		console.log('Fetching mail', mail_id);
-		mail = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
-		localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
+		mail = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
+		if (mail.subject) localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
 	}
-	if (this.getAttribute || forceShow) {
+	// Ensure we're showing the mail, and that we have a valid mail by checking mail.subject exists
+	if ((this.getAttribute || forceShow) && mail.subject) {
 		showSection('mail_container_full');
 
 		document.getElementById('mail_body').innerHTML = '';
@@ -369,7 +370,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
-	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: true }));
+	let res = await doJsonAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: true }));
 
 	if (res.status == 204) { // Success
 		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
@@ -433,10 +434,11 @@ async function fetchNames(fetch_names) {
 	try {
 		if (fetch_names.length > 0) {
 			console.log('Fetching', fetch_names.length, 'names', fetch_names);
-			let names = await doRequest('https://esi.evetech.net/universe/names', 'POST', mimetype_json, JSON.stringify(fetch_names))
+			let names = await doJsonRequest('https://esi.evetech.net/universe/names', 'POST', mimetype_json, JSON.stringify(fetch_names))
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {
+		console.log(e);
 		await sleep(1000);
 		if (fetch_names.length > 1) {
 			const middle = Math.ceil(fetch_names.length / 2);
@@ -461,14 +463,13 @@ async function fetchNames(fetch_names) {
 }
 
 async function getPublicCharacterName(character_id) {
-	let res = await doRequest(`https://esi.evetech.net/characters/${character_id}`);
-	let char = await res.json();
+	const char = await doJsonRequest(`https://esi.evetech.net/characters/${character_id}`);
 	return char.name;
 }
 
 async function fetchIDFromName(the_name) {
 	try {
-		return await doAuthRequest('https://esi.evetech.net/universe/ids', 'POST', mimetype_json, JSON.stringify([the_name]));
+		return await doJsonRequest('https://esi.evetech.net/universe/ids', 'POST', mimetype_json, JSON.stringify([the_name]));
 	} catch (e) {
 		return {};
 	}
@@ -700,7 +701,7 @@ async function btn_send(e) {
 		console.log('Sending eve mail')
 		console.log(msg);
 
-		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
+		let res = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
 		if (typeof res == 'number' && res > 0) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
@@ -719,7 +720,7 @@ async function btn_deleteMail(e) {
 	if (! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
 
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${current_mail_id}`;
-	let res = await doAuthRequest(url, 'DELETE', mimetype_json);
+	let res = await doJsonAuthRequest(url, 'DELETE', mimetype_json);
 	if (res.status == 204) {
 		let mail_header = document.getElementById(`mail_header_${current_mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
