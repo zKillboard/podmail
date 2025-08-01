@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="html" githubhash="ca4f82a" data-bs-theme="dark">
+<html lang="en" id="html" githubhash="e1d20da" data-bs-theme="dark">
 
 <head>
 	<title>PodMail</title>
@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-	<link rel="stylesheet" href="/css/app.css?v=ca4f82a">
+	<link rel="stylesheet" href="/css/app.css?v=e1d20da">
 	<style id="current_folder">
 		.folder-1.showhide {
 			display: block;
@@ -86,7 +86,18 @@
 						</div>
 					</div>
 					<div id='headers_container_full' class="overflow-auto h-100 d-flex flex-column mb-2">
+						<div id="multi_mail_options" class="d-flex flex-row w-100">
+							<div class="m-auto"></div>
+							<button type="button" id="btn_multi_markReadStatus" class="btn btn-bind btn-info"
+								data-read="true" disabled>Mark </button>
+							<button type="button" id="btn_multi_deleteMail" class="btn btn-bind btn-danger"
+								disabled>Delete</button>
+						</div>
 						<div class="mail_header mail_header_top d-flex">
+							<span id="span-chk" class="span_chk form-check" mail_id="399254359">
+								<input id="mail_headers_checkbox" class="mail_checkbox form_check_input"
+									type="checkbox">
+							</span>
 							<span class="from">Sender</span>
 							<span class="subject flex-fill">Subject</span>
 							<span id="mail_header_timestamp" class="timestamp text-end">Timestamp</span>
@@ -108,8 +119,10 @@
 								<button type="button" id="btn_replyAll" class="btn btn-bind btn-primary">Reply
 									All</button>
 								<div class="m-auto"></div>
-								<button type="button" id="btn_deleteMail" class="btn btn-bind btn-danger"
-									folder_id="1">Delete</button>
+								<button type="button" id="btn_markReadStatus" class="btn btn-bind btn-info"
+									data-read="true">Mark </button>
+								<button type="button" id="btn_deleteMail"
+									class="btn btn-bind btn-danger">Delete</button>
 							</div>
 							<hr class="p-0 m-0 mt-1 mb-1" />
 							<div id="mail_all" class="h-100 w-100 overflow-auto">
@@ -215,8 +228,8 @@
 	<script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
 		crossorigin="anonymous"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=ca4f82a"></script>
-	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=ca4f82a"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/auth.js?v=e1d20da"></script>
+	<script defer="" data-server_start="1752004823892" src="/js/app.js?v=e1d20da"></script>
 </body>
 
 </html>

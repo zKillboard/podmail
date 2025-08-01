@@ -1,4 +1,4 @@
-const githubhash = "ca4f82a";
+const githubhash = "e1d20da";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -35,6 +35,9 @@ async function main() {
 
 	document.getElementsByName('compose_recipients')[0].addEventListener('blur', updateComposeRecipients);
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
+	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
+
+
 
 	// bind buttons with class btn-bind to a function equivalent to the button's id
 	Array.from(document.getElementsByClassName('btn-bind')).forEach((el) => {
@@ -189,6 +192,7 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 		document.getElementById(`folder_${id}`).classList.add('folder_selected');
 		pushState(`/folder/${id}`);
 		current_folder = id;
+		checkMulti();
 	} catch (e) {
 		console.log(e);
 	}
@@ -292,6 +296,12 @@ async function addMailHeader(mail) {
 		elp.style.order = mail.mail_id;
 		elp.appendChild(el);
 
+		//  createEl(tag, innerHTML, id = null, classes = [], attributes = {}, events = {}) {
+		let chk = createEl('input', '', `mail-checkbox-${mail.mail_id}`, 'mail_checkbox form_check_input', { type: 'checkbox', mail_id: mail.mail_id }, { click: mailCheckboxClick, change: mailCheckboxClick });
+		let chkspan = createEl('span', '', `span-chk-${mail.mail_id}`, 'span_chk form-check', { mail_id: mail.mail_id }, { click: mailCheckboxClick });
+		chkspan.appendChild(chk);
+		el.appendChild(chkspan);
+
 		el.appendChild(createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
 		el.appendChild(createEl('span', mail.subject, null, 'subject flex-fill'));
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
@@ -300,6 +310,69 @@ async function addMailHeader(mail) {
 	}
 	if (mail.is_read == true) el.classList.remove('unread');
 	else el.classList.add('unread');
+}
+
+function mailCheckboxClick(e, tthis = null, forceSelectionTo = null) {
+	if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+	if (e.stopPropogation) e.stopPropogation();
+	if (e.type != 'change') return false;
+
+	tthis = tthis ?? this;
+
+	let mail_id = parseInt(tthis.getAttribute('mail_id'));
+	let header = document.getElementById(`mail_header_${mail_id}`);
+
+	if (forceSelectionTo !== null) tthis.checked = forceSelectionTo;
+
+	if (header) {
+		if (tthis.checked) header.classList.add('selected');
+		else header.classList.remove('selected');
+	}
+
+	if (forceSelectionTo === null) checkMulti();
+	return false;
+}
+
+function checkMulti() {
+	let displayed = document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']`).length;
+	let checked = document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`).length;
+
+	document.getElementById('mail_headers_checkbox').checked = (checked == displayed && displayed > 0);
+
+	document.getElementById('btn_multi_markReadStatus').disabled = (checked == 0);
+	document.getElementById('btn_multi_deleteMail').disabled = (checked == 0);
+}
+
+function mail_headers_checkbox_changed(e) {
+	if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+	if (e.stopPropogation) e.stopPropogation();
+	if (e.type != 'change') return false;
+	console.log('triggered mail_headers_checkbox_changed');
+
+	Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']`)).forEach((el) =>
+		mailCheckboxClick({ type: 'change' }, el, this.checked));
+}
+
+async function btn_multi_markReadStatus(e) {
+	let checked = Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`));
+	for (const el of checked) {
+		await pm_updateReadStatus(await getMail(el.getAttribute('mail_id')), this.dataset.read != "true");
+	}
+	checkMulti();
+	updateUnreadCounts();
+}
+
+
+async function btn_multi_deleteMail(e) {
+	let checked = Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`));
+
+	if (! await confirm('Are you sure you wwant to PERMANENTLY delete these evemails?')) return;
+
+	for (const el of checked) {
+		await btn_deleteMail(null, el.getAttribute('mail_id'), true);
+	}
+	checkMulti();
+	updateUnreadCounts();
 }
 
 const sections = ['headers_container_full', 'mail_container_full', 'compose_container_full']
@@ -319,14 +392,8 @@ let current_mail_id = -1;
 let current_mail = null;
 async function showMail(e, mail, forceShow = false) {
 	mail_id = this.getAttribute ? this.getAttribute('mail_id') : mail.mail_id;
-	mail = localStorage.getItem(`mail-${mail_id}`);
-	if (mail != null) {
-		mail = JSON.parse(mail);
-	} else {
-		console.log('Fetching mail', mail_id);
-		mail = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
-		if (mail.subject) localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
-	}
+	mail = await getMail(mail_id);
+
 	// Ensure we're showing the mail, and that we have a valid mail by checking mail.subject exists
 	if ((this.getAttribute || forceShow) && mail.subject) {
 		showSection('mail_container_full');
@@ -360,9 +427,25 @@ async function showMail(e, mail, forceShow = false) {
 		current_mail_id = mail_id;
 		current_mail = mail;
 		setTimeout(loadNames, 1);
+		document.getElementById('btn_markReadStatus').dataset.read = true;
 
 		checkContrast(document.getElementById('mail_body'));
 	}
+}
+
+async function getMail(mail_id) {
+	mail = localStorage.getItem(`mail-${mail_id}`);
+	if (mail != null) {
+		mail = JSON.parse(mail);
+		mail.mail_id = mail_id;
+		return mail;
+	}
+
+	console.log('Fetching mail', mail_id);
+	mail = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
+	mail.mail_id = mail_id;
+	if (mail.subject) localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
+	return mail;
 }
 
 function contrastNotify() {
@@ -373,6 +456,8 @@ function contrastNotify() {
 async function pm_updateReadStatus(mail, read = true) {
 	if (mail.read == read) return; // no need to change anything
 
+	if (mail.mail_id == null) return console.error('mail has no mail_id', mail);
+
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
 	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: true }));
@@ -382,6 +467,10 @@ async function pm_updateReadStatus(mail, read = true) {
 		if (read) el.classList.remove('unread');
 		else el.classList.add('unread');
 		updateUnreadCounts();
+
+		mail.read = read;
+		document.getElementById('btn_markReadStatus').dataset.read = read;
+		localStorage.setItem(`mail-${mail.mail_id}`, JSON.stringify(mail));
 	}
 }
 
@@ -486,15 +575,17 @@ function applyNameToId(name_record) {
 	for (const from_el of from_els) {
 		from_el.innerHTML = name_record.name;
 		from_el.classList.remove('load_name');
+		from_el.style.order = getStrOrder(name_record.name);
 	}
 	localStorage.setItem(`name-${id}`, name_record.name);
 }
 
-function createEl(tag, innerHTML, id = null, classes = [], attributes = {}, events = {}) {
+function createEl(tag, innerHTML, id = '', classes = [], attributes = {}, events = {}) {
 	let el = document.createElement(tag);
 	el.innerHTML = innerHTML;
 
-	if (id != null && id.length > 0) el.id = id;
+	id = id || '';
+	if (id.length > 0) el.id = id;
 
 	if (typeof classes == 'string') classes = classes.split(' ');
 	classes.forEach(c => { el.classList.add(c) });
@@ -721,16 +812,22 @@ async function btn_send(e) {
 	}
 }
 
-async function btn_deleteMail(e) {
-	if (! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
+async function btn_markReadStatus(e) {
+	return await pm_updateReadStatus(await getMail(current_mail_id), this.dataset.read != "true");
+}
 
-	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${current_mail_id}`;
+async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
+	if (no_prrompt == false && ! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
+
+	mail_id = mail_id ?? current_mail_id;
+
+	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`;
 	let res = await doAuthRequest(url, 'DELETE', mimetype_json);
 	if (res.status == 204) {
-		let mail_header = document.getElementById(`mail_header_${current_mail_id}`)
+		let mail_header = document.getElementById(`mail_header_${mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
-		localStorage.removeItem(`mail-${current_mail_id}`);
+		localStorage.removeItem(`mail-${mail_id}`);
 		btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
