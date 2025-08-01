@@ -1,4 +1,4 @@
-const githubhash = "90b26ee";
+const githubhash = "ca4f82a";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -98,7 +98,7 @@ function fail(res) {
 async function doAffiliation() {
 	try {
 		if (whoami == null) return;
-		const aff = await doJsonAuthRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
+		const aff = await doJsonRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
 		if (aff.length) {
 			whoami.corporation_id = aff[0].corporation_id;
 			whoami.corporation_name = 'Corp ' + aff[0].corporation_id;
@@ -375,7 +375,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
-	let res = await doJsonAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: true }));
+	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: true }));
 
 	if (res.status == 204) { // Success
 		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
@@ -706,7 +706,7 @@ async function btn_send(e) {
 		console.log('Sending eve mail')
 		console.log(msg);
 
-		let res = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
+		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
 		if (typeof res == 'number' && res > 0) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
@@ -725,7 +725,7 @@ async function btn_deleteMail(e) {
 	if (! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
 
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${current_mail_id}`;
-	let res = await doJsonAuthRequest(url, 'DELETE', mimetype_json);
+	let res = await doAuthRequest(url, 'DELETE', mimetype_json);
 	if (res.status == 204) {
 		let mail_header = document.getElementById(`mail_header_${current_mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
