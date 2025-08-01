@@ -15,7 +15,7 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 ### Current Features
 
 • Compose and send EVEmails  
-• When necessary, adjust text contrast in evemails to be more readable 
+• When necessary, adjusted colors in an EVEmail to improve contrast and readability.
 • Loads the latest 500 EVEmails (subject to increase)  
 • Displays unread counts across all folders including mailing labels not natively supported by ESI  
 • Marks mails as read when opened  

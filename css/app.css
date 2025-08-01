@@ -251,6 +251,14 @@ hr.vertical-hr {
 	margin-right: 0.75rem;
 }
 
+#mail_all {
+	padding-right: 0.5rem;
+}
+
+.recipient {
+	margin-right: 0.75rem;
+}
+
 input,
 textarea,
 #compose_body_textarea,
@@ -320,4 +328,12 @@ textarea::placeholder,
 	font-size: 70%;
 	font-style: italic;
 	padding-top: 8px;
+}
+
+#mail_body_adjusted a {
+	text-decoration: none;
+}
+
+#mail_body_adjusted[data-contrast="false"] {
+	display: none;
 }
