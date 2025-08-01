@@ -6,7 +6,6 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 
 ### Upcoming Features
 
-• UI improvements including mobile responsiveness  
 • Search functionality limited to sender, recipient, and subject for now  
 • Additional features planned
 
@@ -22,3 +21,4 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 • Resolves and displays names for labels, mailing lists, characters, corporations, and alliances  
 • Links character, corporation, and alliance names in EveMails to EveWho  
 • Detects and links killmails in EveMails to zKillboard
+• UI improvements including mobile responsiveness  
