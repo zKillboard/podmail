@@ -1,4 +1,4 @@
-const githubhash = "0cf8b9d";
+const githubhash = "90b26ee";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -361,8 +361,13 @@ async function showMail(e, mail, forceShow = false) {
 		current_mail = mail;
 		setTimeout(loadNames, 1);
 
-		document.querySelectorAll('#mail_body').forEach(adjustTextContrast);
+		checkContrast(document.getElementById('mail_body'));
 	}
+}
+
+function contrastNotify() {
+	alert('Some colors in this EVEmail have been adjusted to improve contrast and readability.');
+	return false;
 }
 
 async function pm_updateReadStatus(mail, read = true) {
@@ -387,7 +392,7 @@ function adjustTags(html) {
 		.replace(/ style="/gi, ' stile="')
 		.replace(/ size="/gi, ' syze="')
 		//.replace(/ color="/gi, ' colour="')
-		.replace(/ color="#ff/gi, ' color="')
+		.replace(/ color="#ff/gi, ' color="#')
 		.replace(/ color="#000000/gi, ' color="#222222')
 		.replace(/\n/g, '<br/>')
 		.replace(/href="killReport:/g, 'target=\'_blank\' href="https://zkillboard.com/kill/')
@@ -799,7 +804,13 @@ function parseRGB(str) {
 	return match ? match.map(Number) : [0, 0, 0];
 }
 
-function adjustTextContrast(el, includeChildren = true) {
+const contrast_adjusted = document.getElementById('mail_body_adjusted');
+function checkContrast(el) {
+	contrast_adjusted.dataset.contrast = false;
+	adjustTextContrast(el);
+}
+
+function adjustTextContrast(el) {
 	const style = getComputedStyle(el);
 	const fg = parseRGB(style.color);
 	const bg = parseRGB(style.backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(el.parentElement).backgroundColor : style.backgroundColor);
@@ -813,8 +824,9 @@ function adjustTextContrast(el, includeChildren = true) {
 		g = Math.min(255, g + 10);
 		b = Math.min(255, b + 10);
 		contrast = getContrast([r, g, b], bg);
+		contrast_adjusted.dataset.contrast = true;
 	}
 
 	el.style.color = `rgb(${r}, ${g}, ${b})`;
-	if (includeChildren) Array.from(el.children).forEach(adjustTextContrast);
+	Array.from(el.children).forEach(adjustTextContrast);
 }
