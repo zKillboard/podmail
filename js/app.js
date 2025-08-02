@@ -466,7 +466,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
 	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
-	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read }));
+	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: read }));
 
 	if (res.status == 204) { // Success
 		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
