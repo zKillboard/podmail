@@ -104,8 +104,8 @@ async function doRequest(url, method = 'GET', headers = null, body = null) {
 		if (res.status >= 500) handleEsiIssue(res);
 		return res;
 	} catch (e) {
-		if (typeof handleEsiIssue == 'function') handleEsiIssue(res, e);
 		console.log(e);
+		if (typeof handleEsiIssue == 'function') handleEsiIssue(e, res);
 	} finally {
 		inflight--;
 		if (haveInflightHandler) handleInflight(inflight);
