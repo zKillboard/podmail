@@ -96,10 +96,11 @@ async function doRequest(url, method = 'GET', headers = null, body = null) {
 	}
 
 	let haveInflightHandler = typeof handleInflight == 'function';
+	let res;
 	try {
 		inflight++;
 		if (haveInflightHandler) handleInflight(inflight);
-		let res = await fetch(url, params);
+		res = await fetch(url, params);
 		if (res.status >= 500) handleEsiIssue(res);
 		return res;
 	} catch (e) {
