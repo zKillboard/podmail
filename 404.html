@@ -12,7 +12,7 @@
 	<script>
 		const referrer = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
 
-		window.location.replace('/?referrer=' + referrer);
+		window.location = '/?referrer=' + referrer;
 	</script>
 </head>
 
