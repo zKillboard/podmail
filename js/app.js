@@ -252,7 +252,7 @@ async function pm_fetchHeaders() {
 			total_mails += mails.length;
 
 			if (total_mails >= 500) break;
-		} while (mails.length > 0);
+		} while (mails.length >= 50);
 		setTimeout(loadNames, 1);
 
 		lsSet('mail_headers', JSON.stringify(mail_headers_stored));
