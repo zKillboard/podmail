@@ -195,6 +195,7 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 
 		checkMulti();
 		btn_viewRight();
+		updateUnreadCounts();
 	} catch (e) {
 		console.log(e);
 	}
