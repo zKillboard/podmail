@@ -1,4 +1,4 @@
-const githubhash = "ee66b41";
+const githubhash = "a12291a";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -195,6 +195,7 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 
 		checkMulti();
 		btn_viewRight();
+		updateUnreadCounts();
 	} catch (e) {
 		console.log(e);
 	}
@@ -252,7 +253,7 @@ async function pm_fetchHeaders() {
 			total_mails += mails.length;
 
 			if (total_mails >= 500) break;
-		} while (mails.length > 0);
+		} while (mails.length >= 50);
 		setTimeout(loadNames, 1);
 
 		lsSet('mail_headers', JSON.stringify(mail_headers_stored));
