@@ -22,5 +22,8 @@ if __name__ == '__main__':
     os.chdir('.')  # Serve from current dir
     httpd = HTTPServer(('0.0.0.0', 8080), CustomHandler)
     print("Serving on http://localhost:8080")
-    httpd.serve_forever()
-
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nShutting down server.")
+        httpd.server_close()
