@@ -1,25 +1,32 @@
-const githubhash = "d789b2f";
+const githubhash = "901b63e";
 
+document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
 
-async function main() {
-	let docgithubhash = document.getElementById('html').getAttribute('githubhash');
-	let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim()
-	// Check the hash, if they don't match, we need to cache-bust
-	if (githubhash != docgithubhash || githubhash != podmail_version) return window.location = `/?githubhash=${githubhash}`;
+function doBtnBinds() {
+	// bind buttons with class btn-bind to a function equivalent to the button's id
+	Array.from(document.getElementsByClassName('btn-bind')).forEach((el) => {
+		const id = el.id;
+		if (id == null || id.trim().length == 0) return console.error('this btn-bind does not have an id', el);
+		if (!window[id] || typeof window[id] != 'function') return console.error('button', id, 'does not have a matching function');
+		el.addEventListener('click', window[id]); // assign the function with the same name
+	});
+}
 
+async function main() {
 	// This is for localhost testing
 	if (githubhash == '') document.getElementById('podmailLink').setAttribute('href', '/?' + Date.now());
+	setTimeout(versionCheck, 5000);
 
-	// whoami is defined and handled in auth.js
-	if (whoami == null) {
+	// esi.whoami is defined and handled in auth.js
+	if (esi.whoami == null) {
 		loadReadme('readme');
 		return document.getElementById('about').classList.remove('d-none');
 	}
 	document.getElementById('podmail').classList.remove('d-none');
 
-	document.getElementById('charname').innerHTML = whoami.name;
-	document.getElementById('charimg').setAttribute('src', `https://images.evetech.net/characters/${whoami.character_id}/portrait?size=32`);
+	document.getElementById('charname').innerHTML = esi.whoami.name;
+	document.getElementById('charimg').setAttribute('src', `https://images.evetech.net/characters/${esi.whoami.character_id}/portrait?size=32`);
 
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
@@ -39,13 +46,22 @@ async function main() {
 
 
 
-	// bind buttons with class btn-bind to a function equivalent to the button's id
-	Array.from(document.getElementsByClassName('btn-bind')).forEach((el) => {
-		const id = el.id;
-		if (id == null || id.trim().length == 0) return console.error('this btn-bind does not have an id', el);
-		if (!window[id] || typeof window[id] != 'function') return console.error('button', id, 'does not have a matching function');
-		el.addEventListener('click', window[id]); // assign the function with the same name
-	});
+
+}
+
+async function versionCheck() {
+	try {
+		let docgithubhash = document.getElementById('html').getAttribute('githubhash');
+		let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim();
+		// Check the hash, if they don't match, we need to cache-bust
+		if (githubhash != docgithubhash || githubhash != podmail_version) {
+			if (await confirm('A new version of PodMail has been detected, would you like to refresh to get the lastest version?')) {
+				return window.location = `/?githubhash=${podmail_version}`;
+			}
+		}
+	} finally {
+		setTimeout(versionCheck, 3600000); // check again in an hour
+	}
 }
 
 function pushState(new_route) {
@@ -75,7 +91,13 @@ function updateRoute(e, route = null) {
 	}
 }
 
-btn_logout = auth_logout;
+function btn_login() {
+	return esi.authBegin();
+}
+
+function btn_logout() {
+	return esi.authLogout();
+}
 
 function btn_mails() {
 	// TODO, for mobile, show evemails
@@ -100,22 +122,22 @@ function fail(res) {
 
 async function doAffiliation() {
 	try {
-		if (whoami == null) return;
-		const aff = await doJsonRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', mimetype_json, JSON.stringify([`${whoami.character_id}`]));
+		if (esi.whoami == null) return;
+		const aff = await esi.doJsonRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', esi.mimetype_json, JSON.stringify([`${esi.whoami.character_id}`]));
 		if (aff.length) {
-			whoami.corporation_id = aff[0].corporation_id;
-			whoami.corporation_name = 'Corp ' + aff[0].corporation_id;
-			whoami.alliance_id = aff[0].alliance_id || 0;
-			whoami.alliance_name = 'Alli ' + whoami.alliance_id;
+			esi.whoami.corporation_id = aff[0].corporation_id;
+			esi.whoami.corporation_name = 'Corp ' + aff[0].corporation_id;
+			esi.whoami.alliance_id = aff[0].alliance_id || 0;
+			esi.whoami.alliance_name = 'Alli ' + esi.whoami.alliance_id;
 
-			let res = await doRequest(`https://esi.evetech.net/corporations/${whoami.corporation_id}`);
+			let res = await esi.doRequest(`https://esi.evetech.net/corporations/${esi.whoami.corporation_id}`);
 			const corp = await res.json();
-			whoami.corporation_name = corp.name;
+			esi.whoami.corporation_name = corp.name;
 
-			if (whoami.alliance_id > 0) {
-				res = await doRequest(`https://esi.evetech.net/alliances/${whoami.alliance_id}`);
+			if (esi.whoami.alliance_id > 0) {
+				res = await esi.doRequest(`https://esi.evetech.net/alliances/${esi.whoami.alliance_id}`);
 				const alli = await res.json();
-				whoami.alliance_name = alli.name;
+				esi.whoami.alliance_name = alli.name;
 			}
 		}
 	} finally {
@@ -127,10 +149,10 @@ let labels = {};
 let current_folder = 1;
 async function pm_fetchFolders() {
 	try {
-		const labels = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/labels`);
+		const labels = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/labels`);
 		for (const label of labels.labels) addFolder(label, false);
 
-		const subs = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/lists`);
+		const subs = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/lists`);
 		for (const sub of subs) addFolder(sub, true);
 	} catch (e) {
 		console.log(e);
@@ -143,7 +165,7 @@ async function addFolder(label, mailing_list = false) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
-	localStorage.setItem(`name-${id}`, label.name);
+	esi.lsSet(`name-${id}`, label.name);
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp';
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
@@ -214,7 +236,7 @@ async function pm_fetchHeaders() {
 	let mail_headers_stored = {};
 	try {
 		if (headers_first_load) {
-			let json_str = JSON.parse(lsGet('mail_headers'));
+			let json_str = JSON.parse(esi.lsGet('mail_headers'));
 			if (json_str) {
 				mail_headers = Array.from(Object.values(json_str));
 				if (mail_headers) {
@@ -244,7 +266,7 @@ async function pm_fetchHeaders() {
 		let mails, last_mail_id = -1, high_mail_id = 0;
 		do {
 			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
-			mails = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail${last_mail_param}`, 'GET', mimetype_json);
+			mails = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail${last_mail_param}`, 'GET', esi.mimetype_json);
 
 			for (const mail of mails) {
 				addMail(mail);
@@ -258,8 +280,8 @@ async function pm_fetchHeaders() {
 		} while (mails.length >= 50);
 		setTimeout(loadNames, 1);
 
-		lsSet('mail_headers', JSON.stringify(mail_headers_stored));
-		lsGet('folders', JSON.stringify(folders));
+		esi.lsSet('mail_headers', JSON.stringify(mail_headers_stored));
+		esi.lsGet('folders', JSON.stringify(folders));
 
 		if (mail_ids.size) {
 			// Cleanup removed mails
@@ -307,7 +329,7 @@ async function addMailHeader(mail) {
 		chkspan.appendChild(chk);
 		el.appendChild(chkspan);
 
-		el.appendChild(createEl('span', localStorage.getItem(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
+		el.appendChild(createEl('span', esi.lsGet(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
 		el.appendChild(createEl('span', mail.subject, null, 'subject flex-fill'));
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
 
@@ -413,14 +435,14 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_timestamp').innerHTML = mail.timestamp.replace('T', ' ').replace(':00Z', '')
 
 		// <span id="recip_id_91565688" class="compose_recipient left-img" recip_id="91565688" recip_type="character" style="order: 1117110107; --left-img: url('https://images.evetech.net/characters/91565688/portrait?size=32');">Unknown ID 91565688</span>
-		let span = createEl('span', localStorage.getItem(`name-${mail.from}`) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
+		let span = createEl('span', esi.lsGet(`name-${mail.from}`) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
 		applyLeftImage(span, 'character', mail.from);
 		document.getElementById('mail_about_from').innerHTML = '';
 		document.getElementById('mail_about_from').appendChild(span);
 
 		document.getElementById('mail_about_recipients').innerHTML = '';
 		for (let recip of mail.recipients) {
-			span = createEl('span', localStorage.getItem(`name-${recip.recipient_id}`), null, `left-img recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`), null, `left-img recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id });
 			applyLeftImage(span, recip.recipient_type, recip.recipient_id, recip.recipient_id, recip.recipient_id);
 			document.getElementById('mail_about_recipients').appendChild(span);
 		}
@@ -443,7 +465,7 @@ async function showMail(e, mail, forceShow = false) {
 }
 
 async function getMail(mail_id) {
-	mail = localStorage.getItem(`mail-${mail_id}`);
+	mail = esi.lsGet(`mail-${mail_id}`);
 	if (mail != null) {
 		mail = JSON.parse(mail);
 		mail.mail_id = mail_id;
@@ -451,9 +473,9 @@ async function getMail(mail_id) {
 	}
 
 	console.log('Fetching mail', mail_id);
-	mail = await doJsonAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`);
+	mail = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`);
 	mail.mail_id = mail_id;
-	if (mail.subject) localStorage.setItem(`mail-${mail_id}`, JSON.stringify(mail));
+	if (mail.subject) esi.lsSet(`mail-${mail_id}`, JSON.stringify(mail));
 	return mail;
 }
 
@@ -468,8 +490,8 @@ async function pm_updateReadStatus(mail, read = true) {
 	if (mail.mail_id == null) return console.error('mail has no mail_id', mail);
 
 	console.log('Marking', mail.mail_id, 'as read:', read);
-	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail.mail_id}`
-	let res = await doAuthRequest(url, 'PUT', mimetype_json, JSON.stringify({ labels: mail.labels, read: read }));
+	let url = `https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail.mail_id}`
+	let res = await esi.doAuthRequest(url, 'PUT', esi.mimetype_json, JSON.stringify({ labels: mail.labels, read: read }));
 
 	if (res.status == 204) { // Success
 		let el = document.querySelector(`[mail_id="${mail.mail_id}"]`);
@@ -479,7 +501,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 		mail.read = read;
 		document.getElementById('btn_markReadStatus').dataset.read = read;
-		localStorage.setItem(`mail-${mail.mail_id}`, JSON.stringify(mail));
+		esi.lsSet(`mail-${mail.mail_id}`, JSON.stringify(mail));
 	}
 }
 
@@ -521,9 +543,9 @@ async function loadNames() {
 		for (const el of els) {
 			let from_id = parseInt(el.getAttribute('from_id'));
 
-			let saved_name = localStorage.getItem(`name-${from_id}`);
+			let saved_name = esi.lsGet(`name-${from_id}`);
 			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
-				el.innerHTML = localStorage.getItem(`name-${from_id}`);
+				el.innerHTML = esi.lsGet(`name-${from_id}`);
 				el.classList.remove('load_name');
 			} else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
@@ -537,7 +559,7 @@ async function fetchNames(fetch_names) {
 	try {
 		if (fetch_names.length > 0) {
 			console.log('Fetching', fetch_names.length, 'names', fetch_names);
-			let names = await doJsonRequest('https://esi.evetech.net/universe/names', 'POST', mimetype_json, JSON.stringify(fetch_names))
+			let names = await esi.doJsonRequest('https://esi.evetech.net/universe/names', 'POST', esi.mimetype_json, JSON.stringify(fetch_names))
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {
@@ -566,13 +588,13 @@ async function fetchNames(fetch_names) {
 }
 
 async function getPublicCharacterName(character_id) {
-	const char = await doJsonRequest(`https://esi.evetech.net/characters/${character_id}`);
+	const char = await esi.doJsonRequest(`https://esi.evetech.net/characters/${character_id}`);
 	return char.name;
 }
 
 async function fetchIDFromName(the_name) {
 	try {
-		return await doJsonRequest('https://esi.evetech.net/universe/ids', 'POST', mimetype_json, JSON.stringify([the_name]));
+		return await esi.doJsonRequest('https://esi.evetech.net/universe/ids', 'POST', esi.mimetype_json, JSON.stringify([the_name]));
 	} catch (e) {
 		return {};
 	}
@@ -586,7 +608,7 @@ function applyNameToId(name_record) {
 		from_el.classList.remove('load_name');
 		if (from_el.classList.contains('left-img')) from_el.style.order = getStrOrder(name_record.name);
 	}
-	localStorage.setItem(`name-${id}`, name_record.name);
+	esi.lsSet(`name-${id}`, name_record.name);
 }
 
 function createEl(tag, innerHTML, id = '', classes = [], attributes = {}, events = {}) {
@@ -618,7 +640,7 @@ function updateTime() {
 }
 
 async function updateTqStatus() {
-	let status = await doRequest('https://esi.evetech.net/status/');
+	let status = await esi.doRequest('https://esi.evetech.net/status/');
 	let data = await status.json();
 	setTqStatus(data);
 }
@@ -668,12 +690,12 @@ function btn_reply(e) {
 }
 
 function btn_replyAll(e, all_recips = true) {
-	let recipients = [{ type: 'character', info: { id: current_mail.from, name: localStorage.getItem(`name-${current_mail.from}`) || 'Unknown Name' } }];
+	let recipients = [{ type: 'character', info: { id: current_mail.from, name: esi.lsGet(`name-${current_mail.from}`) || 'Unknown Name' } }];
 
 	if (all_recips) {
 		for (const recip of current_mail.recipients) {
-			if (recip.recipient_id != whoami.character_id) { // don't include ourselves
-				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: localStorage.getItem(`name-${recip.recipient_id}`) || 'Unknown Name' } });
+			if (recip.recipient_id != esi.whoami.character_id) { // don't include ourselves
+				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: esi.lsGet(`name-${recip.recipient_id}`) || 'Unknown Name' } });
 			}
 		}
 	}
@@ -683,7 +705,7 @@ function btn_replyAll(e, all_recips = true) {
 }
 
 function btn_compose(subject = '', body = '', recipients = []) {
-	document.getElementById('btn_addAlli').disabled = (whoami.alliance_id == 0);
+	document.getElementById('btn_addAlli').disabled = (esi.whoami.alliance_id == 0);
 	document.getElementById('btn_group_ml').innerHTML = '';
 	for (const [id, label] of Object.entries(labels)) {
 		if (label.esi.mailing_list_id > 0) {
@@ -731,11 +753,11 @@ async function updateComposeRecipients(e) {
 
 
 function btn_addCorp() {
-	addComposeRecipient('corporation', { id: whoami.corporation_id, name: whoami.corporation_name });
+	addComposeRecipient('corporation', { id: esi.whoami.corporation_id, name: esi.whoami.corporation_name });
 }
 
 function btn_addAlli() {
-	addComposeRecipient('alliance', { id: whoami.alliance_id, name: whoami.alliance_name });
+	addComposeRecipient('alliance', { id: esi.whoami.alliance_id, name: esi.whoami.alliance_name });
 }
 
 function btn_addML() {
@@ -745,7 +767,7 @@ function btn_addML() {
 function addComposeRecipient(type, info) {
 	if (document.getElementById(`#compose_recipients_calculated .recip_id_${info.id}`)) return true;
 	let span = createEl('span', info.name, null, 'recip_id_${info.id} compose_recipient left-img', { recip_id: info.id, recip_type: type });
-	applyLeftImage(span, type, info.id, whoami.corporation_id, whoami.alliance_id);
+	applyLeftImage(span, type, info.id, esi.whoami.corporation_id, esi.whoami.alliance_id);
 	span.addEventListener('click', removeSelf);
 
 	if (span) {
@@ -807,7 +829,7 @@ async function btn_send(e) {
 		console.log('Sending eve mail')
 		console.log(msg);
 
-		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
+		let res = await esi.doAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail`, 'POST', esi.mimetype_json, JSON.stringify(msg));
 		if (res.status == 201) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
@@ -834,8 +856,8 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 
 	console.log('DELETING', mail_id);
 
-	let url = `https://esi.evetech.net/characters/${whoami.character_id}/mail/${mail_id}`;
-	let res = await doAuthRequest(url, 'DELETE', mimetype_json);
+	let url = `https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`;
+	let res = await esi.doAuthRequest(url, 'DELETE', esi.mimetype_json);
 	if (res.status == 204) {
 		let mail_header = document.getElementById(`mail_header_${mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
