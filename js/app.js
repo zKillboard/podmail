@@ -1,4 +1,4 @@
-const githubhash = "901b63e";
+const githubhash = "618432f";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -196,6 +196,7 @@ function updateUnreadCounts() {
 		if (unread == 0) unread = '';
 		document.getElementById(`folder-${folder_id}-unread`).innerText = unread;
 	}
+	document.title = "";
 	document.title = (total_unread == 0 ? '' : '(' + total_unread + ') 🔴 ') + 'PodMail';
 }
 
