@@ -11,9 +11,7 @@ body {
 	font-size: 1rem;
 	background-color: var(--podmail_bg_color) !important;
 
-	word-break: break-word;
 	overflow-wrap: break-word;
-	word-wrap: break-word;
 	white-space: normal;
 }
 
@@ -167,10 +165,6 @@ h4 {
 	#leftpanel,
 	#rightpanel {
 		width: 100% !important;
-	}
-
-	#mail_container_full {
-		word-break: break-all;
 	}
 }
 
