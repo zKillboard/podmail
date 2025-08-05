@@ -1,4 +1,4 @@
-const githubhash = "934a6f7";
+const githubhash = "359e1a0";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -187,12 +187,14 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 
 		let id = folder_id ?? this.getAttribute('folder_id');
 		style.innerText = `.folder-${id}.showhide {display: block;}`;
+		console.log('Switching to folder:', labels[`label_${id}`].esi.name);
 
 		Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
 		document.getElementById(`folder_${id}`).classList.add('folder_selected');
 		pushState(`/folder/${id}`);
 		current_folder = id;
 
+		document.getElementById('current_folder_name').innerText = labels[`label_${id}`].esi.name;
 		checkMulti();
 		btn_viewRight();
 		updateUnreadCounts();
@@ -685,7 +687,7 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	document.getElementById('btn_group_ml').innerHTML = '';
 	for (const [id, label] of Object.entries(labels)) {
 		if (label.esi.mailing_list_id > 0) {
-			let btn = createEl('button', label.esi.name, null, 'btn btn-info', { type: 'button', ml_id: label.esi.mailing_list_id }, { click: btn_addML });
+			let btn = createEl('button', label.esi.name, null, 'btn btn-info mb-2', { type: 'button', ml_id: label.esi.mailing_list_id }, { click: btn_addML });
 			document.getElementById('btn_group_ml').appendChild(btn);
 		}
 	}
@@ -811,6 +813,7 @@ async function btn_send(e) {
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
 			document.getElementsByName('compose_subject')[0].value = '';
 			document.getElementById('compose_body_textarea').value = '';
+			showToast('EveMail has been sent...');
 			return btn_backToFolder();
 		}
 		console.log(res);
@@ -957,4 +960,33 @@ function btn_viewLeft() {
 	console.log('showing leftpanel')
 	panel_view('leftpanel', true);
 	panel_view('rightpanel', false);
+}
+
+// Paste this in your main JS file
+function showToast(message, duration = 3000) {
+	// Ensure a container exists
+	let container = document.getElementById('toast-container');
+	if (!container) {
+		container = document.createElement('div');
+		container.id = 'toast-container';
+		document.body.appendChild(container);
+	}
+
+	// Create toast element
+	const toast = document.createElement('div');
+	toast.className = 'toast';
+	toast.textContent = message;
+
+	container.appendChild(toast);
+
+	_setTimeout(() => { toast.classList.add('show'); }, 10);
+
+
+	// Hide and remove after duration
+	setTimeout(hideToast, 3000);
+}
+
+function hideToast() {
+	let container = document.getElementById('toast-container');
+	if (container) container.remove();
 }
