@@ -3,13 +3,9 @@ const githubhash = "";
 document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
-	let docgithubhash = document.getElementById('html').getAttribute('githubhash');
-	let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim()
-	// Check the hash, if they don't match, we need to cache-bust
-	if (githubhash != docgithubhash || githubhash != podmail_version) return window.location = `/?githubhash=${githubhash}`;
-
 	// This is for localhost testing
 	if (githubhash == '') document.getElementById('podmailLink').setAttribute('href', '/?' + Date.now());
+	setTimeout(versionCheck, 5000);
 
 	// whoami is defined and handled in auth.js
 	if (whoami == null) {
@@ -46,6 +42,21 @@ async function main() {
 		if (!window[id] || typeof window[id] != 'function') return console.error('button', id, 'does not have a matching function');
 		el.addEventListener('click', window[id]); // assign the function with the same name
 	});
+}
+
+async function versionCheck() {
+	try {
+		let docgithubhash = document.getElementById('html').getAttribute('githubhash');
+		let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim();
+		// Check the hash, if they don't match, we need to cache-bust
+		if (githubhash != docgithubhash || githubhash != podmail_version) {
+			if (await confirm('A new version of PodMail has been detected, would you like to refresh to get the lastest version?')) {
+				return window.location = `/?githubhash=${podmail_version}`;
+			}
+		}
+	} finally {
+		setTimeout(versionCheck, 3600000); // check again in an hour
+	}
 }
 
 function pushState(new_route) {
