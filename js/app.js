@@ -187,12 +187,14 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 
 		let id = folder_id ?? this.getAttribute('folder_id');
 		style.innerText = `.folder-${id}.showhide {display: block;}`;
+		console.log('Switching to folder:', labels[`label_${id}`].esi.name);
 
 		Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
 		document.getElementById(`folder_${id}`).classList.add('folder_selected');
 		pushState(`/folder/${id}`);
 		current_folder = id;
 
+		document.getElementById('current_folder_name').innerText = labels[`label_${id}`].esi.name;
 		checkMulti();
 		btn_viewRight();
 		updateUnreadCounts();
