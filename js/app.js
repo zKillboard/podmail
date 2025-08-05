@@ -687,7 +687,7 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	document.getElementById('btn_group_ml').innerHTML = '';
 	for (const [id, label] of Object.entries(labels)) {
 		if (label.esi.mailing_list_id > 0) {
-			let btn = createEl('button', label.esi.name, null, 'btn btn-info', { type: 'button', ml_id: label.esi.mailing_list_id }, { click: btn_addML });
+			let btn = createEl('button', label.esi.name, null, 'btn btn-info mb-2', { type: 'button', ml_id: label.esi.mailing_list_id }, { click: btn_addML });
 			document.getElementById('btn_group_ml').appendChild(btn);
 		}
 	}
