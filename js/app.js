@@ -1,4 +1,4 @@
-const githubhash = "a12291a";
+const githubhash = "934a6f7";
 
 document.addEventListener('DOMContentLoaded', main);
 
@@ -806,7 +806,7 @@ async function btn_send(e) {
 		console.log(msg);
 
 		let res = await doAuthRequest(`https://esi.evetech.net/characters/${whoami.character_id}/mail`, 'POST', mimetype_json, JSON.stringify(msg));
-		if (typeof res == 'number' && res > 0) {
+		if (res.status == 201) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
 			document.getElementsByName('compose_subject')[0].value = '';
