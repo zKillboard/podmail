@@ -925,7 +925,7 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 		let mail_header = document.getElementById(`mail_header_${mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
-		lsDel(`mail-${mail_id}`);
+		esi.lsDel(`mail-${mail_id}`);
 		btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
