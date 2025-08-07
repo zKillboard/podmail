@@ -325,6 +325,25 @@ function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
 	return mail_ids;
 }
 
+async function fetchUnfetchedMails() {
+	let delay = 1000;
+	try {
+		let span = document.querySelector('.unfetched');
+		if (span == null) return; // nothing to fetch!
+
+		let mail_id = span.getAttribute('mail_id');
+		let mail = esi.lsGet(`mail-${mail_id}`);
+		if (mail != null && mail.subject) {
+			delay = 1;
+		} else {
+			await getMail(mail_id);
+		}
+		span.classList.remove('unfetched');
+	} finally {
+		setTimeout(fetchUnfetchedMails, delay);
+	}
+}
+
 function addMail(mail) {
 	if (!mail.labels) return;
 
@@ -345,7 +364,7 @@ async function addMailHeader(mail) {
 		elp.appendChild(el);
 
 		//  createEl(tag, innerHTML, id = null, classes = [], attributes = {}, events = {}) {
-		let chk = createEl('input', '', `mail-checkbox-${mail.mail_id}`, 'mail_checkbox form_check_input', { type: 'checkbox', mail_id: mail.mail_id }, { click: mailCheckboxClick, change: mailCheckboxClick });
+		let chk = createEl('input', '', `mail-checkbox-${mail.mail_id}`, 'mail_checkbox form_check_input unfetched', { type: 'checkbox', mail_id: mail.mail_id }, { click: mailCheckboxClick, change: mailCheckboxClick });
 		let chkspan = createEl('span', '', `span-chk-${mail.mail_id}`, 'span_chk form-check', { mail_id: mail.mail_id }, { click: mailCheckboxClick });
 		chkspan.appendChild(chk);
 		el.appendChild(chkspan);
@@ -890,7 +909,7 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 		let mail_header = document.getElementById(`mail_header_${mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
-		localStorage.removeItem(`mail-${mail_id}`);
+		lsDel(`mail-${mail_id}`);
 		btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
