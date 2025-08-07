@@ -243,11 +243,13 @@ function btn_backToFolder(replaceState = false) {
 let headers_first_load = true;
 let headers_iteration_count = 0;
 async function pm_fetchHeaders() {
-	let mail_headers_stored = {};
 	try {
 		if (headers_first_load) {
+			console.log('Loading stored mail haeaders');
 			addAllMailsFromHeader(esi.lsGet('mail_headers'));
 			addAllMailsFromHeader(esi.lsGet('mail_headers_partial'));
+
+			return setTimeout(pm_fetchHeaders, 10);
 		}
 	} catch (e) {
 		console.log(e);
@@ -255,7 +257,7 @@ async function pm_fetchHeaders() {
 		headers_first_load = false;
 	}
 
-	mail_headers_stored = {};
+	let mail_headers_stored = {};
 	let now = Date.now();
 	let total_mails = 0;
 	let full_iteration = (headers_iteration_count % 10 == 0);
@@ -316,7 +318,7 @@ function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
 
 	for (const mail of headers) {
 		addMail(mail);
-		mail_ids.add(mail.mail_id);
+		mail_ids.add(`${mail.mail_id}`);
 		mail_headers_stored[mail.mail_id] = mail;
 	}
 
