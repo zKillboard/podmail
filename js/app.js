@@ -37,6 +37,7 @@ async function main() {
 	setTimeout(doAffiliation, 0);
 	await pm_fetchFolders();
 	pm_fetchHeaders();
+	fetchUnfetchedMails();
 
 	window.addEventListener('popstate', updateRoute);
 
@@ -351,6 +352,7 @@ function addMail(mail) {
 }
 
 async function addMailHeader(mail) {
+	let body = document.getElementsByTagName('body')[0];
 	let el = document.getElementById('mail_header_' + mail.mail_id);
 	if (el == null) {
 
@@ -358,7 +360,19 @@ async function addMailHeader(mail) {
 
 		let classes = ['showhide', 'ordered'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
-		for (let recip of mail.recipients) if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
+		for (let recip of mail.recipients) {
+			if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
+			else {
+				// preload the names with this bass ackwards method that continues to use the DOM as a db
+				if (esi.lsGet(`name-${recip.recipient_id}`) == null) {
+					let span = document.getElementById(`preload-${recip.recipient_id}`);
+					if (span == null) {
+						span = createEl('span', '', `preload-${recip.recipient_id}`, 'dd-none preload load_name', { from_id: recip.recipient_id });
+						body.appendChild(span);
+					}
+				}
+			}
+		}
 		elp = createEl('div', null, null, classes);
 		elp.style.order = mail.mail_id;
 		elp.appendChild(el);
@@ -374,6 +388,7 @@ async function addMailHeader(mail) {
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
 
 		document.getElementById('mail_headers').appendChild(elp);
+
 	}
 	if (mail.is_read == true) el.classList.remove('unread');
 	else el.classList.add('unread');
@@ -593,6 +608,7 @@ async function loadNames() {
 			} else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
 		await fetchNames(fetch_names);
+		document.querySelectorAll('.preload:not(.load_name)').forEach((e) => { e.remove(); });
 	} finally {
 		setTimeout(loadNames, 1000);
 	}
