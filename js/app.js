@@ -41,7 +41,7 @@ async function main() {
 
 	window.addEventListener('popstate', updateRoute);
 
-	let referrer = decodeURIComponent(new URLSearchParams(window.location.search).get('referrer') || '/folder/1');
+	let referrer = document.referrer ? new URL(document.referrer).pathname + new URL(document.referrer).search + new URL(document.referrer).hash : '';
 	if (referrer != '/') updateRoute(null, referrer);
 
 	document.getElementsByName('compose_recipients')[0].addEventListener('blur', updateComposeRecipients);
@@ -327,7 +327,7 @@ function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
 }
 
 async function fetchUnfetchedMails() {
-	let delay = 1000;
+	let delay = 250;
 	try {
 		let span = document.querySelector('.unfetched');
 		if (span == null) return; // nothing to fetch!
