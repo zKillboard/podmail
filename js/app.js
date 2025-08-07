@@ -1,4 +1,4 @@
-const githubhash = "618432f";
+const githubhash = "cc3ea9c";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -44,9 +44,7 @@ async function main() {
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
 	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
 
-
-
-
+	if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
 }
 
 async function versionCheck() {
@@ -149,19 +147,27 @@ let labels = {};
 let current_folder = 1;
 async function pm_fetchFolders() {
 	try {
-		const labels = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/labels`);
-		for (const label of labels.labels) addFolder(label, false);
+		let lastLabels = esi.lsGet('labels');
+		for (const [id, label] of (Object.entries(lastLabels) || {})) {
+			addFolder(label.esi, label.esi.mailing_list_id > 0);
+		}
+
+		const cur_labels = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/labels`);
+		for (const label of cur_labels.labels) addFolder(label, false);
 
 		const subs = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/lists`);
 		for (const sub of subs) addFolder(sub, true);
+
+		esi.lsSet('labels', labels);
 	} catch (e) {
 		console.log(e);
+		showToast('Error fetching your labels and mailing list subscriptions... :(')
 	} finally {
 		setTimeout(pm_fetchFolders, 300000);
 	}
 }
 
-async function addFolder(label, mailing_list = false) {
+function addFolder(label, mailing_list = false) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
@@ -232,12 +238,11 @@ function btn_backToFolder(replaceState = false) {
 }
 
 let headers_first_load = true;
-let folders = {};
 async function pm_fetchHeaders() {
 	let mail_headers_stored = {};
 	try {
 		if (headers_first_load) {
-			let json_str = JSON.parse(esi.lsGet('mail_headers'));
+			let json_str = esi.lsGet('mail_headers');
 			if (json_str) {
 				mail_headers = Array.from(Object.values(json_str));
 				if (mail_headers) {
@@ -281,8 +286,7 @@ async function pm_fetchHeaders() {
 		} while (mails.length >= 50);
 		setTimeout(loadNames, 1);
 
-		esi.lsSet('mail_headers', JSON.stringify(mail_headers_stored));
-		esi.lsGet('folders', JSON.stringify(folders));
+		esi.lsSet('mail_headers', mail_headers_stored);
 
 		if (mail_ids.size) {
 			// Cleanup removed mails
@@ -303,11 +307,7 @@ async function pm_fetchHeaders() {
 
 function addMail(mail) {
 	if (!mail.labels) return;
-	for (const label_id of mail.labels) {
-		if (folders[label_id] == null) folders[label_id] = {};
-		if (folders[label_id].mail_ids == null) folders[label_id].mail_ids = [];
-		folders[label_id].mail_ids.push(mail.mail_id);
-	}
+
 	addMailHeader(mail);
 }
 
@@ -443,7 +443,7 @@ async function showMail(e, mail, forceShow = false) {
 
 		document.getElementById('mail_about_recipients').innerHTML = '';
 		for (let recip of mail.recipients) {
-			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`), null, `left-img recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id });
 			applyLeftImage(span, recip.recipient_type, recip.recipient_id, recip.recipient_id, recip.recipient_id);
 			document.getElementById('mail_about_recipients').appendChild(span);
 		}
@@ -467,16 +467,19 @@ async function showMail(e, mail, forceShow = false) {
 
 async function getMail(mail_id) {
 	mail = esi.lsGet(`mail-${mail_id}`);
-	if (mail != null) {
-		mail = JSON.parse(mail);
+	if (mail != null && typeof mail == 'object') {
 		mail.mail_id = mail_id;
 		return mail;
 	}
 
-	console.log('Fetching mail', mail_id);
-	mail = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`);
+	try {
+		console.log('Fetching mail', mail_id);
+		mail = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`);
+	} catch (e) {
+		showToast('error fetching that evemail... :(');
+	}
 	mail.mail_id = mail_id;
-	if (mail.subject) esi.lsSet(`mail-${mail_id}`, JSON.stringify(mail));
+	if (mail.subject) esi.lsSet(`mail-${mail_id}`, mail);
 	return mail;
 }
 
@@ -502,7 +505,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 		mail.read = read;
 		document.getElementById('btn_markReadStatus').dataset.read = read;
-		esi.lsSet(`mail-${mail.mail_id}`, JSON.stringify(mail));
+		esi.lsSet(`mail-${mail.mail_id}`, mail);
 	}
 }
 
@@ -641,9 +644,13 @@ function updateTime() {
 }
 
 async function updateTqStatus() {
-	let status = await esi.doRequest('https://esi.evetech.net/status/');
-	let data = await status.json();
-	setTqStatus(data);
+	try {
+		let status = await esi.doRequest('https://esi.evetech.net/status/');
+		let data = await status.json();
+		setTqStatus(data);
+	} catch (e) {
+		showToast('Error fetching  TQ Status... :(')
+	}
 }
 
 let tqstatusid = -1;
