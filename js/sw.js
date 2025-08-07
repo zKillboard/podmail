@@ -5,7 +5,7 @@ const urlsToCache = [
 	'/css/app.css',
 	'/js/app.js',
 	'/js/esi.js',
-	'/js/SimpleEsi.js',
+	'/js/SimpleESI.js',
 	'/js/sw.js',
 	'/favicon.ico',
 	'/README.md',
