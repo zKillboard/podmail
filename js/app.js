@@ -1,4 +1,4 @@
-const githubhash = "50723dd";
+const githubhash = "b039d51";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -367,7 +367,7 @@ async function addMailHeader(mail) {
 				if (esi.lsGet(`name-${recip.recipient_id}`) == null) {
 					let span = document.getElementById(`preload-${recip.recipient_id}`);
 					if (span == null) {
-						span = createEl('span', '', `preload-${recip.recipient_id}`, 'dd-none preload load_name', { from_id: recip.recipient_id });
+						span = createEl('span', '', `preload-${recip.recipient_id}`, 'd-none preload load_name', { from_id: recip.recipient_id });
 						body.appendChild(span);
 					}
 				}
