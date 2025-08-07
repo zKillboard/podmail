@@ -148,7 +148,7 @@ let current_folder = 1;
 async function pm_fetchFolders() {
 	try {
 		let lastLabels = esi.lsGet('labels');
-		for (const [id, label] of (Object.entries(lastLabels) || {})) {
+		for (const [id, label] of (Object.entries(lastLabels || {}))) {
 			addFolder(label.esi, label.esi.mailing_list_id > 0);
 		}
 
