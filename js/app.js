@@ -1,4 +1,4 @@
-const githubhash = "6e1ee2b";
+const githubhash = "2286c34";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -241,6 +241,7 @@ function btn_backToFolder(replaceState = false) {
 	showFolder(null, current_folder, false);
 }
 
+let all_highest_mail_id = -1;
 let headers_first_load = true;
 let headers_iteration_count = 0;
 async function pm_fetchHeaders() {
@@ -271,15 +272,21 @@ async function pm_fetchHeaders() {
 		for (const header of mail_headers) mail_ids.add(header.getAttribute('mail_id'));
 		mail_ids.delete(null); // this is the header row, ignore it so it doesn't get removed
 
-		let mails, last_mail_id = -1;
+		let mails, last_mail_id = Number.MAX_SAFE_INTEGER, highest_mail_id = -1;
 		do {
-			let last_mail_param = (last_mail_id == -1) ? '' : `?last_mail_id=${last_mail_id}`;
+			let last_mail_param = (last_mail_id == Number.MAX_SAFE_INTEGER) ? '' : `?last_mail_id=${last_mail_id}`;
 			mails = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail${last_mail_param}`, 'GET', esi.mimetype_json);
 
 			let ids = addAllMailsFromHeader(mails, mail_headers_stored);
-			for (const i of ids) mail_ids.delete(i);
+			for (const i of ids) {
+				highest_mail_id = Math.max(highest_mail_id, i);
+				last_mail_id = Math.min(last_mail_id, i);
+				mail_ids.delete(i);
+			}
 
-			if (mails.length > 0) last_mail_id = mails[mails.length - 1].mail_id;
+			if (mails.length > 0) {
+				//last_mail_id = mails[mails.length - 1].mail_id;
+			}
 			total_mails += mails.length;
 
 			if (total_mails >= 500) break;
@@ -300,6 +307,7 @@ async function pm_fetchHeaders() {
 		} else {
 			esi.lsSet('mail_headers_partial', mail_headers_stored);
 		}
+		all_highest_mail_id = Math.max(highest_mail_id, all_highest_mail_id);
 	} catch (e) {
 		console.log(e);
 	} finally {
@@ -321,14 +329,41 @@ function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
 		addMail(mail);
 		mail_ids.add(`${mail.mail_id}`);
 		mail_headers_stored[mail.mail_id] = mail;
+		if (all_highest_mail_id != -1 && mail.mail_id > all_highest_mail_id && mail.is_read != true) {
+			showNotification('New EveMail!', mail.subject, mail);
+		}
 	}
 
 	return mail_ids;
 }
 
+async function showNotification(title, body, mail) {
+	if (Notification.permission === 'default') {
+		await Notification.requestPermission();
+	}
+
+	if (Notification.permission === 'granted') {
+		const n = new Notification(title, {
+			body: body,
+			icon: '/img/podmail.png' // optional
+		});
+		n.onclick = () => {
+			window.focus();
+			if (mail) {
+				console.log('Notification clicked, showing mail');
+				showMail(null, mail, true);
+			}
+		}
+	} else {
+		showToast(`${title}<br/>${body}`);
+	}
+}
+
 async function fetchUnfetchedMails() {
 	let delay = 250;
 	try {
+		if (all_highest_mail_id == -1) return; // headers aren't finished loading yet after page load
+
 		let span = document.querySelector('.unfetched');
 		if (span == null) return; // nothing to fetch!
 
@@ -337,7 +372,7 @@ async function fetchUnfetchedMails() {
 		if (mail != null && mail.subject) {
 			delay = 1;
 		} else {
-			await getMail(mail_id);
+			await getMail(mail_id, false);
 		}
 		span.classList.remove('unfetched');
 	} finally {
@@ -519,7 +554,7 @@ async function showMail(e, mail, forceShow = false) {
 	}
 }
 
-async function getMail(mail_id) {
+async function getMail(mail_id, user_requested = true) {
 	mail = esi.lsGet(`mail-${mail_id}`);
 	if (mail != null && typeof mail == 'object') {
 		mail.mail_id = mail_id;
@@ -530,7 +565,7 @@ async function getMail(mail_id) {
 		console.log('Fetching mail', mail_id);
 		mail = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`);
 	} catch (e) {
-		showToast('error fetching that evemail... :(');
+		if (user_requested) showToast('error fetching that evemail... :(');
 	}
 	mail.mail_id = mail_id;
 	if (mail.subject) esi.lsSet(`mail-${mail_id}`, mail);
@@ -1033,7 +1068,7 @@ function panel_view(el_id, visible) {
 }
 
 function btn_viewRight() {
-	console.log('showing rightpanel')
+	//console.log('showing rightpanel')
 	panel_view('leftpanel', false);
 	panel_view('rightpanel', true);
 }
@@ -1042,7 +1077,7 @@ function btn_viewLeft() {
 	// if we're viewing an evemail, just go back to the folder
 	if (!document.getElementById('mail_container_full').classList.contains('d-none')) return btn_backToFolder();
 
-	console.log('showing leftpanel')
+	//console.log('showing leftpanel')
 	panel_view('leftpanel', true);
 	panel_view('rightpanel', false);
 }
@@ -1059,7 +1094,7 @@ function showToast(message, duration = 3000) {
 	// Create toast element
 	const toast = document.createElement('div');
 	toast.className = 'toast';
-	toast.textContent = message;
+	toast.innerHTML = message;
 
 	container.appendChild(toast);
 
