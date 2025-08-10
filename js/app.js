@@ -897,7 +897,7 @@ async function btn_send(e) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
 			document.getElementsByName('compose_subject')[0].value = '';
-			document.getElementById('compose_body_textarea').value = '';
+			document.getElementById('compose_body_textarea').innerHTML = '';
 			showToast('EveMail has been sent...');
 			return btn_backToFolder();
 		}
@@ -1047,7 +1047,6 @@ function btn_viewLeft() {
 	panel_view('rightpanel', false);
 }
 
-// Paste this in your main JS file
 function showToast(message, duration = 3000) {
 	// Ensure a container exists
 	let container = document.getElementById('toast-container');
