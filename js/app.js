@@ -75,11 +75,14 @@ function updateRoute(e, route = null) {
 	const path = route ?? window.location.pathname;
 	const split = path.split('/').filter(Boolean);
 
+	//let el = 
+	//const getScrollPoint = el => ({ x: el.scrollLeft, y: el.scrollTop });
+
 	switch (split[0]) {
 		case '':
 		case 'folder':
 			const new_folder_id = split.length == 1 ? 1 : split[1];
-			showFolder(null, new_folder_id);
+			showFolder(null, new_folder_id, false);
 			break;
 		case 'mail':
 			const new_mail = split.length == 1 ? 1 : split[1];
