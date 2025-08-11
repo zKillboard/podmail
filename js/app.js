@@ -522,7 +522,6 @@ async function showMail(e, mail, forceShow = false) {
 		showSection('mail_container_full');
 
 		document.getElementById('mail_body').innerHTML = '';
-		document.getElementById('mail_body').scrollTo({ top: 0 });
 
 		document.getElementById('mail_about_subject').innerHTML = mail.subject;
 		document.getElementById('mail_about_timestamp').innerHTML = mail.timestamp.replace('T', ' ').replace(':00Z', '')
@@ -557,6 +556,7 @@ async function showMail(e, mail, forceShow = false) {
 
 		checkContrast(document.getElementById('mail_body'));
 		btn_viewRight();
+		requestAnimationFrame(() => { document.getElementById('mail_all').scrollTo({ top: 0 }); });
 	}
 }
 
