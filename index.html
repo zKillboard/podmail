@@ -16,7 +16,7 @@
 </head>
 
 <body>
-	<div class=" container-fluid content">
+	<div class="container-fluid content">
 		<noscript>
 			<div class="row">
 				<div class="col">
@@ -26,17 +26,20 @@
 			</div>
 		</noscript>
 		<div id="about" class="row d-none">
-			<div class="col">
-				<h1>PodMail <small>β</small></h1>
-				<p>A web application for accessing and sending in game evemails.</p>
-				<p>
-					<button id="btn_login" class="btn btn-default btn-bind"><img src="/img/ssologin.png"
-							alt="LOG IN with EVE Online" /></button>
-				</p>
+			<div class="col-md-6 order-1 order-md-2">
+				<div class="d-flex">
+					<span class="m-auto"></span>
+					<span>
+						<button id="btn_login" class="btn btn-default btn-bind">
+							<img src="/img/ssologin.png" alt="Log in with EVE Online" />
+						</button>
+					</span>
+				</div>
 			</div>
-			<div id="readme"></div>
-			<div><a class="btn btn-secondary external-link" href='https://github.com/zkillboard/podmail'
-					target="_blank">GitHub</a>
+			<div class="col-md-6 order-2 order-md-1">
+				<span id="readme"></span>
+				<a class="btn btn-secondary external-link mt-3" href="https://github.com/zkillboard/podmail"
+					target="_blank"> GitHub </a>
 			</div>
 		</div>
 		<div id="podmail" class="d-flex flex-row d-none">
