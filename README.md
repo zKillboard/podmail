@@ -11,12 +11,14 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 * Delete mails or mark mails as read or unread 
 * Bulk selection and actions such as mark unread and delete all
 * Loads the latest 500 EVEmails (subject to increase)  
-* Displays unread counts across all folders including mailing labels not natively supported by ESI  
+* Displays unread counts across all folders including mailing lists (not natively supported by ESI)
 * Marks mails as read when opened  
 * Resolves and displays names for labels, mailing lists, characters, corporations, and alliances  
 * Links character, corporation, and alliance names in EveMails to EveWho  
 * Detects and links killmails in EveMails to zKillboard
 * UI improvements including mobile responsiveness
+* Rudimentary offline mode
+* Pre-caching of evemails related to loaded evemail headers for faster access as well as to help with offline mode and upcoming search implementation.
 
  ### Upcoming Features
 
