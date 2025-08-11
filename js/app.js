@@ -1,4 +1,4 @@
-const githubhash = "1a62b80";
+const githubhash = "069e65b";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -35,6 +35,7 @@ async function main() {
 	setTimeout(updateTqStatus, 0);
 
 	setTimeout(doAffiliation, 0);
+	addFolder({ label_id: 0, 'name': 'All' });
 	await pm_fetchFolders();
 	pm_fetchHeaders();
 	fetchUnfetchedMails();
@@ -174,26 +175,27 @@ async function pm_fetchFolders() {
 	}
 }
 
-function addFolder(label, mailing_list = false) {
+function addFolder(label, mailing_list = false, save = true) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
-	esi.lsSet(`name-${id}`, label.name);
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp';
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
+		if (save) esi.lsSet(`name-${id}`, label.name);
 
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
 		let el_count = createEl('span', '', `folder-${id}-unread`, 'unread_count');
 		if (label.name == 'Sent') el_count.classList.add('d-none'); // never show unread count in sent
 
 		el = createEl('div', null, id_str, 'folder_label', { folder_id: id }, { click: showFolder });
+		if (mailing_list) el.classList.add('mailing_list');
 		el.appendChild(el_name);
 		el.appendChild(el_count);
 
 		if (id == 1) el.classList.add('folder_selected');
 		document.getElementById('folders').appendChild(el);
-		labels[`label_${id}`] = { esi: label, el: el };
+		if (save) labels[`label_${id}`] = { esi: label, el: el };
 	}
 }
 
@@ -396,7 +398,7 @@ async function addMailHeader(mail) {
 
 		el = createEl('div', '', 'mail_header_' + mail.mail_id, ['mail_header', 'd-flex'], { mail_id: mail.mail_id }, { click: showMail });
 
-		let classes = ['showhide', 'ordered'];
+		let classes = ['showhide', 'ordered', 'folder-0'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
 		for (let recip of mail.recipients) {
 			if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
