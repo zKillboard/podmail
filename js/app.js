@@ -533,7 +533,7 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_from').appendChild(span);
 
 		document.getElementById('mail_about_recipients').innerHTML = '';
-		console.log(mail.recipients);
+
 		for (let recip of mail.recipients) {
 			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
 			if (recip.recipient_type == 'mailing_list' && esi.lsGet(`name-${recip.recipient_id}`) == null) span.innerText = 'Unknown Mailing List';
