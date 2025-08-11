@@ -1010,7 +1010,7 @@ window.alert = async function (message) {
 };
 
 function getStrOrder(str) {
-	return '1' + str.toLowerCase().slice(0, 3).split('').map(c => c.charCodeAt(0).toString().padStart(3, '0')).join('');
+	return '1' + (str || '').toLowerCase().slice(0, 3).split('').map(c => c.charCodeAt(0).toString().padStart(3, '0')).join('');
 }
 
 function getLuminance(r, g, b) {
