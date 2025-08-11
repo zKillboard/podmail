@@ -1,4 +1,4 @@
-const githubhash = "1cf0cf1";
+const githubhash = "1a62b80";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -75,11 +75,14 @@ function updateRoute(e, route = null) {
 	const path = route ?? window.location.pathname;
 	const split = path.split('/').filter(Boolean);
 
+	//let el = 
+	//const getScrollPoint = el => ({ x: el.scrollLeft, y: el.scrollTop });
+
 	switch (split[0]) {
 		case '':
 		case 'folder':
 			const new_folder_id = split.length == 1 ? 1 : split[1];
-			showFolder(null, new_folder_id);
+			showFolder(null, new_folder_id, false);
 			break;
 		case 'mail':
 			const new_mail = split.length == 1 ? 1 : split[1];
@@ -519,7 +522,6 @@ async function showMail(e, mail, forceShow = false) {
 		showSection('mail_container_full');
 
 		document.getElementById('mail_body').innerHTML = '';
-		document.getElementById('mail_body').scrollTo({ top: 0 });
 
 		document.getElementById('mail_about_subject').innerHTML = mail.subject;
 		document.getElementById('mail_about_timestamp').innerHTML = mail.timestamp.replace('T', ' ').replace(':00Z', '')
@@ -530,7 +532,7 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_from').appendChild(span);
 
 		document.getElementById('mail_about_recipients').innerHTML = '';
-		console.log(mail.recipients);
+
 		for (let recip of mail.recipients) {
 			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
 			if (recip.recipient_type == 'mailing_list' && esi.lsGet(`name-${recip.recipient_id}`) == null) span.innerText = 'Unknown Mailing List';
@@ -554,6 +556,7 @@ async function showMail(e, mail, forceShow = false) {
 
 		checkContrast(document.getElementById('mail_body'));
 		btn_viewRight();
+		requestAnimationFrame(() => { document.getElementById('mail_all').scrollTo({ top: 0 }); });
 	}
 }
 
@@ -907,12 +910,16 @@ async function btn_send(e) {
 		// Validation first
 		let recips = document.getElementsByClassName('compose_recipient');
 		if (recips.length == 0) return alert('You have not added any recipients.');
+		if (recips.length >= 50) return alert('You must have 50 recipients or less.');
 
-		let subject = document.getElementsByName('compose_subject')[0].value;
+		let subject = document.getElementsByName('compose_subject')[0].value.trim();
 		if (subject.length == 0) return alert('You have not added a subject.');
+		if (subject.length > 150) return alert('Subject must be 150 characters or less.');
 
 		let body = document.getElementById('compose_body_textarea').innerHTML;
+		body = body.replace('&nbsp;', ' ').trim();
 		if (body.length == 0) return alert('You have not added any content.');
+		if (body.length > 8000) return alert('Content must be 8000 characters or less.');
 
 		let recipients = [];
 		for (const r of recips) {
