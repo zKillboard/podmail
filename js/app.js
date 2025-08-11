@@ -907,12 +907,16 @@ async function btn_send(e) {
 		// Validation first
 		let recips = document.getElementsByClassName('compose_recipient');
 		if (recips.length == 0) return alert('You have not added any recipients.');
+		if (recips.length >= 50) return alert('You must have 50 recipients or less.');
 
-		let subject = document.getElementsByName('compose_subject')[0].value;
+		let subject = document.getElementsByName('compose_subject')[0].value.trim();
 		if (subject.length == 0) return alert('You have not added a subject.');
+		if (subject.length > 150) return alert('Subject must be 150 characters or less.');
 
 		let body = document.getElementById('compose_body_textarea').innerHTML;
+		body = body.replace('&nbsp;', ' ').trim();
 		if (body.length == 0) return alert('You have not added any content.');
+		if (body.length > 8000) return alert('Content must be 8000 characters or less.');
 
 		let recipients = [];
 		for (const r of recips) {
