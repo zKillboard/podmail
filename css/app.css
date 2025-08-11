@@ -423,3 +423,13 @@ textarea::placeholder,
 #podmail:has(#mail_container_full:not(.d-none)) #btn_viewLeft:after {
 	content: '⟵';
 }
+
+#folder_0 {
+	border-bottom: solid 1px #333;
+	margin-bottom: 0.5em;
+}
+
+.mailing_list:not(.mailing_list ~ .mailing_list) {
+	border-top: solid 1px #333;
+	margin-top: 0.5em;
+}
