@@ -524,15 +524,18 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_subject').innerHTML = mail.subject;
 		document.getElementById('mail_about_timestamp').innerHTML = mail.timestamp.replace('T', ' ').replace(':00Z', '')
 
-		// <span id="recip_id_91565688" class="compose_recipient left-img" recip_id="91565688" recip_type="character" style="order: 1117110107; --left-img: url('https://images.evetech.net/characters/91565688/portrait?size=32');">Unknown ID 91565688</span>
 		let span = createEl('span', esi.lsGet(`name-${mail.from}`) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
 		applyLeftImage(span, 'character', mail.from);
 		document.getElementById('mail_about_from').innerHTML = '';
 		document.getElementById('mail_about_from').appendChild(span);
 
 		document.getElementById('mail_about_recipients').innerHTML = '';
+		console.log(mail.recipients);
 		for (let recip of mail.recipients) {
-			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient load_name from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			if (recip.recipient_type == 'mailing_list' && esi.lsGet(`name-${recip.recipient_id}`) == null) span.innerText = 'Unknown Mailing List';
+			else if (recip.recipient_type != 'mailing_list') span.classList.add('load_name');
+
 			applyLeftImage(span, recip.recipient_type, recip.recipient_id, recip.recipient_id, recip.recipient_id);
 			document.getElementById('mail_about_recipients').appendChild(span);
 		}

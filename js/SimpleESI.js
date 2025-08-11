@@ -255,7 +255,11 @@ class SimpleESI {
 
 	lsGet(key) {
 		if (!this.whoami || !this.whoami.character_id) return null;
-		return JSON.parse(localStorage.getItem(`${this.whoami.character_id}-${key}`));
+		try {
+			return JSON.parse(localStorage.getItem(`${this.whoami.character_id}-${key}`));
+		} catch (e) {
+			return null;
+		}
 	}
 
 	lsSet(key, value) {
