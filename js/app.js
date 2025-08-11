@@ -180,6 +180,7 @@ function addFolder(label, mailing_list = false, save = true) {
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
 	if (el == null) {
+		console.log(label);
 		if (label.name == '[Corp]') label.name = 'Corp';
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
 		if (save) esi.lsSet(`name-${id}`, label.name);
@@ -224,15 +225,17 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 		if (scrollToTop) document.getElementById('mail_headers').scrollTo({ top: 0 });
 
 		let id = folder_id ?? this.getAttribute('folder_id');
+		let folder_name = labels[`label_${id}`]?.esi?.name ?? 'ML ' + folder_id;
+
 		style.innerText = `.folder-${id}.showhide {display: block;}`;
-		console.log('Switching to folder:', labels[`label_${id}`].esi.name);
+		console.log('Switching to folder:', folder_name);
 
 		Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
 		document.getElementById(`folder_${id}`).classList.add('folder_selected');
 		pushState(`/folder/${id}`);
 		current_folder = id;
 
-		document.getElementById('current_folder_name').innerText = labels[`label_${id}`].esi.name;
+		document.getElementById('current_folder_name').innerText = folder_name;
 		checkMulti();
 		btn_viewRight();
 		updateUnreadCounts();
@@ -401,8 +404,10 @@ async function addMailHeader(mail) {
 		let classes = ['showhide', 'ordered', 'folder-0'];
 		for (let id of mail.labels) classes.push(`folder-${id}`);
 		for (let recip of mail.recipients) {
-			if (recip.recipient_type == 'mailing_list') classes.push(`folder-${recip.recipient_id}`);
-			else {
+			if (recip.recipient_type == 'mailing_list') {
+				classes.push(`folder-${recip.recipient_id}`);
+				addFolder({ mailing_list_id: recip.recipient_id, 'name': `ML ${recip.recipient_id}` }, true, false);
+			} else {
 				// preload the names with this bass ackwards method that continues to use the DOM as a db
 				if (esi.lsGet(`name-${recip.recipient_id}`) == null) {
 					let span = document.getElementById(`preload-${recip.recipient_id}`);

@@ -431,5 +431,5 @@ textarea::placeholder,
 
 .mailing_list:not(.mailing_list ~ .mailing_list) {
 	border-top: solid 1px #333;
-	margin-top: 0.5em;
+	padding-top: 0.5em;
 }
