@@ -104,7 +104,14 @@ h4 {
 	background: inherit;
 }
 
-.mail_header span.from,
+.mail_header span.from {
+	min-width: 15em;
+	width: 15em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .mail_header span.timestamp {
 	min-width: 11em;
 	width: 11em;
@@ -137,43 +144,8 @@ h4 {
 	flex-flow: column;
 }
 
-@media (max-width: 600px) {
-	body {
-		width: 100% !important;
-		max-width: 100% !important;
-	}
-
-	.overflow-auto {
-		overflow: visible !important;
-	}
-
-	.mail_header.d-flex {
-		flex-direction: column;
-		border-bottom: solid 1px #ccc;
-		padding-bottom: 1rem;
-	}
-
-	.mail_header span {
-		text-align: left !important;
-	}
-
-	.xs-hideit {
-		display: none !important;
-		transition: display 1s linear;
-	}
-
-	.xs-showit {
-		display: block !important;
-	}
-
-	#leftpanel,
-	#rightpanel {
-		width: 100% !important;
-	}
-}
-
 .xs-showit {
-	display: none;
+	display: none !important;
 }
 
 .resizable-x {
@@ -433,7 +405,46 @@ textarea::placeholder,
 	margin-bottom: 0.5em;
 }
 
-.mailing_list:not(.mailing_list ~ .mailing_list) {
-	border-top: solid 1px #333;
-	padding-top: 0.5em;
+
+.mailing_list:not(.mailing_list ~ .mailing_list):before {
+	content: 'Mailing Lists';
+	display: block;
+	border-bottom: solid 1px #333;
+	font-weight: bold;
+	background-color: var(--podmail_bg_color);
+	cursor: default;
+}
+
+@media (max-width: 60em) {
+	body {
+		width: 100% !important;
+		max-width: 100% !important;
+	}
+
+	.overflow-auto {
+		overflow: visible !important;
+	}
+
+	.mail_header.d-flex {
+		flex-direction: column;
+		border-bottom: solid 1px #ccc;
+		padding-bottom: 1rem;
+	}
+
+	.mail_header span {
+		text-align: left !important;
+	}
+
+	.xs-hideit {
+		display: none !important;
+	}
+
+	.xs-showit {
+		display: block !important;
+	}
+
+	#leftpanel,
+	#rightpanel {
+		width: 100% !important;
+	}
 }
