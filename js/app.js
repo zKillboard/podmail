@@ -1155,4 +1155,5 @@ function showToast(message, duration = 3000) {
 
 	_setTimeout(() => { toast.classList.add('show'); }, 0);
 	_setTimeout(() => { toast.remove(); }, 3000);
+	toast.addEventListener('click', () => { toast.remove(); return false; });
 }
