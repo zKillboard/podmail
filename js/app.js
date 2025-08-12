@@ -976,12 +976,25 @@ async function btn_send(e) {
 			document.getElementsByName('compose_subject')[0].value = '';
 			document.getElementById('compose_body_textarea').innerHTML = '';
 			showToast('EveMail has been sent...');
+
+			fetchNewMail(parseInt(await res.text() || '0'));
 			return btn_backToFolder();
 		}
 		console.log(res);
 		alert('There was an error sending your evemail' + (res.error ? ':<br/><br/>' + res.error : ''));
 	} finally {
 		sending_evemail = false;
+	}
+}
+
+async function fetchNewMail(new_mail_id) {
+	try {
+		if (new_mail_id > 0) {
+			await addMailHeader(await getMail(new_mail_id, false));
+			updateUnreadCounts();
+		}
+	} catch (e) {
+		console.error(e);
 	}
 }
 
