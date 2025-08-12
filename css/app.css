@@ -88,6 +88,12 @@ h4 {
 	background-color: inherit;
 }
 
+.mail_header {
+	border-bottom: solid 1px #111;
+	padding-top: 0.05em;
+	padding-bottom: 0.05em;
+}
+
 .folder_selected,
 .folder_label:hover,
 .mail_header.selected,
