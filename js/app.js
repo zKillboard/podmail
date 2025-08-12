@@ -657,13 +657,11 @@ function adjustLinks(html) {
 		html = html.replace(regex, 'href="https://evewho.com/character/');
 	}
 
-	html = html.replace(/href="showinfo:/g, 'href="https://zkillboard.com/item/')
-
-
 	html = html
 		.replace(/href="opportunity:/g, REPLACE_WITH)
 		.replace(/href="localsvc:/g, REPLACE_WITH)
 		.replace(/href="helpPointer:/g, REPLACE_WITH)
+		.replace(/href="showinfo:/g, REPLACE_WITH)
 
 	return html;
 }
