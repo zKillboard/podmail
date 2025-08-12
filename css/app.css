@@ -18,8 +18,22 @@ body {
 #mail_body a,
 #mail_body a:active,
 #mail_body a:hover,
-#mail_body a:visited {
+#mail_body a:visited,
+#compose_body_textarea a,
+#compose_body_textarea a:active,
+#compose_body_textarea a:hover,
+#compose_body_textarea a:visited {
 	color: #ffff00;
+}
+
+#mail_body font[size],
+#compose_body_textarea font[size] {
+	font-size: var(--bs-body-font-size);
+}
+
+#mail_body font[color='#000000'],
+#compose_body_textarea font[color='#000000'] {
+	color: #222222 !important;
 }
 
 ::-webkit-scrollbar {

@@ -3,6 +3,7 @@ const urlsToCache = [
 	'/',
 	'/index.html',
 	'/css/app.css',
+	'/css/supports.css',
 	'/js/app.js',
 	'/js/esi.js',
 	'/js/SimpleESI.js',

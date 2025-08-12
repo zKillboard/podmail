@@ -1,4 +1,4 @@
-const githubhash = "a47695c";
+const githubhash = "b719a6e";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -227,7 +227,7 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 		let folder_name = labels[`label_${id}`]?.esi?.name ?? 'ML ' + folder_id;
 
 		style.innerText = `.folder-${id}.showhide {display: block;}`;
-		console.log('Switching to folder:', folder_name);
+		//console.log('Switching to folder:', folder_name);
 
 		Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
 		pushState(`/folder/${id}`);
@@ -273,7 +273,7 @@ async function pm_fetchHeaders() {
 	let full_iteration = (headers_iteration_count % 10 == 0);
 	headers_iteration_count++;
 	try {
-		console.log('Fetching evemail headers:', (full_iteration ? '(up to 10 pages)' : ('1 page')));
+		console.log('Fetching evemail headers:', (full_iteration ? 'up to 10 pages' : '1 page'));
 
 		let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
 		let mail_headers = document.getElementsByClassName('mail_header');
@@ -358,7 +358,7 @@ async function showNotification(title, body, mail) {
 		n.onclick = () => {
 			window.focus();
 			if (mail) {
-				console.log('Notification clicked, showing mail');
+				//console.log('Notification clicked, showing mail');
 				showMail(null, mail, true);
 			}
 		}
@@ -474,7 +474,7 @@ function mail_headers_checkbox_changed(e) {
 	if (e.stopImmediatePropagation) e.stopImmediatePropagation();
 	if (e.stopPropogation) e.stopPropogation();
 	if (e.type != 'change') return false;
-	console.log('triggered mail_headers_checkbox_changed');
+	//console.log('triggered mail_headers_checkbox_changed');
 
 	Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']`)).forEach((el) =>
 		mailCheckboxClick({ type: 'change' }, el, this.checked));
@@ -550,6 +550,8 @@ async function showMail(e, mail, forceShow = false) {
 		}
 
 		document.getElementById('mail_body').innerHTML = adjustTags(mail.body.trim());
+		document.querySelectorAll('#mail_body a[href^="http"]:not([target])')
+			.forEach(a => { a.target = '_blank'; a.rel ||= 'noopener'; });
 
 		mail.mail_id = mail_id;
 		pm_updateReadStatus(mail);
@@ -615,11 +617,7 @@ async function pm_updateReadStatus(mail, read = true) {
 // https://github.com/joaomlneto/jitaspace/blob/d3d0969245fae4f6263931f8237803b8af6da3ca/packages/tiptap-eve/Extensions/EveLink.ts#L12C1-L15C3
 function adjustTags(html) {
 	return html
-		.replace(/ style="/gi, ' stile="')
-		.replace(/ size="/gi, ' syze="')
-		//.replace(/ color="/gi, ' colour="')
 		.replace(/ color="#ff/gi, ' color="#')
-		.replace(/ color="#000000/gi, ' color="#222222')
 		.replace(/\n/g, '<br/>')
 		.replace(/href="killReport:/g, 'target=\'_blank\' href="https://zkillboard.com/kill/')
 		.replace(/href="showinfo:2\/\//g, 'href="https://evewho.com/corporation/')
@@ -638,8 +636,6 @@ function adjustTags(html) {
 		.replace(/href="showinfo:1384\/\//g, 'href="https://evewho.com/character/')
 		.replace(/href="showinfo:34574\/\//g, 'href="https://evewho.com/character/')
 		.replace(/href="showinfo:47466\/\//g, 'href="https://eveconomy.online/item/')
-		.replace(/href="http/gi, 'target=\'_blank\' href="http')
-		.replace(/href='http/gi, 'target=\'_blank\' href=\'http');
 }
 
 async function loadNames() {
@@ -810,7 +806,7 @@ function btn_replyAll(e, all_recips = true) {
 			}
 		}
 	}
-	console.log(recipients);
+	//console.log(recipients);
 
 	btn_compose('Re: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, recipients);
 }
@@ -942,7 +938,6 @@ async function btn_send(e) {
 		};
 
 		console.log('Sending eve mail')
-		console.log(msg);
 
 		let res = await esi.doAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail`, 'POST', esi.mimetype_json, JSON.stringify(msg));
 		if (res.status == 201) {
