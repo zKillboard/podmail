@@ -1,4 +1,4 @@
-const githubhash = "fd77729";
+const githubhash = "e21db20";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -93,7 +93,7 @@ function updateRoute(e, route = null) {
 			return btn_compose();
 		default:
 			console.log('unknown route');
-			showFolder(null, '1');
+			showFolder(null, '0');
 	}
 }
 
@@ -180,7 +180,6 @@ function addFolder(label, mailing_list = false, save = true) {
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
 	if (el == null) {
-		console.log(label);
 		if (label.name == '[Corp]') label.name = 'Corp';
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
 		if (save) esi.lsSet(`name-${id}`, label.name);
@@ -208,7 +207,7 @@ function updateUnreadCounts() {
 		if (folder_id == '2') continue;
 
 		let unread = document.querySelectorAll(`.folder-${folder_id} .unread`).length;
-		total_unread += unread;
+		if (folder_id != 0) total_unread += unread;
 		if (unread == 0) unread = '';
 		document.getElementById(`folder-${folder_id}-unread`).innerText = unread;
 	}
@@ -231,16 +230,17 @@ async function showFolder(e, folder_id = null, scrollToTop = true) {
 		console.log('Switching to folder:', folder_name);
 
 		Array.from(document.getElementsByClassName('folder_selected')).forEach(el => { el.classList.remove('folder_selected') });
-		document.getElementById(`folder_${id}`).classList.add('folder_selected');
 		pushState(`/folder/${id}`);
 		current_folder = id;
 
 		document.getElementById('current_folder_name').innerText = folder_name;
+		document.getElementById(`folder_${id}`).classList.add('folder_selected');
+	} catch (e) {
+		console.log(e);
+	} finally {
 		checkMulti();
 		btn_viewRight();
 		updateUnreadCounts();
-	} catch (e) {
-		console.log(e);
 	}
 }
 
