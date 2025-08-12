@@ -549,7 +549,7 @@ async function showMail(e, mail, forceShow = false) {
 			document.getElementById('mail_about_recipients').appendChild(span);
 		}
 
-		document.getElementById('mail_body').innerHTML = adjustTags(mail.body.trim());
+		document.getElementById('mail_body').innerHTML = adjustLinks(adjustTags(mail.body.trim()));
 		document.querySelectorAll('#mail_body a[href^="http"]:not([target])')
 			.forEach(a => { a.target = '_blank'; a.rel ||= 'noopener'; });
 
@@ -613,29 +613,59 @@ async function pm_updateReadStatus(mail, read = true) {
 	}
 }
 
-// [1373, 1374, 1375, 1376, 1377, 1378, 1379, 1380, 1381, 1382, 1383, 1384, 1385, 1386, 34574]
-// https://github.com/joaomlneto/jitaspace/blob/d3d0969245fae4f6263931f8237803b8af6da3ca/packages/tiptap-eve/Extensions/EveLink.ts#L12C1-L15C3
 function adjustTags(html) {
 	return html
 		.replace(/ color="#ff/gi, ' color="#')
 		.replace(/\n/g, '<br/>')
+}
+
+const STATION_TYPE_IDS = [
+	14, 54, 56, 57, 58, 59, 1529, 1530, 1531, 1926, 1927, 1928, 1929, 1930, 1931,
+	1932, 2071, 2496, 2497, 2498, 2499, 2500, 2501, 2502, 3864, 3865, 3866, 3867,
+	3868, 3869, 3870, 3871, 3872, 4023, 4024, 9856, 9857, 9867, 9868, 9873, 10795,
+	12242, 12294, 12295, 19757, 21642, 21644, 21645, 21646, 22296, 22297, 22298,
+	29323, 29387, 29388, 29389, 29390, 34325, 34326, 52678, 59956, 71361, 74397,
+];
+
+const CHARACTER_TYPE_IDS = [
+	1373, 1374, 1375, 1376, 1377, 1378, 1379, 1380, 1381, 1382, 1383, 1384, 1385,
+	1386, 34574
+];
+
+const REPLACE_WITH = ' onClick=\'showToast("An in game link without proper mapping within PodMail. Sorry..."); return false;\' href="showInfo:';
+
+// https://github.com/joaomlneto/jitaspace/blob/d3d0969245fae4f6263931f8237803b8af6da3ca/packages/tiptap-eve/Extensions/EveLink.ts#L12C1-L15C3
+// need to add showinfo for ships, stations, etc, basically any showinfo
+function adjustLinks(html) {
+	html = html
 		.replace(/href="killReport:/g, 'target=\'_blank\' href="https://zkillboard.com/kill/')
-		.replace(/href="showinfo:2\/\//g, 'href="https://evewho.com/corporation/')
+		.replace(/href="showinfo:4\/\//g, 'href="https://zkillboard.com/constellation/')
+		.replace(/href="showinfo:3\/\//g, 'href="https://zkillboard.com/region/')
 		.replace(/href="showinfo:5\/\//g, 'href="https://zkillboard.com/system/')
-		.replace(/href="showinfo:1373\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1374\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1375\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1376\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1377\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1378\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1379\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1380\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1381\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1382\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1383\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:1384\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:34574\/\//g, 'href="https://evewho.com/character/')
-		.replace(/href="showinfo:47466\/\//g, 'href="https://eveconomy.online/item/')
+		.replace(/href="showinfo:47466\/\//g, 'href="https://zkillboard.com/item/')
+		.replace(/href="showinfo:2\/\//g, 'href="https://evewho.com/corporation/')
+		.replace(/href="showinfo:16159\/\//g, 'href="https://evewho.com/alliance/')
+		.replace(/href="showinfo:30\/\//g, 'href="https://evewho.com/faction/')
+
+	for (const id of STATION_TYPE_IDS) {
+		const regex = new RegExp(`href="showinfo:${id}\\/\\/`, 'g');
+		html = html.replace(regex, 'href="https://zkillboard.com/location/');
+	}
+
+	for (const id of CHARACTER_TYPE_IDS) {
+		const regex = new RegExp(`href="showinfo:${id}\\/\\/`, 'g');
+		html = html.replace(regex, 'href="https://evewho.com/character/');
+	}
+
+	html = html.replace(/href="showinfo:/g, 'href="https://zkillboard.com/item/')
+
+
+	html = html
+		.replace(/href="opportunity:/g, REPLACE_WITH)
+		.replace(/href="localsvc:/g, REPLACE_WITH)
+		.replace(/href="helpPointer:/g, REPLACE_WITH)
+
+	return html;
 }
 
 async function loadNames() {
@@ -1110,14 +1140,6 @@ function showToast(message, duration = 3000) {
 
 	container.appendChild(toast);
 
-	_setTimeout(() => { toast.classList.add('show'); }, 10);
-
-
-	// Hide and remove after duration
-	setTimeout(hideToast, 3000);
-}
-
-function hideToast() {
-	let container = document.getElementById('toast-container');
-	if (container) container.remove();
+	_setTimeout(() => { toast.classList.add('show'); }, 0);
+	_setTimeout(() => { toast.remove(); }, 3000);
 }
