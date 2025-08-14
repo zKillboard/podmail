@@ -1,16 +1,16 @@
 const CACHE_NAME = 'PodMail-v1';
 const urlsToCache = [
-	'/',
-	'/index.html',
-	'/css/app.css',
-	'/css/supports.css',
-	'/js/app.js',
-	'/js/esi.js',
-	'/js/SimpleESI.js',
-	'/js/sw.js',
-	'/favicon.ico',
-	'/README.md',
-	'/podmail.version',
+	'/?v=3340499', // hash
+	'/index.html?v=3340499', // hash
+	'/css/app.css?v=3340499', // hash
+	'/css/supports.css?v=3340499', // hash
+	'/js/app.js?v=3340499?v=3340499', // hash
+	'/js/esi.js?v=3340499?v=3340499', // hash
+	'/js/SimpleESI.js?v=3340499?v=3340499', // hash
+	'/js/sw.js?v=3340499?v=3340499', // hash
+	'/favicon.ico?v=3340499', // hash
+	'/README.md?v=3340499', // hash
+	'/podmail.version?v=3340499', // hash
 ];
 
 self.addEventListener('install', function (event) {

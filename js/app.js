@@ -1,4 +1,4 @@
-const githubhash = "58b82a1";
+const githubhash = "3340499";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -21,7 +21,7 @@ async function main() {
 	esi.setOption('esiInFlightHandler', handleInflight);
 	esi.setOption('esiIssueHandler', handleEsiIssue);
 
-	// esi.whoami is defined and handled in auth.js
+	// esi.whoami is defined and handled in SimpleESI.js
 	if (esi.whoami == null) {
 		loadReadme('readme');
 		return document.getElementById('about').classList.remove('d-none');
@@ -34,11 +34,9 @@ async function main() {
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
 
-	setTimeout(doAffiliation, 0);
 	addFolder({ label_id: 0, 'name': 'All' });
-	await pm_fetchFolders();
-	pm_fetchHeaders();
-	fetchUnfetchedMails();
+	initFolders();
+	initHeaders();
 
 	window.addEventListener('popstate', updateRoute);
 
@@ -50,6 +48,32 @@ async function main() {
 	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
 
 	if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
+
+	startNetworkCalls();
+}
+
+async function startNetworkCalls(level = 0) {
+	try {
+		switch (level) {
+			case 0:
+				await fetchFolders();
+				break;
+			case 1:
+				await fetchHeaders();
+				break;
+			case 2:
+				//await fetchUnfetchedMails();
+				break;
+			case 3:
+				await doAffiliation();
+			default: // we're done
+				return;
+		}
+		setTimeout(startNetworkCalls.bind(null, ++level, 1));
+	} catch (e) {
+		console.log(e);
+		setTimeout(startNetworkCalls.bind(null, level), 15000);
+	}
 }
 
 async function versionCheck() {
@@ -81,8 +105,9 @@ function updateRoute(e, route = null) {
 
 	switch (split[0]) {
 		case '':
+		case '/':
 		case 'folder':
-			const new_folder_id = split.length == 1 ? 1 : split[1];
+			const new_folder_id = split.length == 1 ? 0 : split[1];
 			showFolder(null, new_folder_id, false);
 			break;
 		case 'mail':
@@ -97,16 +122,12 @@ function updateRoute(e, route = null) {
 	}
 }
 
-function btn_login() {
-	return esi.authBegin();
+async function btn_login() {
+	return await esi.authBegin();
 }
 
-function btn_logout() {
-	return esi.authLogout();
-}
-
-function btn_mails() {
-	// TODO, for mobile, show evemails
+async function btn_logout() {
+	return await esi.authLogout();
 }
 
 async function loadReadme(id) {
@@ -127,8 +148,11 @@ function fail(res) {
 }
 
 async function doAffiliation() {
+	let delay = 300000;
 	try {
 		if (esi.whoami == null) return;
+
+		console.log('Updating affiliation');
 		const aff = await esi.doJsonRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', esi.mimetype_json, JSON.stringify([`${esi.whoami.character_id}`]));
 		if (aff.length) {
 			esi.whoami.corporation_id = aff[0].corporation_id;
@@ -145,20 +169,26 @@ async function doAffiliation() {
 				const alli = await res.json();
 				esi.whoami.alliance_name = alli.name;
 			}
+			delay = 36000000;
 		}
 	} finally {
-		setTimeout(doAffiliation, 3600000);
+		setTimeout(doAffiliation, 300000);
+	}
+}
+
+function initFolders() {
+	console.log('Loading stored folders');
+	let lastLabels = esi.lsGet('labels');
+	for (const [id, label] of (Object.entries(lastLabels || {}))) {
+		addFolder(label.esi, label.esi.mailing_list_id > 0);
 	}
 }
 
 let labels = {};
 let current_folder = 1;
-async function pm_fetchFolders() {
+async function fetchFolders() {
 	try {
-		let lastLabels = esi.lsGet('labels');
-		for (const [id, label] of (Object.entries(lastLabels || {}))) {
-			addFolder(label.esi, label.esi.mailing_list_id > 0);
-		}
+		console.log('Fetching folders...');
 
 		const cur_labels = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/labels`);
 		for (const label of cur_labels.labels) addFolder(label, false);
@@ -171,7 +201,7 @@ async function pm_fetchFolders() {
 		console.log(e);
 		showToast('Error fetching your labels and mailing list subscriptions... :(')
 	} finally {
-		setTimeout(pm_fetchFolders, 300000);
+		setTimeout(fetchFolders, 300000);
 	}
 }
 
@@ -249,24 +279,16 @@ function btn_backToFolder(replaceState = false) {
 	showFolder(null, current_folder, false);
 }
 
+function initHeaders() {
+	console.log('Loading stored mail haeaders');
+	addAllMailsFromHeader(esi.lsGet('mail_headers') || {});
+	addAllMailsFromHeader(esi.lsGet('mail_headers_partial') || {});
+}
+
 let all_highest_mail_id = -1;
 let headers_first_load = true;
 let headers_iteration_count = 0;
-async function pm_fetchHeaders() {
-	try {
-		if (headers_first_load) {
-			console.log('Loading stored mail haeaders');
-			addAllMailsFromHeader(esi.lsGet('mail_headers'));
-			addAllMailsFromHeader(esi.lsGet('mail_headers_partial'));
-
-			return setTimeout(pm_fetchHeaders, 10);
-		}
-	} catch (e) {
-		console.log(e);
-	} finally {
-		headers_first_load = false;
-	}
-
+async function fetchHeaders() {
 	let mail_headers_stored = {};
 	let now = Date.now();
 	let total_mails = 0;
@@ -297,6 +319,7 @@ async function pm_fetchHeaders() {
 			}
 			total_mails += mails.length;
 
+			updateUnreadCounts();
 			if (total_mails >= 500) break;
 		} while (full_iteration && mails.length >= 50);
 		setTimeout(loadNames, 1);
@@ -320,8 +343,8 @@ async function pm_fetchHeaders() {
 		console.log(e);
 	} finally {
 		console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
-		setTimeout(updateUnreadCounts, 0);
-		setTimeout(pm_fetchHeaders, 61000);
+		setTimeout(updateUnreadCounts, 1);
+		setTimeout(fetchHeaders, 61000);
 	}
 }
 

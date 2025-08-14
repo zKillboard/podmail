@@ -66,10 +66,15 @@ body {
 	border: 2px solid #222;
 }
 
-#sitelogo,
-#charimg {
+#sitelogo {
 	height: 32px;
 	max-height: 32px;
+	margin: 0.25rem;
+}
+
+#charimg {
+	width: 32px;
+	height: 32px;
 	margin: 0.25rem;
 }
 
