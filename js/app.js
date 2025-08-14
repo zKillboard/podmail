@@ -1,4 +1,4 @@
-const githubhash = "8468a40";
+const githubhash = "bc4e324";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -16,7 +16,6 @@ function doBtnBinds() {
 async function main() {
 	// This is for localhost testing
 	if (githubhash == '') document.getElementById('podmailLink').setAttribute('href', '/?' + Date.now());
-	setTimeout(versionCheck, 5000);
 
 	esi.setOption('esiInFlightHandler', handleInflight);
 	esi.setOption('esiIssueHandler', handleEsiIssue);
@@ -67,9 +66,10 @@ async function startNetworkCalls(level = 0) {
 				await doAffiliation();
 				break;
 			case 4:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=8468a40');
+				await versionCheck();
 				break;
-			default: // we're done
+			default:
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=bc4e324');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -85,6 +85,8 @@ async function versionCheck() {
 
 		let docgithubhash = document.getElementById('html').getAttribute('githubhash');
 		let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim();
+		if (podmail_version.length > 40) return; // that's not an expected hash, are we offline?
+
 		// Check the hash, if they don't match, we need to cache-bust
 		if (githubhash != docgithubhash || githubhash != podmail_version) {
 			if (await confirm('A new version of PodMail has been detected, would you like to refresh to get the lastest version?')) {
@@ -136,7 +138,7 @@ async function btn_logout() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=8468a40');
+	let res = await fetch('/README.md?v=bc4e324');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
@@ -176,8 +178,10 @@ async function doAffiliation() {
 			}
 			delay = 36000000;
 		}
+	} catch (e) {
+		console.log(e);
 	} finally {
-		setTimeout(doAffiliation, 300000);
+		setTimeout(doAffiliation, delay);
 	}
 }
 
