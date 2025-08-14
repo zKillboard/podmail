@@ -1,51 +1,50 @@
-const CACHE_NAME = 'PodMail-v1';
+const CACHE_NAME = 'PodMail-v--hash--';
 const urlsToCache = [
-	'/', // hash
-	'/index.html', // hash
-	'/css/app.css', // hash
-	'/css/supports.css', // hash
-	'/js/app.js', // hash
-	'/js/esi.js', // hash
-	'/js/SimpleESI.js', // hash
-	'/js/sw.js', // hash
-	'/favicon.ico', // hash
-	'/README.md', // hash
-	'/podmail.version', // hash
+	'/?v=--hash--',
+	'/index.html?v=--hash--',
+	'/css/app.css?v=--hash--',
+	'/css/supports.css?v=--hash--',
+	'/js/app.js?v=--hash--',
+	'/js/esi.js?v=--hash--',
+	'/js/SimpleESI.js?v=--hash--',
+	'/js/sw.js?v=--hash--',
+	'/favicon.ico?v=--hash--',
+	'/README.md?v=--hash--'
 ];
 
-self.addEventListener('install', function (event) {
+// Install: cache all core files
+self.addEventListener('install', event => {
 	event.waitUntil(
-		caches.open(CACHE_NAME)
-			.then(function (cache) {
-				return cache.addAll(urlsToCache);
-			})
+		caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
 	);
 });
 
-self.addEventListener('fetch', function (event) {
+// Fetch: network first, fallback to cache
+self.addEventListener('fetch', event => {
 	event.respondWith(
-		caches.match(event.request)
-			.then(function (response) {
-				// Serve from cache if available
-				if (response) {
-					return response;
+		fetch(event.request)
+			.then(networkResponse => {
+				// Update the cache with the latest version
+				if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+					caches.open(CACHE_NAME).then(cache => {
+						cache.put(event.request, networkResponse.clone());
+					});
 				}
-				// Else fetch from network
-				return fetch(event.request);
+				return networkResponse.clone();
+			})
+			.catch(() => {
+				// Fallback to cache if offline or fetch fails
+				return caches.match(event.request);
 			})
 	);
 });
 
-self.addEventListener('activate', function (event) {
-	// Clean up old caches if you update your cache name
+// Activate: remove old caches
+self.addEventListener('activate', event => {
 	event.waitUntil(
-		caches.keys().then(function (cacheNames) {
+		caches.keys().then(cacheNames => {
 			return Promise.all(
-				cacheNames.filter(function (name) {
-					return name !== CACHE_NAME;
-				}).map(function (name) {
-					return caches.delete(name);
-				})
+				cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
 			);
 		})
 	);

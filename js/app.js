@@ -62,7 +62,7 @@ async function startNetworkCalls(level = 0) {
 				await fetchHeaders();
 				break;
 			case 2:
-				//await fetchUnfetchedMails();
+				await fetchUnfetchedMails();
 				break;
 			case 3:
 				await doAffiliation();
@@ -131,7 +131,7 @@ async function btn_logout() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md');
+	let res = await fetch('/README.md?v=--hash--');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
