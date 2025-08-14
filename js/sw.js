@@ -1,5 +1,6 @@
 const CACHE_NAME = 'PodMail-v--hash--';
 const urlsToCache = [
+	'/',
 	'/?v=--hash--',
 	'/index.html?v=--hash--',
 	'/css/app.css?v=--hash--',
@@ -24,7 +25,6 @@ self.addEventListener('fetch', event => {
 	event.respondWith(
 		fetch(event.request)
 			.then(networkResponse => {
-				// Update the cache with the latest version
 				if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
 					caches.open(CACHE_NAME).then(cache => {
 						cache.put(event.request, networkResponse.clone());
@@ -33,8 +33,13 @@ self.addEventListener('fetch', event => {
 				return networkResponse.clone();
 			})
 			.catch(() => {
-				// Fallback to cache if offline or fetch fails
-				return caches.match(event.request);
+				return caches.match(event.request).then(cached => {
+					// If it's in cache, return it
+					if (cached) return cached;
+
+					// If it's a navigation request, serve index.html for SPA fallback
+					return caches.match('/index.html?v=--hash--');
+				});
 			})
 	);
 });
