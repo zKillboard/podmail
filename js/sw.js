@@ -1,15 +1,15 @@
-const CACHE_NAME = 'PodMail-v2677f1e';
+const CACHE_NAME = 'PodMail-vd016881';
 const urlsToCache = [
-	'/?v=2677f1e',
-	'/index.html?v=2677f1e',
-	'/css/app.css?v=2677f1e',
-	'/css/supports.css?v=2677f1e',
-	'/js/app.js?v=2677f1e',
-	'/js/esi.js?v=2677f1e',
-	'/js/SimpleESI.js?v=2677f1e',
-	'/js/sw.js?v=2677f1e',
-	'/favicon.ico?v=2677f1e',
-	'/README.md?v=2677f1e'
+	'/?v=d016881',
+	'/index.html?v=d016881',
+	'/css/app.css?v=d016881',
+	'/css/supports.css?v=d016881',
+	'/js/app.js?v=d016881',
+	'/js/esi.js?v=d016881',
+	'/js/SimpleESI.js?v=d016881',
+	'/js/sw.js?v=d016881',
+	'/favicon.ico?v=d016881',
+	'/README.md?v=d016881'
 ];
 
 // Install: cache all core files

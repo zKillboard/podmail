@@ -1,4 +1,4 @@
-const githubhash = "2677f1e";
+const githubhash = "d016881";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -47,8 +47,6 @@ async function main() {
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
 	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
 
-	if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
-
 	startNetworkCalls();
 }
 
@@ -66,6 +64,10 @@ async function startNetworkCalls(level = 0) {
 				break;
 			case 3:
 				await doAffiliation();
+				break;
+			case 4:
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
+				break;
 			default: // we're done
 				return;
 		}
@@ -131,7 +133,7 @@ async function btn_logout() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=2677f1e');
+	let res = await fetch('/README.md?v=d016881');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
