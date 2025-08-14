@@ -47,8 +47,6 @@ async function main() {
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
 	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
 
-	if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
-
 	startNetworkCalls();
 }
 
@@ -66,6 +64,10 @@ async function startNetworkCalls(level = 0) {
 				break;
 			case 3:
 				await doAffiliation();
+				break;
+			case 4:
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
+				break;
 			default: // we're done
 				return;
 		}
