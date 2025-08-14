@@ -1,56 +1,71 @@
-const CACHE_NAME = 'PodMail-v216c98d';
-const urlsToCache = [
+const VERSION = '8468a40';
+const CACHE_NAME = `PodMail-${VERSION}`;
+const CORE = [
 	'/',
-	'/?v=216c98d',
-	'/index.html?v=216c98d',
-	'/css/app.css?v=216c98d',
-	'/css/supports.css?v=216c98d',
-	'/js/app.js?v=216c98d',
-	'/js/esi.js?v=216c98d',
-	'/js/SimpleESI.js?v=216c98d',
-	'/js/sw.js?v=216c98d',
-	'/favicon.ico?v=216c98d',
-	'/README.md?v=216c98d'
+	'/index.html?v=8468a40',
+	'/css/app.css?v=8468a40',
+	'/css/supports.css?v=8468a40',
+	'/js/app.js?v=8468a40',
+	'/js/esi.js?v=8468a40',
+	'/js/SimpleESI.js?v=8468a40',
+	'/favicon.ico?v=8468a40'
 ];
 
-// Install: cache all core files
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
 	event.waitUntil(
-		caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+		caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE))
 	);
+	self.skipWaiting();
 });
 
-// Fetch: network first, fallback to cache
-self.addEventListener('fetch', event => {
-	event.respondWith(
-		fetch(event.request)
-			.then(networkResponse => {
-				if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
-					caches.open(CACHE_NAME).then(cache => {
-						cache.put(event.request, networkResponse.clone());
-					});
-				}
-				return networkResponse.clone();
-			})
-			.catch(() => {
-				return caches.match(event.request).then(cached => {
-					// If it's in cache, return it
-					if (cached) return cached;
-
-					// If it's a navigation request, serve index.html for SPA fallback
-					return caches.match('/index.html?v=216c98d');
-				});
-			})
+self.addEventListener('activate', (event) => {
+	event.waitUntil(
+		caches.keys().then((names) =>
+			Promise.all(names.filter(n => n !== CACHE_NAME).map(n => caches.delete(n)))
+		)
 	);
+	self.clients.claim();
 });
 
-// Activate: remove old caches
-self.addEventListener('activate', event => {
-	event.waitUntil(
-		caches.keys().then(cacheNames => {
-			return Promise.all(
-				cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
-			);
-		})
-	);
+self.addEventListener('fetch', (event) => {
+	const { request } = event;
+
+	// Only handle same-origin GETs
+	if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) {
+		return; // let the browser/network handle it
+	}
+
+	// 1) Page navigations: network-first, fallback to cached index for SPA
+	if (request.mode === 'navigate') {
+		event.respondWith((async () => {
+			try {
+				const net = await fetch(request);
+				// Optionally cache the shell HTML:
+				const cache = await caches.open(CACHE_NAME);
+				cache.put(request, net.clone());
+				return net;
+			} catch {
+				// Serve the app shell when offline, ignoring query strings
+				return (await caches.match('/index.html?v=8468a40', { ignoreSearch: true })) ||
+					new Response('Offline', { status: 503 });
+			}
+		})());
+		return;
+	}
+
+	// 2) Static assets: stale-while-revalidate
+	event.respondWith((async () => {
+		const cache = await caches.open(CACHE_NAME);
+		const cached = await cache.match(request, { ignoreSearch: true });
+		const fetchPromise = fetch(request).then((net) => {
+			if (net && net.ok) cache.put(request, net.clone());
+			return net;
+		}).catch(() => null);
+
+		// Serve cache immediately if present, update in background
+		if (cached) return cached;
+
+		// Otherwise wait for network (or fail if offline)
+		return (await fetchPromise) || new Response('Offline', { status: 503 });
+	})());
 });
