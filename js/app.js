@@ -1,4 +1,4 @@
-const githubhash = "3340499";
+const githubhash = "2677f1e";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -62,7 +62,7 @@ async function startNetworkCalls(level = 0) {
 				await fetchHeaders();
 				break;
 			case 2:
-				//await fetchUnfetchedMails();
+				await fetchUnfetchedMails();
 				break;
 			case 3:
 				await doAffiliation();
@@ -131,7 +131,7 @@ async function btn_logout() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md');
+	let res = await fetch('/README.md?v=2677f1e');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 

@@ -1,51 +1,50 @@
-const CACHE_NAME = 'PodMail-v1';
+const CACHE_NAME = 'PodMail-v2677f1e';
 const urlsToCache = [
-	'/?v=3340499', // hash
-	'/index.html?v=3340499', // hash
-	'/css/app.css?v=3340499', // hash
-	'/css/supports.css?v=3340499', // hash
-	'/js/app.js?v=3340499?v=3340499', // hash
-	'/js/esi.js?v=3340499?v=3340499', // hash
-	'/js/SimpleESI.js?v=3340499?v=3340499', // hash
-	'/js/sw.js?v=3340499?v=3340499', // hash
-	'/favicon.ico?v=3340499', // hash
-	'/README.md?v=3340499', // hash
-	'/podmail.version?v=3340499', // hash
+	'/?v=2677f1e',
+	'/index.html?v=2677f1e',
+	'/css/app.css?v=2677f1e',
+	'/css/supports.css?v=2677f1e',
+	'/js/app.js?v=2677f1e',
+	'/js/esi.js?v=2677f1e',
+	'/js/SimpleESI.js?v=2677f1e',
+	'/js/sw.js?v=2677f1e',
+	'/favicon.ico?v=2677f1e',
+	'/README.md?v=2677f1e'
 ];
 
-self.addEventListener('install', function (event) {
+// Install: cache all core files
+self.addEventListener('install', event => {
 	event.waitUntil(
-		caches.open(CACHE_NAME)
-			.then(function (cache) {
-				return cache.addAll(urlsToCache);
-			})
+		caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
 	);
 });
 
-self.addEventListener('fetch', function (event) {
+// Fetch: network first, fallback to cache
+self.addEventListener('fetch', event => {
 	event.respondWith(
-		caches.match(event.request)
-			.then(function (response) {
-				// Serve from cache if available
-				if (response) {
-					return response;
+		fetch(event.request)
+			.then(networkResponse => {
+				// Update the cache with the latest version
+				if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+					caches.open(CACHE_NAME).then(cache => {
+						cache.put(event.request, networkResponse.clone());
+					});
 				}
-				// Else fetch from network
-				return fetch(event.request);
+				return networkResponse.clone();
+			})
+			.catch(() => {
+				// Fallback to cache if offline or fetch fails
+				return caches.match(event.request);
 			})
 	);
 });
 
-self.addEventListener('activate', function (event) {
-	// Clean up old caches if you update your cache name
+// Activate: remove old caches
+self.addEventListener('activate', event => {
 	event.waitUntil(
-		caches.keys().then(function (cacheNames) {
+		caches.keys().then(cacheNames => {
 			return Promise.all(
-				cacheNames.filter(function (name) {
-					return name !== CACHE_NAME;
-				}).map(function (name) {
-					return caches.delete(name);
-				})
+				cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
 			);
 		})
 	);
