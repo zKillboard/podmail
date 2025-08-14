@@ -85,6 +85,8 @@ async function versionCheck() {
 
 		let docgithubhash = document.getElementById('html').getAttribute('githubhash');
 		let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim();
+		if (podmail_version.length > 40) return; // that's not an expected hash, are we offline?
+
 		// Check the hash, if they don't match, we need to cache-bust
 		if (githubhash != docgithubhash || githubhash != podmail_version) {
 			if (await confirm('A new version of PodMail has been detected, would you like to refresh to get the lastest version?')) {
