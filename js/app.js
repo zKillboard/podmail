@@ -30,6 +30,7 @@ async function main() {
 
 	document.getElementById('charname').innerHTML = esi.whoami.name;
 	document.getElementById('charimg').setAttribute('src', `https://images.evetech.net/characters/${esi.whoami.character_id}/portrait?size=32`);
+	document.getElementById('charimg').setAttribute('alt', esi.whoami.name);
 
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
@@ -66,7 +67,7 @@ async function startNetworkCalls(level = 0) {
 				await doAffiliation();
 				break;
 			case 4:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/js/sw.js');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=--hash--');
 				break;
 			default: // we're done
 				return;
@@ -80,6 +81,8 @@ async function startNetworkCalls(level = 0) {
 
 async function versionCheck() {
 	try {
+		if (window.location.hostname == 'localhost') return;
+
 		let docgithubhash = document.getElementById('html').getAttribute('githubhash');
 		let podmail_version = (await (await (await fetch('/podmail.version?' + Date.now()))).text()).trim();
 		// Check the hash, if they don't match, we need to cache-bust
@@ -448,7 +451,7 @@ async function addMailHeader(mail) {
 		elp.appendChild(el);
 
 		//  createEl(tag, innerHTML, id = null, classes = [], attributes = {}, events = {}) {
-		let chk = createEl('input', '', `mail-checkbox-${mail.mail_id}`, 'mail_checkbox form_check_input unfetched', { type: 'checkbox', mail_id: mail.mail_id }, { click: mailCheckboxClick, change: mailCheckboxClick });
+		let chk = createEl('input', '', `mail-checkbox-${mail.mail_id}`, 'mail_checkbox form_check_input unfetched', { type: 'checkbox', mail_id: mail.mail_id, 'aria-label': 'unchecked' }, { click: mailCheckboxClick, change: mailCheckboxClick });
 		let chkspan = createEl('span', '', `span-chk-${mail.mail_id}`, 'span_chk form-check', { mail_id: mail.mail_id }, { click: mailCheckboxClick });
 		chkspan.appendChild(chk);
 		el.appendChild(chkspan);
@@ -479,6 +482,7 @@ function mailCheckboxClick(e, tthis = null, forceSelectionTo = null) {
 	if (header) {
 		if (tthis.checked) header.classList.add('selected');
 		else header.classList.remove('selected');
+		tthis.setAttribute('aria-label', (tthis.checked ? 'checked' : 'unchecked'));
 	}
 
 	if (forceSelectionTo === null) checkMulti();
