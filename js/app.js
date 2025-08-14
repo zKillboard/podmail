@@ -97,16 +97,12 @@ function updateRoute(e, route = null) {
 	}
 }
 
-function btn_login() {
-	return esi.authBegin();
+async function btn_login() {
+	return await esi.authBegin();
 }
 
-function btn_logout() {
-	return esi.authLogout();
-}
-
-function btn_mails() {
-	// TODO, for mobile, show evemails
+async function btn_logout() {
+	return await esi.authLogout();
 }
 
 async function loadReadme(id) {
@@ -127,6 +123,7 @@ function fail(res) {
 }
 
 async function doAffiliation() {
+	let delay = 300000;
 	try {
 		if (esi.whoami == null) return;
 		const aff = await esi.doJsonRequest(`https://esi.evetech.net/characters/affiliation`, 'POST', esi.mimetype_json, JSON.stringify([`${esi.whoami.character_id}`]));
@@ -145,9 +142,10 @@ async function doAffiliation() {
 				const alli = await res.json();
 				esi.whoami.alliance_name = alli.name;
 			}
+			delay = 36000000;
 		}
 	} finally {
-		setTimeout(doAffiliation, 3600000);
+		setTimeout(doAffiliation, 300000);
 	}
 }
 
