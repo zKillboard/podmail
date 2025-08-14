@@ -22,6 +22,8 @@ jobs:
         sed -i -E "s|(href=\"/css/.*\.css)(\")|\1?v=${HASH}\2|g" index.html
         sed -i -E "s|githubhash=\"\"|githubhash=\"${HASH}\"|g" index.html
         sed -i -E "s|githubhash = \"\"|githubhash = \"${HASH}\"|g" js/app.js
+        sed -i -E "s|('/js/.*\.js)(')|\1?v=${HASH}\2|g" js/sw.js
+        sed -i -E "s|(', \/\/ hash)|?v=${HASH}\1|g" js/sw.js
         echo "${HASH}" > podmail.version
 
     - name: Deploy to GitHub Pages
