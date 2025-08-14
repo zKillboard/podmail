@@ -1,4 +1,4 @@
-const githubhash = "d016881";
+const githubhash = "216c98d";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -133,7 +133,7 @@ async function btn_logout() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=d016881');
+	let res = await fetch('/README.md?v=216c98d');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 

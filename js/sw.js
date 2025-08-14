@@ -1,15 +1,16 @@
-const CACHE_NAME = 'PodMail-vd016881';
+const CACHE_NAME = 'PodMail-v216c98d';
 const urlsToCache = [
-	'/?v=d016881',
-	'/index.html?v=d016881',
-	'/css/app.css?v=d016881',
-	'/css/supports.css?v=d016881',
-	'/js/app.js?v=d016881',
-	'/js/esi.js?v=d016881',
-	'/js/SimpleESI.js?v=d016881',
-	'/js/sw.js?v=d016881',
-	'/favicon.ico?v=d016881',
-	'/README.md?v=d016881'
+	'/',
+	'/?v=216c98d',
+	'/index.html?v=216c98d',
+	'/css/app.css?v=216c98d',
+	'/css/supports.css?v=216c98d',
+	'/js/app.js?v=216c98d',
+	'/js/esi.js?v=216c98d',
+	'/js/SimpleESI.js?v=216c98d',
+	'/js/sw.js?v=216c98d',
+	'/favicon.ico?v=216c98d',
+	'/README.md?v=216c98d'
 ];
 
 // Install: cache all core files
@@ -24,7 +25,6 @@ self.addEventListener('fetch', event => {
 	event.respondWith(
 		fetch(event.request)
 			.then(networkResponse => {
-				// Update the cache with the latest version
 				if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
 					caches.open(CACHE_NAME).then(cache => {
 						cache.put(event.request, networkResponse.clone());
@@ -33,8 +33,13 @@ self.addEventListener('fetch', event => {
 				return networkResponse.clone();
 			})
 			.catch(() => {
-				// Fallback to cache if offline or fetch fails
-				return caches.match(event.request);
+				return caches.match(event.request).then(cached => {
+					// If it's in cache, return it
+					if (cached) return cached;
+
+					// If it's a navigation request, serve index.html for SPA fallback
+					return caches.match('/index.html?v=216c98d');
+				});
 			})
 	);
 });
