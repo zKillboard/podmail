@@ -16,7 +16,6 @@ function doBtnBinds() {
 async function main() {
 	// This is for localhost testing
 	if (githubhash == '') document.getElementById('podmailLink').setAttribute('href', '/?' + Date.now());
-	setTimeout(versionCheck, 5000);
 
 	esi.setOption('esiInFlightHandler', handleInflight);
 	esi.setOption('esiIssueHandler', handleEsiIssue);
@@ -67,9 +66,10 @@ async function startNetworkCalls(level = 0) {
 				await doAffiliation();
 				break;
 			case 4:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=--hash--');
+				await versionCheck();
 				break;
-			default: // we're done
+			default:
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=--hash--');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -176,8 +176,10 @@ async function doAffiliation() {
 			}
 			delay = 36000000;
 		}
+	} catch (e) {
+		console.log(e);
 	} finally {
-		setTimeout(doAffiliation, 300000);
+		setTimeout(doAffiliation, delay);
 	}
 }
 
