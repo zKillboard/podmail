@@ -134,7 +134,12 @@ async function btn_login() {
 }
 
 async function btn_logout() {
-	return await esi.authLogout();
+	if (await confirm('Are you sure you want to logout?')) setTimeout(btn_logout_datacheck, 100);
+}
+
+async function btn_logout_datacheck() {
+	let not_destructive = await confirm('Do you keep already fetched data for faster processing next time you login?');
+	return await esi.authLogout(!not_destructive);
 }
 
 async function loadReadme(id) {

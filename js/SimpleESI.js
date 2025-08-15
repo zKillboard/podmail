@@ -54,8 +54,16 @@ class SimpleESI {
 		this.ssoAuthUrl = 'https://login.eveonline.com/v2/oauth/authorize/';
 		this.ssoTokenUrl = 'https://login.eveonline.com/v2/oauth/token';
 
-		this.mimetypeForm = { 'Content-Type': 'application/x-www-form-urlencoded' };
-		this.mimetypeJson = { Accept: 'application/json', 'Content-Type': 'application/json' };
+		const compatability_date = '2020-01-01';
+
+		this.mimetypeForm = {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		};
+		this.mimetypeJson = {
+			Accept: 'application/json',
+			'X-Compatibility-Date': compatability_date,
+			'Content-Type': 'application/json'
+		};
 
 		this.inflight = 0;
 		this.clearAccessTokenId = -1;
@@ -78,6 +86,8 @@ class SimpleESI {
 	}
 
 	initWhoami() {
+		if (localStorage.getItem('loggedout') === 'true') return null;
+
 		let whoamiinit = localStorage.getItem('whoami');
 		this.whoami = whoamiinit == null ? null : JSON.parse(whoamiinit);
 	}
@@ -93,8 +103,10 @@ class SimpleESI {
 		}
 	}
 
-	authLogout() {
-		localStorage.clear();
+	authLogout(desctructive = true) {
+		if (desctructive) localStorage.clear();
+		else localStorage.setItem('loggedout', 'true');
+
 		window.location = '/';
 		return false;
 	}
@@ -123,6 +135,7 @@ class SimpleESI {
 		localStorage.setItem('whoami', JSON.stringify(this.whoami));
 		this.lsSet('whoami', this.whoami);
 		this.lsSet('authed_json', json);
+		localStorage.removeItem('loggedout')
 
 		window.location = '/';
 	}
