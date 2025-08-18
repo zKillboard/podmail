@@ -1,4 +1,4 @@
-const githubhash = "b9e0994";
+const githubhash = "088a6c3";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -69,7 +69,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=b9e0994');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=088a6c3');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -143,7 +143,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=b9e0994');
+	let res = await fetch('/README.md?v=088a6c3');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
@@ -1052,7 +1052,7 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
 		esi.lsDel(`mail-${mail_id}`);
-		btn_backToFolder();
+		if (mail_id == current_mail_id) btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
 }
