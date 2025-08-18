@@ -1052,7 +1052,7 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
 		esi.lsDel(`mail-${mail_id}`);
-		btn_backToFolder();
+		if (mail_id == current_mail_id) btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
 }
