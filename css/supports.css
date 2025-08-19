@@ -2,6 +2,6 @@
 
 	#mail_body font[size],
 	#compose_body_textarea font[size] {
-		font-size: calc(var(--bs-body-font-size) * (attr(size type(<number>), 12) / 12));
+		font-size: calc(var(--bs-body-font-size) * (attr(size type(<number>), 14) / 14));
 	}
 }
