@@ -20,12 +20,12 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 * Rudimentary offline mode
 * Pre-caching of evemails related to loaded evemail headers for faster access as well as to help with offline mode and upcoming search implementation.
 * Adjusts font sizes based on browser defaults (on browsers that support advanced attr handling, Firefox is currently not one of them)
+* Compose mail formatting, bold, italic, links, colors, etc.
 
  ### Upcoming Features
 
 * Multiple characters!  Have multiple characters logged in and check evemail on each with just a couple of clicks.
 * Cross-Tab communication, for those with multiple tabs of PodMail open, ensuring only one tab makes fetches and communicats this to other tabs
-* Compose mail formatting, bold, italic, links, colors, etc.
 * For offline mode, queueing events to happen later, such as sending an evemail or deleting evemail
 * Option for PodMail trash (since in game Trash is not exposed properly)
 * Configure the total amount of evemails to load (default 500)
