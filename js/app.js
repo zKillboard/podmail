@@ -1,4 +1,4 @@
-const githubhash = "030978e";
+const githubhash = "ded5cdb";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -159,7 +159,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=030978e');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=ded5cdb');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -233,7 +233,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=030978e');
+	let res = await fetch('/README.md?v=ded5cdb');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
