@@ -1,7 +1,8 @@
-const githubhash = "c698294";
+const githubhash = "030978e";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
+let quill;
 
 function doBtnBinds() {
 	// bind buttons with class btn-bind to a function equivalent to the button's id
@@ -47,7 +48,96 @@ async function main() {
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
 	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
 
+	initQuill();
 	startNetworkCalls();
+}
+
+async function initQuill() {
+	try {
+		const ColorStyle = Quill.import('attributors/style/color');
+		Quill.register(ColorStyle, true);
+
+		quill = new Quill('#compose_body_textarea', {
+			theme: 'snow',
+			modules: {
+				toolbar: [
+					['bold', 'italic', 'underline', 'link', 'clean'],
+					[{ 'color': [] }]
+				]
+			},
+			formats: ['bold', 'italic', 'underline', 'color', 'link']
+		});
+		quill.root.setAttribute('spellcheck', 'false');
+
+		quill.root.addEventListener('paste', (e) => {
+			e.preventDefault();
+			let raw = e.clipboardData.getData('text/plain');
+			raw = raw.replaceAll(
+				/rgba?\s*\((\s*\d+)\s*,(\s*\d+)\s*,(\s*\d+)(?:\s*,\s*[\d.]+\s*)?\)/g,
+				(_, r, g, b) => `rgb(${r},${g},${b})`
+			);
+
+
+			console.log(raw.replace(/\n/g, '|\n'));
+			raw = raw.replace(/\n/g, '<br/>');
+			console.log(raw);
+			quill.clipboard.dangerouslyPasteHTML(raw);
+		});
+
+		// Preserve inline style="color:..."
+		quill.clipboard.addMatcher(Node.ELEMENT_NODE, (node, delta) => {
+			const color = node.style && node.style.color;
+			if (color) {
+				delta.ops.forEach(op => {
+					op.attributes = op.attributes || {};
+					op.attributes.color = color;
+				});
+			}
+			// no background handling here
+			return delta;
+		});
+
+		// Preserve <font color="..."> tags
+		quill.clipboard.addMatcher('font', (node, delta) => {
+			const color = node.getAttribute('color');
+			if (color) {
+				delta.ops.forEach(op => {
+					op.attributes = op.attributes || {};
+					op.attributes.color = color;
+				});
+			}
+			return delta;
+		});
+
+		const container = document.querySelector('#compose_body_textarea'); // or your quill container
+
+		const observer = new MutationObserver(() => {
+			document.querySelectorAll('.ql-editing').forEach(el => {
+				const rect = el.getBoundingClientRect();
+				const parentRect = container.getBoundingClientRect();
+
+				// If it sticks out on the left
+				if (rect.left < parentRect.left) {
+					el.style.left = '0px';
+				}
+
+				// If it sticks out on the right
+				if (rect.right > parentRect.right) {
+					const maxLeft = parentRect.width - rect.width;
+					el.style.left = maxLeft + 'px';
+				}
+			});
+		});
+
+		observer.observe(document.body, {
+			attributes: true,
+			subtree: true,
+			attributeFilter: ['style']
+		});
+
+	} catch (e) {
+		console.log(e);
+	}
 }
 
 async function startNetworkCalls(level = 0) {
@@ -69,7 +159,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=c698294');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=030978e');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -143,7 +233,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=c698294');
+	let res = await fetch('/README.md?v=030978e');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
@@ -882,6 +972,8 @@ function btn_replyAll(e, all_recips = true) {
 }
 
 function btn_compose(subject = '', body = '', recipients = []) {
+	if (!quill) return setTimeout(btn_compose.bind(null, subject, body, recipients), 10);
+
 	document.getElementById('btn_addAlli').disabled = (esi.whoami.alliance_id == 0);
 	document.getElementById('btn_group_ml').innerHTML = '';
 	for (const [id, label] of Object.entries(labels)) {
@@ -892,7 +984,8 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	}
 
 	if (subject.length > 0) document.getElementsByName('compose_subject')[0].value = subject;
-	if (body.length > 0) document.getElementById('compose_body_textarea').innerHTML = adjustTags(body);
+	//if (body.length > 0) document.getElementById('compose_body_textarea').innerHTML = adjustTags(body);
+	quill.clipboard.dangerouslyPasteHTML(adjustTags(body));
 
 	if (recipients.length > 0) {
 		document.getElementById('compose_recipients_calculated').innerHTML = '';
@@ -970,7 +1063,7 @@ function removeSelf() {
 function btn_reset(e) {
 	document.getElementsByName('compose_subject')[0].value = '';
 	document.getElementById('compose_body_textarea').innerHTML = '';
-	document.getElementById('compose_recipients_calculated').innerHTML = '';
+	quill.clipboard.dangerouslyPasteHTML('');
 }
 
 let sending_evemail = false;
@@ -989,7 +1082,7 @@ async function btn_send(e) {
 		if (subject.length == 0) return alert('You have not added a subject.');
 		if (subject.length > 150) return alert('Subject must be 150 characters or less.');
 
-		let body = document.getElementById('compose_body_textarea').innerHTML;
+		let body = quill.root.innerHTML;
 		body = body.replace('&nbsp;', ' ').trim();
 		if (body.length == 0) return alert('You have not added any content.');
 		if (body.length > 8000) return alert('Content must be 8000 characters or less.');
@@ -1007,14 +1100,15 @@ async function btn_send(e) {
 			subject,
 		};
 
-		console.log('Sending eve mail')
+		console.log('Sending eve mail');
+		console.log(msg);
 
 		let res = await esi.doAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail`, 'POST', esi.mimetype_json, JSON.stringify(msg));
 		if (res.status == 201) {
 			// success!
 			document.getElementById('compose_recipients_calculated').innerHTML = '';
 			document.getElementsByName('compose_subject')[0].value = '';
-			document.getElementById('compose_body_textarea').innerHTML = '';
+			quill.clipboard.dangerouslyPasteHTML('');
 			showToast('EveMail has been sent...');
 
 			fetchNewMail(parseInt(await res.text() || '0'));

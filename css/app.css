@@ -23,7 +23,21 @@ body {
 #compose_body_textarea a:active,
 #compose_body_textarea a:hover,
 #compose_body_textarea a:visited {
-	color: #ffff00;
+	color: #ffff00 !important;
+}
+
+#compose_body {
+	overflow: auto;
+	/* still scrollable */
+	scrollbar-width: none;
+	/* Firefox */
+	-ms-overflow-style: none;
+	/* IE/Edge */
+}
+
+#compose_body::-webkit-scrollbar {
+	display: none;
+	/* Chrome/Safari */
 }
 
 #mail_body font[size],
@@ -34,6 +48,10 @@ body {
 #mail_body font[color='#000000'],
 #compose_body_textarea font[color='#000000'] {
 	color: #222222 !important;
+}
+
+#mail_body p br {
+	display: none;
 }
 
 ::-webkit-scrollbar {
@@ -275,8 +293,7 @@ hr.vertical-hr {
 
 #compose_body_textarea {
 	margin: 0px;
-	min-height: 300px;
-	height: calc(100% - 1em);
+	height: calc(100% - 4em);
 }
 
 .folder-name:has(+ .unread_count:empty) {
@@ -301,7 +318,7 @@ input,
 textarea,
 #compose_body_textarea,
 #compose_body_textarea:focus {
-	background-color: #1e1e1e;
+	background-color: black;
 	color: #ffffff;
 	border: 1px solid #444;
 	padding: 0.25em;
@@ -472,4 +489,17 @@ textarea::placeholder,
 	#rightpanel {
 		width: 100% !important;
 	}
+}
+
+#compose_body,
+#compose_body .ql-editor {
+	overflow-wrap: anywhere !important;
+	word-break: break-word !important;
+	overflow-x: hidden !important;
+	max-width: 100% !important;
+	box-sizing: border-box;
+}
+
+#compose_body .ql-editor .ql-editing {
+	max-width: 100% !important;
 }
