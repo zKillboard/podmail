@@ -862,6 +862,10 @@ function btn_reply(e) {
 	btn_replyAll(e, false);
 }
 
+function btn_forward(e) {
+	btn_compose('Fwd: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, []);
+}
+
 function btn_replyAll(e, all_recips = true) {
 	let recipients = [{ type: 'character', info: { id: current_mail.from, name: esi.lsGet(`name-${current_mail.from}`) || 'Unknown Name' } }];
 
