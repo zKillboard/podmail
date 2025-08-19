@@ -1,4 +1,4 @@
-const githubhash = "088a6c3";
+const githubhash = "c698294";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -69,7 +69,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=088a6c3');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=c698294');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -143,7 +143,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=088a6c3');
+	let res = await fetch('/README.md?v=c698294');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
@@ -860,6 +860,10 @@ function clearEsiIssue() {
 
 function btn_reply(e) {
 	btn_replyAll(e, false);
+}
+
+function btn_forward(e) {
+	btn_compose('Fwd: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, []);
 }
 
 function btn_replyAll(e, all_recips = true) {
