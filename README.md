@@ -21,6 +21,7 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 * Pre-caching of evemails related to loaded evemail headers for faster access as well as to help with offline mode and upcoming search implementation.
 * Adjusts font sizes based on browser defaults (on browsers that support advanced attr handling, Firefox is currently not one of them)
 * Compose mail formatting, bold, italic, links, colors, etc.
+* Browser notifications for new evemails
 
  ### Upcoming Features
 
