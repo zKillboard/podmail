@@ -597,19 +597,28 @@ function mailCheckboxClick(e, tthis = null, forceSelectionTo = null) {
 
 function checkMulti() {
 	let displayed = document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']`).length;
-	let checked = document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`).length;
+	let checked = document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`);
+	let checked_count = checked.length;
 
-	document.getElementById('mail_headers_checkbox').checked = (checked == displayed && displayed > 0);
+	let unread = false;
+	for (const h of checked) {
+		const id = h.getAttribute('mail_id');
+		let hh = document.getElementById(`mail_header_${id}`);
+		unread |= hh.classList.contains('unread');
+		if (unread) break;
+	}
 
-	document.getElementById('btn_multi_markReadStatus').disabled = (checked == 0);
-	document.getElementById('btn_multi_deleteMail').disabled = (checked == 0);
+	document.getElementById('mail_headers_checkbox').checked = (checked_count == displayed && displayed > 0);
+
+	document.getElementById('btn_multi_markReadStatus').disabled = (checked_count == 0);
+	document.getElementById('btn_multi_markReadStatus').dataset.read = !unread;
+	document.getElementById('btn_multi_deleteMail').disabled = (checked_count == 0);
 }
 
 function mail_headers_checkbox_changed(e) {
 	if (e.stopImmediatePropagation) e.stopImmediatePropagation();
 	if (e.stopPropogation) e.stopPropogation();
 	if (e.type != 'change') return false;
-	//console.log('triggered mail_headers_checkbox_changed');
 
 	Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']`)).forEach((el) =>
 		mailCheckboxClick({ type: 'change' }, el, this.checked));
@@ -618,6 +627,7 @@ function mail_headers_checkbox_changed(e) {
 
 async function btn_multi_markReadStatus(e) {
 	let checked = Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`));
+	console.log(checked);
 	for (const el of checked) {
 		await pm_updateReadStatus(await getMail(el.getAttribute('mail_id')), this.dataset.read != "true");
 	}
