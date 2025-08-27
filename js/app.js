@@ -1,4 +1,4 @@
-const githubhash = "0477e33";
+const githubhash = "0fdf710";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -159,7 +159,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=0477e33');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=0fdf710');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -228,12 +228,12 @@ async function btn_logout() {
 }
 
 async function btn_logout_datacheck() {
-	let not_destructive = await confirm('Do you keep already fetched data for faster processing next time you login?');
+	let not_destructive = await confirm('Do you want to keep already fetched data for faster processing next time you login?');
 	return await esi.authLogout(!not_destructive);
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=0477e33');
+	let res = await fetch('/README.md?v=0fdf710');
 	document.getElementById(id).innerHTML = marked.parse(await res.text());
 }
 
@@ -398,7 +398,14 @@ async function fetchHeaders() {
 	let total_mails = 0;
 	let full_iteration = (headers_iteration_count % 10 == 0);
 	headers_iteration_count++;
+	let header_fetch_delay = 31000;
 	try {
+		// Ensure we're online and TQ status is online
+		if (esi_status != 'online') {
+			header_fetch_delay = 10000;
+			return;
+		}
+
 		console.log('Fetching evemail headers:', (full_iteration ? 'up to 10 pages' : '1 page'));
 
 		let mail_ids = new Set(); // mail_ids to be removed after loading mail headers
@@ -448,7 +455,7 @@ async function fetchHeaders() {
 	} finally {
 		console.log('Loaded', total_mails, 'mail headers in', Date.now() - now, 'ms');
 		setTimeout(updateUnreadCounts, 1);
-		setTimeout(fetchHeaders, 61000);
+		setTimeout(fetchHeaders, header_fetch_delay);
 	}
 }
 
@@ -903,12 +910,14 @@ async function updateTqStatus() {
 		let status = await esi.doRequest('https://esi.evetech.net/status/');
 		let data = await status.json();
 		setTqStatus(data);
+		return data;
 	} catch (e) {
 		showToast('Error fetching  TQ Status... :(')
 	}
 }
 
 let tqstatusid = -1;
+let esi_status = 'offline';
 function setTqStatus(data) {
 	try {
 		if (data == null || data.players == null) return;
@@ -917,10 +926,12 @@ function setTqStatus(data) {
 			tqStatus.innerHTML = ' TQ ONLINE';
 			tqStatus.classList.add('online');
 			tqStatus.classList.remove('offline');
+			esi_status = 'online';
 		} else {
 			tqStatus.innerHTML = ' TQ OFFLINE';
 			tqStatus.classList.remove('online');
 			tqStatus.classList.add('offline');
+			esi_status = 'offline';
 		}
 	} finally {
 		const nowUTC = new Date();
