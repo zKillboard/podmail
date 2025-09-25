@@ -28,7 +28,7 @@ async function main() {
 	}
 	document.getElementById('podmail').classList.remove('d-none');
 
-	document.getElementById('charname').innerHTML = esi.whoami.name;
+	document.getElementById('charname').textContent = esi.whoami.name;
 	document.getElementById('charimg').setAttribute('src', `https://images.evetech.net/characters/${esi.whoami.character_id}/portrait?size=32`);
 	document.getElementById('charimg').setAttribute('alt', esi.whoami.name);
 
@@ -234,7 +234,7 @@ async function btn_logout_datacheck() {
 
 async function loadReadme(id) {
 	let res = await fetch('/README.md?v=--hash--');
-	document.getElementById(id).innerHTML = marked.parse(await res.text());
+	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
 const timeouts = {};
@@ -556,7 +556,6 @@ async function addMailHeader(mail) {
 		elp.style.order = mail.mail_id;
 		elp.appendChild(el);
 
-		//  createEl(tag, innerHTML, id = null, classes = [], attributes = {}, events = {}) {
 		let chk = createEl('input', '', `mail-checkbox-${mail.mail_id}`, 'mail_checkbox form_check_input unfetched', { type: 'checkbox', mail_id: mail.mail_id, 'aria-label': 'unchecked' }, { click: mailCheckboxClick, change: mailCheckboxClick });
 		let chkspan = createEl('span', '', `span-chk-${mail.mail_id}`, 'span_chk form-check', { mail_id: mail.mail_id }, { click: mailCheckboxClick });
 		chkspan.appendChild(chk);
@@ -673,17 +672,17 @@ async function showMail(e, mail, forceShow = false) {
 	if ((this.getAttribute || forceShow) && mail.subject) {
 		showSection('mail_container_full');
 
-		document.getElementById('mail_body').innerHTML = '';
+		document.getElementById('mail_body').textContent = '';
 
-		document.getElementById('mail_about_subject').innerHTML = mail.subject;
-		document.getElementById('mail_about_timestamp').innerHTML = mail.timestamp.replace('T', ' ').replace(':00Z', '')
+		document.getElementById('mail_about_subject').textContent = mail.subject;
+		document.getElementById('mail_about_timestamp').textContent = mail.timestamp.replace('T', ' ').replace(':00Z', '')
 
 		let span = createEl('span', esi.lsGet(`name-${mail.from}`) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
 		applyLeftImage(span, 'character', mail.from);
-		document.getElementById('mail_about_from').innerHTML = '';
+		document.getElementById('mail_about_from').textContent = '';
 		document.getElementById('mail_about_from').appendChild(span);
 
-		document.getElementById('mail_about_recipients').innerHTML = '';
+		document.getElementById('mail_about_recipients').textContent = '';
 
 		for (let recip of mail.recipients) {
 			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
@@ -694,7 +693,7 @@ async function showMail(e, mail, forceShow = false) {
 			document.getElementById('mail_about_recipients').appendChild(span);
 		}
 
-		document.getElementById('mail_body').innerHTML = adjustLinks(adjustTags(mail.body.trim()));
+		document.getElementById('mail_body').innerHTML = purify(adjustLinks(adjustTags(mail.body.trim())));
 		document.querySelectorAll('#mail_body a[href^="http"]:not([target])')
 			.forEach(a => { a.target = '_blank'; a.rel ||= 'noopener'; });
 
@@ -820,7 +819,7 @@ async function loadNames() {
 
 			let saved_name = esi.lsGet(`name-${from_id}`);
 			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
-				el.innerHTML = esi.lsGet(`name-${from_id}`);
+				el.textContent = esi.lsGet(`name-${from_id}`);
 				el.classList.remove('load_name');
 			} else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
@@ -880,7 +879,7 @@ function applyNameToId(name_record) {
 	let id = name_record.id;
 	let from_els = document.getElementsByClassName(`from-${id}`);
 	for (const from_el of from_els) {
-		from_el.innerHTML = name_record.name;
+		from_el.textContent = name_record.name;
 		from_el.classList.remove('load_name');
 		if (from_el.classList.contains('left-img')) from_el.style.order = getStrOrder(name_record.name);
 	}
@@ -889,7 +888,7 @@ function applyNameToId(name_record) {
 
 function createEl(tag, innerHTML, id = '', classes = [], attributes = {}, events = {}) {
 	let el = document.createElement(tag);
-	el.innerHTML = innerHTML;
+	el.innerHTML = purify(innerHTML);
 
 	id = id || '';
 	if (id.length > 0) el.id = id;
@@ -910,7 +909,7 @@ function getTime() {
 }
 
 function updateTime() {
-	document.getElementById('utcClock').innerHTML = getTime();
+	document.getElementById('utcClock').textContent = getTime();
 	let seconds = new Date().getUTCSeconds();
 	setTimeout(updateTime, 1000 * (60 - seconds));
 }
@@ -933,12 +932,12 @@ function setTqStatus(data) {
 		if (data == null || data.players == null) return;
 		const tqStatus = document.getElementById('tqStatus');
 		if (data.players >= 500) {
-			tqStatus.innerHTML = ' TQ ONLINE';
+			tqStatus.textContent = ' TQ ONLINE';
 			tqStatus.classList.add('online');
 			tqStatus.classList.remove('offline');
 			esi_status = 'online';
 		} else {
-			tqStatus.innerHTML = ' TQ OFFLINE';
+			tqStatus.textContent = ' TQ OFFLINE';
 			tqStatus.classList.remove('online');
 			tqStatus.classList.add('offline');
 			esi_status = 'offline';
@@ -996,7 +995,7 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	if (!quill) return setTimeout(btn_compose.bind(null, subject, body, recipients), 10);
 
 	document.getElementById('btn_addAlli').disabled = (esi.whoami.alliance_id == 0);
-	document.getElementById('btn_group_ml').innerHTML = '';
+	document.getElementById('btn_group_ml').textContent = '';
 	for (const [id, label] of Object.entries(labels)) {
 		if (label.esi.mailing_list_id > 0) {
 			let btn = createEl('button', label.esi.name, null, 'btn btn-info mb-2', { type: 'button', ml_id: label.esi.mailing_list_id }, { click: btn_addML });
@@ -1005,11 +1004,10 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	}
 
 	if (subject.length > 0) document.getElementsByName('compose_subject')[0].value = subject;
-	//if (body.length > 0) document.getElementById('compose_body_textarea').innerHTML = adjustTags(body);
 	quill.clipboard.dangerouslyPasteHTML(adjustTags(body));
 
 	if (recipients.length > 0) {
-		document.getElementById('compose_recipients_calculated').innerHTML = '';
+		document.getElementById('compose_recipients_calculated').textContent = '';
 		for (const recip of recipients) addComposeRecipient(recip.type, recip.info);
 	}
 
@@ -1083,7 +1081,7 @@ function removeSelf() {
 
 function btn_reset(e) {
 	document.getElementsByName('compose_subject')[0].value = '';
-	document.getElementById('compose_body_textarea').innerHTML = '';
+	document.getElementById('compose_body_textarea').textContent = '';
 	quill.clipboard.dangerouslyPasteHTML('');
 }
 
@@ -1127,7 +1125,7 @@ async function btn_send(e) {
 		let res = await esi.doAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail`, 'POST', esi.mimetype_json, JSON.stringify(msg));
 		if (res.status == 201) {
 			// success!
-			document.getElementById('compose_recipients_calculated').innerHTML = '';
+			document.getElementById('compose_recipients_calculated').textContent = '';
 			document.getElementsByName('compose_subject')[0].value = '';
 			quill.clipboard.dangerouslyPasteHTML('');
 			showToast('EveMail has been sent...');
@@ -1204,7 +1202,7 @@ window.alert = async function (message) {
 		const messageEl = document.getElementById('alertModalMessage');
 		const okButton = document.getElementById('alertModalOk');
 
-		messageEl.innerHTML = message;
+		messageEl.innerHTML = purify(message);
 
 		const newButton = okButton.cloneNode(true);
 		okButton.parentNode.replaceChild(newButton, okButton);
@@ -1304,11 +1302,15 @@ function showToast(message, duration = 3000) {
 	// Create toast element
 	const toast = document.createElement('div');
 	toast.className = 'toast';
-	toast.innerHTML = message;
+	toast.innerHTML = purify(message);
 
 	container.appendChild(toast);
 
 	_setTimeout(() => { toast.classList.add('show'); }, 0);
-	_setTimeout(() => { toast.remove(); }, 3000);
+	_setTimeout(() => { toast.remove(); }, duration);
 	toast.addEventListener('click', () => { toast.remove(); return false; });
+}
+
+function purify(html) {
+	return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
 }
