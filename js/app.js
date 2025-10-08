@@ -314,7 +314,7 @@ function addFolder(label, mailing_list = false, save = true) {
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
 	if (el == null) {
-		if (label.name == '[Corp]') label.name = 'Corp';
+		if (label.name == '[Corp]') label.name = 'Corp'; 
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
 		if (save) esi.lsSet(`name-${id}`, label.name);
 
@@ -543,7 +543,7 @@ async function addMailHeader(mail) {
 				addFolder({ mailing_list_id: recip.recipient_id, 'name': `ML ${recip.recipient_id}` }, true, false);
 			} else {
 				// preload the names with this bass ackwards method that continues to use the DOM as a db
-				if (esi.lsGet(`name-${recip.recipient_id}`) == null) {
+				if (esi.lsGet(`name-${recip.recipient_id}`, true) == null) {
 					let span = document.getElementById(`preload-${recip.recipient_id}`);
 					if (span == null) {
 						span = createEl('span', '', `preload-${recip.recipient_id}`, 'd-none preload load_name', { from_id: recip.recipient_id });
@@ -561,7 +561,7 @@ async function addMailHeader(mail) {
 		chkspan.appendChild(chk);
 		el.appendChild(chkspan);
 
-		el.appendChild(createEl('span', esi.lsGet(`name-${mail.from}`), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
+		el.appendChild(createEl('span', esi.lsGet(`name-${mail.from}`, true), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
 		el.appendChild(createEl('span', mail.subject, null, 'subject flex-fill'));
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
 
@@ -677,7 +677,7 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_subject').textContent = mail.subject;
 		document.getElementById('mail_about_timestamp').textContent = mail.timestamp.replace('T', ' ').replace(':00Z', '')
 
-		let span = createEl('span', esi.lsGet(`name-${mail.from}`) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
+		let span = createEl('span', esi.lsGet(`name-${mail.from}`, true) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
 		applyLeftImage(span, 'character', mail.from);
 		document.getElementById('mail_about_from').textContent = '';
 		document.getElementById('mail_about_from').appendChild(span);
@@ -685,8 +685,8 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_recipients').textContent = '';
 
 		for (let recip of mail.recipients) {
-			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
-			if (recip.recipient_type == 'mailing_list' && esi.lsGet(`name-${recip.recipient_id}`) == null) span.innerText = 'Unknown Mailing List';
+			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`, true) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			if (recip.recipient_type == 'mailing_list' && esi.lsGet(`name-${recip.recipient_id}`, true) == null) span.innerText = 'Unknown Mailing List';
 			else if (recip.recipient_type != 'mailing_list') span.classList.add('load_name');
 
 			applyLeftImage(span, recip.recipient_type, recip.recipient_id, recip.recipient_id, recip.recipient_id);
@@ -817,9 +817,9 @@ async function loadNames() {
 		for (const el of els) {
 			let from_id = parseInt(el.getAttribute('from_id'));
 
-			let saved_name = esi.lsGet(`name-${from_id}`);
+			let saved_name = esi.lsGet(`name-${from_id}`, true);
 			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
-				el.textContent = esi.lsGet(`name-${from_id}`);
+				el.textContent = esi.lsGet(`name-${from_id}`, true);
 				el.classList.remove('load_name');
 			} else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
@@ -883,7 +883,7 @@ function applyNameToId(name_record) {
 		from_el.classList.remove('load_name');
 		if (from_el.classList.contains('left-img')) from_el.style.order = getStrOrder(name_record.name);
 	}
-	esi.lsSet(`name-${id}`, name_record.name);
+	esi.lsSet(`name-${id}`, name_record.name, true);
 }
 
 function createEl(tag, innerHTML, id = '', classes = [], attributes = {}, events = {}) {
@@ -977,12 +977,12 @@ function btn_forward(e) {
 }
 
 function btn_replyAll(e, all_recips = true) {
-	let recipients = [{ type: 'character', info: { id: current_mail.from, name: esi.lsGet(`name-${current_mail.from}`) || 'Unknown Name' } }];
+	let recipients = [{ type: 'character', info: { id: current_mail.from, name: esi.lsGet(`name-${current_mail.from}`, true) || 'Unknown Name' } }];
 
 	if (all_recips) {
 		for (const recip of current_mail.recipients) {
 			if (recip.recipient_id != esi.whoami.character_id) { // don't include ourselves
-				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: esi.lsGet(`name-${recip.recipient_id}`) || 'Unknown Name' } });
+				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: esi.lsGet(`name-${recip.recipient_id}`, true) || 'Unknown Name' } });
 			}
 		}
 	}

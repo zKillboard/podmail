@@ -266,22 +266,32 @@ class SimpleESI {
 		this.access_token = null;
 	}
 
-	lsGet(key) {
-		if (!this.whoami || !this.whoami.character_id) return null;
+	lsGet(key, global = false) {
+		let sesiKey = this.createKey(key, global);
 		try {
-			return JSON.parse(localStorage.getItem(`${this.whoami.character_id}-${key}`));
+			return JSON.parse(localStorage.getItem(sesiKey));
 		} catch (e) {
 			return null;
 		}
 	}
 
-	lsSet(key, value) {
-		if (!this.whoami || !this.whoami.character_id) return;
-		return localStorage.setItem(`${this.whoami.character_id}-${key}`, JSON.stringify(value));
+	lsSet(key, value, global = false) {
+		let sesiKey = this.createKey(key, global);
+		return localStorage.setItem(sesiKey, JSON.stringify(value));
 	}
 
-	lsDel(key) {
-		if (!this.whoami || !this.whoami.character_id) return;
-		return localStorage.removeItem(`${this.whoami.character_id}-${key}`);
+	lsDel(key, global = false) {
+		let sesiKey = this.createKey(key, global);
+		return localStorage.removeItem(sesiKey);
+	}
+
+	createKey(key, global) {
+		if (global === false) {
+			if (!this.whoami || !this.whoami.character_id) {
+				throw 'Not authenticated!';
+			}
+		} 
+		const who = global ? 'global' : this.whoami.character_id;
+		return `simpleesi-${who}-${key}`;
 	}
 }
