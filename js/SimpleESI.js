@@ -133,11 +133,32 @@ class SimpleESI {
 		this.userAgent = `PodMail (Character: ${this.whoami.name} / ${this.whoami.character_id})`;
 
 		localStorage.setItem('whoami', JSON.stringify(this.whoami));
+		localStorage.setItem(`whoami-${this.whoami.character_id}`, JSON.stringify(this.whoami));
 		this.lsSet('whoami', this.whoami);
 		this.lsSet('authed_json', json);
 		localStorage.removeItem('loggedout')
 
 		window.location = '/';
+	}
+
+	changeCharacter(character_id) {
+		// No change
+		if (this.whoami.character_id == character_id) return false;
+
+		const raw_whoami = localStorage.getItem(`whoami-${character_id}`);
+		if (!raw_whoami) {
+			throw `${character_id} is not an authenticated character!`;
+		}
+
+		const next_whoami = JSON.parse(raw_whoami);
+		if (!next_whoami) {
+			throw `${character_id} is not an authenticated character!`;
+		}
+
+		this.whoami = next_whoami;
+		localStorage.setItem('whoami', raw_whoami);
+		this.initWhoami();
+		return true;
 	}
 
 	async doJsonAuthRequest(url, method = 'GET', headers = null, body = null) {
