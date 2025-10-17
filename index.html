@@ -68,7 +68,6 @@
 							<span id="utcClock"></span><br />
 							<span id="tqStatus"></span>
 						</div>
-
 					</div>
 				</div>
 			</div>
@@ -84,12 +83,15 @@
 							<span id="esi_issue" class="esi-container esi-cross d-none">! ESI !<br />issues</span>
 							<h4 id="charname" class="pt-2 pr-0 mr-0"></h4>
 							<div class="dropdown">
-								<button class="btn dropdown-toggle pt-0 pb-0" type="button" data-bs-toggle="dropdown" data-bs-offset="0, -1" aria-expanded="false">
-									<img id="charimg"src="/img/character.jpg"></button>
+								<button class="btn dropdown-toggle pt-0 pb-0" type="button" data-bs-toggle="dropdown"
+									data-bs-offset="0, -1" aria-expanded="false">
+									<img id="charimg" src="/img/character.jpg"></button>
 								<ul class="dropdown-menu m-0 p-0">
 									<li class="dropdown-item"><span id="char_list" class="d-flex"></span></li>
-									<li><a id="btn_add_character" class="dropdown-item btn-bind text-end" href="#">Add Character</a></li>
-									<li><a id="btn_logout" class="dropdown-item btn-bind text-end" href="#">Logout</a></li>
+									<li><a id="btn_add_character" class="dropdown-item btn-bind text-end" href="#">Add
+											Character</a></li>
+									<li><a id="btn_logout" class="dropdown-item btn-bind text-end" href="#">Logout</a>
+									</li>
 								</ul>
 							</div>
 						</div>
@@ -146,14 +148,17 @@
 										<div>
 											<h4 id="mail_about_subject"></h4>
 										</div>
+										
+									</div>
+									<div class="w-100 d-flex flex-wrap">
+										<div>
+											<div class="w-100">From:</div>
+											<div id="mail_about_from" class="w-100"></div>
+										</div>
 										<div class="m-auto"></div>
 										<div id="mail_body_adjusted" data-contrast="false"><a
 												onClick="return contrastNotify();" href="">🌗</a></div>
 										<div id="mail_about_timestamp"></div>
-									</div>
-									<div class="w-100 d-flex flex-wrap">
-										<div class="w-100">From:</div>
-										<div id="mail_about_from" class="w-100"></div>
 									</div>
 									<hr class="m-1" />
 									<div class="w-100 d-flex flex-wrap">
