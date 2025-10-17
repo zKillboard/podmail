@@ -60,13 +60,15 @@
 					<div id="folders" class="flex-fill"></div>
 					<hr />
 					<div id="info" class="d-flex flex-row justify-content-center align-items-center mb-2">
-						<div class="flex-fill d-flex justify-content-center">
+						<div class="flex-fill d-flex justify-content-left">
 							<a class="btn btn-info external-link" href="https://github.com/zkillboard/podmail"
 								target="_blank">GitHub</a>
 						</div>
-						<div class="flex-fill d-flex justify-content-center">
-							<a id="btn_logout" class="btn btn-bind btn-danger">Logout</a>
+						<div style="font-size:80%; text-align: right;">
+							<span id="utcClock"></span><br />
+							<span id="tqStatus"></span>
 						</div>
+
 					</div>
 				</div>
 			</div>
@@ -77,17 +79,19 @@
 						<div class="d-flex">
 							<button type="button" class="d-block xs-showit btn btn-default btn-sm btn-bind mr-3"
 								id="btn_viewLeft"></button>
-							<h4>
-								<img class="d-inline float-start" id="charimg">
-								<h4 id="charname"></h4>
-							</h4>
 							<small class="m-auto"></small>
 							<span id="inflight_spinner" class="spinner d-none"></span>
 							<span id="esi_issue" class="esi-container esi-cross d-none">! ESI !<br />issues</span>
-							<span style="font-size:80%; text-align: right;">
-								<span id="utcClock"></span><br />
-								<span id="tqStatus"></span>
-							</span>
+							<h4 id="charname" class="pt-2 pr-0 mr-0"></h4>
+							<div class="dropdown">
+								<button class="btn dropdown-toggle pt-0 pb-0" type="button" data-bs-toggle="dropdown" data-bs-offset="0, -1" aria-expanded="false">
+									<img id="charimg"src="/img/character.jpg"></button>
+								<ul class="dropdown-menu m-0 p-0">
+									<li class="dropdown-item"><span id="char_list" class="d-flex"></span></li>
+									<li><a id="btn_add_character" class="dropdown-item btn-bind text-end" href="#">Add Character</a></li>
+									<li><a id="btn_logout" class="dropdown-item btn-bind text-end" href="#">Logout</a></li>
+								</ul>
+							</div>
 						</div>
 					</div>
 					<hr class="xs-showit d-none" />

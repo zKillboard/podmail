@@ -4,6 +4,19 @@ document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
 let quill;
 
+const timeouts = {};
+function addTimeout(f, timeout) {
+	clearTimeout(timeouts[f.name]); // clear existing timeout for same function name
+	timeouts[f.name] = _setTimeout(f, timeout);
+}
+function clearTimeouts() {
+	for (const t of Object.values(timeouts)) {
+		clearTimeout(t);
+	}
+}
+const _setTimeout = setTimeout;
+setTimeout = addTimeout;
+
 function doBtnBinds() {
 	// bind buttons with class btn-bind to a function equivalent to the button's id
 	Array.from(document.getElementsByClassName('btn-bind')).forEach((el) => {
@@ -40,6 +53,8 @@ async function main() {
 	initHeaders();
 
 	window.addEventListener('popstate', updateRoute);
+	window.addEventListener('pageshow', (event) => { if (event.persisted) window.location = '/' }); // prevent back button cache issues
+
 
 	let referrer = document.referrer ? new URL(document.referrer).pathname + new URL(document.referrer).search + new URL(document.referrer).hash : '';
 	if (referrer != '/') updateRoute(null, referrer);
@@ -50,6 +65,18 @@ async function main() {
 
 	initQuill();
 	startNetworkCalls();
+
+	let logged_in_characters = esi.lsGet('logged_in_characters', true) || {};
+	if (!(esi.whoami.character_id in logged_in_characters)) {
+		logged_in_characters[esi.whoami.character_id] = esi.whoami.name;
+		esi.lsSet('logged_in_characters', logged_in_characters, true);	
+	}
+	console.log('Logged in characters:', logged_in_characters);
+	for (const [char_id, char_name] of Object.entries(logged_in_characters)) {
+		let img = createEl('img', null, null, 'btn character-img m-0 p-0 me-2', { src: `https://images.evetech.net/characters/${char_id}/portrait?size=32`, alt: char_name, title: char_name, character_id: char_id }, {click: switchCharacter});	
+		img.style.order = getStrOrder(char_name)
+		document.getElementById('char_list').appendChild(img);
+	}
 }
 
 async function initQuill() {
@@ -220,6 +247,10 @@ async function btn_login() {
 	return await esi.authBegin();
 }
 
+async function btn_add_character() {
+	return await esi.authBegin();
+}
+
 async function btn_logout() {
 	if (await confirm('Are you sure you want to logout?')) setTimeout(btn_logout_datacheck, 100);
 }
@@ -233,14 +264,6 @@ async function loadReadme(id) {
 	let res = await fetch('/README.md?v=--hash--');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
-
-const timeouts = {};
-function addTimeout(f, timeout) {
-	clearTimeout(timeouts[f.name]); // clear existing timeout for same function name
-	timeouts[f.name] = _setTimeout(f, timeout);
-}
-const _setTimeout = setTimeout;
-setTimeout = addTimeout;
 
 function fail(res) {
 	console.error(res);
@@ -314,6 +337,7 @@ function addFolder(label, mailing_list = false, save = true) {
 		if (label.name == '[Corp]') label.name = 'Corp'; 
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
 		if (save) esi.lsSet(`name-${id}`, label.name);
+		if (mailing_list) console.log(label);
 
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
 		let el_count = createEl('span', '', `folder-${id}-unread`, 'unread_count');
@@ -683,8 +707,10 @@ async function showMail(e, mail, forceShow = false) {
 
 		for (let recip of mail.recipients) {
 			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`, true) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
-			if (recip.recipient_type == 'mailing_list' && esi.lsGet(`name-${recip.recipient_id}`, true) == null) span.innerText = 'Unknown Mailing List';
-			else if (recip.recipient_type != 'mailing_list') span.classList.add('load_name');
+			if (recip.recipient_type == 'mailing_list') {
+				span.innerText = esi.lsGet(`name-${recip.recipient_id}`, false) || 'Unknown Mailing List';
+			}
+			else span.classList.add('load_name');
 
 			applyLeftImage(span, recip.recipient_type, recip.recipient_id, recip.recipient_id, recip.recipient_id);
 			document.getElementById('mail_about_recipients').appendChild(span);
@@ -815,10 +841,10 @@ async function loadNames() {
 			let from_id = parseInt(el.getAttribute('from_id'));
 
 			let saved_name = esi.lsGet(`name-${from_id}`, true);
-			if (!saved_name) saved_name = esi.lsGet(`name-${from_id}`, false); // Could be a folder name?
+			if (!saved_name)  saved_name = esi.lsGet(`name-${from_id}`, false); // Could be a folder/ml name?			
 			
 			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
-				el.textContent = esi.lsGet(`name-${from_id}`, true);
+				el.textContent = saved_name;
 				el.classList.remove('load_name');
 			} else if (fetch_names.includes(from_id) == false) fetch_names.push(from_id);
 		}
@@ -1312,4 +1338,11 @@ function showToast(message, duration = 3000) {
 
 function purify(html) {
 	return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+}
+
+function switchCharacter() {
+	const charId = this.getAttribute('character_id');
+	if (esi.changeCharacter(charId)) {
+		window.location = '/';
+	}
 }

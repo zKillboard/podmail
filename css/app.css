@@ -503,3 +503,7 @@ textarea::placeholder,
 #compose_body .ql-editor .ql-editing {
 	max-width: 100% !important;
 }
+
+li.dropdown-item #char_list:has(> :only-child) {
+	display: none !important;
+}
