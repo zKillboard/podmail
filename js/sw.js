@@ -1,14 +1,14 @@
-const VERSION = 'd80f349';
+const VERSION = '912b43f';
 const CACHE_NAME = `PodMail-${VERSION}`;
 const CORE = [
 	'/',
-	'/index.html?v=d80f349',
-	'/css/app.css?v=d80f349',
-	'/css/supports.css?v=d80f349',
-	'/js/app.js?v=d80f349',
-	'/js/esi.js?v=d80f349',
-	'/js/SimpleESI.js?v=d80f349',
-	'/favicon.ico?v=d80f349'
+	'/index.html?v=912b43f',
+	'/css/app.css?v=912b43f',
+	'/css/supports.css?v=912b43f',
+	'/js/app.js?v=912b43f',
+	'/js/esi.js?v=912b43f',
+	'/js/SimpleESI.js?v=912b43f',
+	'/favicon.ico?v=912b43f'
 ];
 
 self.addEventListener('install', (event) => {
@@ -46,7 +46,7 @@ self.addEventListener('fetch', (event) => {
 				return net;
 			} catch {
 				// Serve the app shell when offline, ignoring query strings
-				return (await caches.match('/index.html?v=d80f349', { ignoreSearch: true })) ||
+				return (await caches.match('/index.html?v=912b43f', { ignoreSearch: true })) ||
 					new Response('Offline', { status: 503 });
 			}
 		})());
