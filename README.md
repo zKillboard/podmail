@@ -26,7 +26,7 @@ The long term goal of Podmail is to deliver an excellent experience for managing
 
  ### Upcoming Features
 
-* Cross-Tab communication, for those with multiple tabs of PodMail open, ensuring only one tab makes fetches and communicats this to other tabs
+* Cross-Tab communication, for those with multiple tabs of PodMail open, ensuring only one tab makes fetches and communicates this to other tabs
 * For offline mode, queueing events to happen later, such as sending an evemail or deleting evemail
 * Option for PodMail trash (since in game Trash is not exposed properly)
 * Configure the total amount of evemails to load (default 500)
