@@ -197,9 +197,6 @@ function updateRoute(e, route = null) {
 	const path = route ?? window.location.pathname;
 	const split = path.split('/').filter(Boolean);
 
-	//let el = 
-	//const getScrollPoint = el => ({ x: el.scrollLeft, y: el.scrollTop });
-
 	switch (split[0]) {
 		case '':
 		case '/':
@@ -818,6 +815,8 @@ async function loadNames() {
 			let from_id = parseInt(el.getAttribute('from_id'));
 
 			let saved_name = esi.lsGet(`name-${from_id}`, true);
+			if (!saved_name) saved_name = esi.lsGet(`name-${from_id}`, false); // Could be a folder name?
+			
 			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
 				el.textContent = esi.lsGet(`name-${from_id}`, true);
 				el.classList.remove('load_name');
@@ -838,7 +837,7 @@ async function fetchNames(fetch_names) {
 			for (const name_record of names) applyNameToId(name_record);
 		}
 	} catch (e) {
-		console.log(e);
+		console.log(e, fetch_names);
 		await sleep(1000);
 		if (fetch_names.length > 1) {
 			const middle = Math.ceil(fetch_names.length / 2);
