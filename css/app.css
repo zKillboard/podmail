@@ -507,3 +507,10 @@ textarea::placeholder,
 li.dropdown-item #char_list:has(> :only-child) {
 	display: none !important;
 }
+
+.ql-action:after {
+	color: white;
+	background-color: blue;
+	padding: 5px !important;
+	border-radius: 5px;
+}
