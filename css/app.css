@@ -504,13 +504,17 @@ textarea::placeholder,
 	max-width: 100% !important;
 }
 
-li.dropdown-item #char_list:has(> :only-child) {
-	display: none !important;
-}
-
 .ql-action:after {
 	color: white;
 	background-color: blue;
 	padding: 5px !important;
 	border-radius: 5px;
+}
+
+#maindropdownmenu:has(#show_names_checkbox:checked) #char_list {
+	display: none !important;
+}
+
+#maindropdownmenu:has(#show_names_checkbox:not(:checked)) .selectable-character {
+	display: none !important;
 }
