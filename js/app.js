@@ -71,11 +71,20 @@ async function main() {
 		logged_in_characters[esi.whoami.character_id] = esi.whoami.name;
 		esi.lsSet('logged_in_characters', logged_in_characters, true);	
 	}
+	// Take the list and sorts the characters alphabetically then create the dropdown entries
+	const sorted_characters = Object.entries(logged_in_characters).sort((a, b) => a[1].localeCompare(b[1]));
 	console.log('Logged in characters:', logged_in_characters);
-	for (const [char_id, char_name] of Object.entries(logged_in_characters)) {
-		let img = createEl('img', null, null, 'btn character-img m-0 p-0 me-2', { src: `https://images.evetech.net/characters/${char_id}/portrait?size=32`, alt: char_name, title: char_name, character_id: char_id }, {click: switchCharacter});	
-		img.style.order = getStrOrder(char_name)
-		document.getElementById('char_list').appendChild(img);
+	for (const [char_id, char_name] of sorted_characters) {
+		if (char_name == esi.whoami.name) continue; // skip current character
+		let li = createEl('li', null, null, 'dropdown-item p-0 m-0 text-end');
+		let a = createEl('a', null, null, 'btn text-start text-end p-2 d-inline-flex align-items-end w-100', { href: '#', character_id: char_id }, { click: switchCharacter });
+		let span_char_name = createEl('span', char_name, null, 'flex-grow-1 text-end');
+		let img = createEl('img', null, null, 'btn character-img m-0 p-0 ms-2', { src: `https://images.evetech.net/characters/${char_id}/portrait?size=32`, alt: char_name, title: char_name, character_id: char_id }, {click: switchCharacter});	
+		li.style.order = getStrOrder(char_name);
+		li.appendChild(a);
+		a.appendChild(span_char_name);
+		a.appendChild(img);
+		document.getElementById('maindropdownmenu').insertBefore(li, document.getElementById('li_add_character'));
 	}
 }
 
