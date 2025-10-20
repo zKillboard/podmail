@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="html" githubhash="fad6b59" data-bs-theme="dark">
+<html lang="en" id="html" githubhash="4463090" data-bs-theme="dark">
 
 <head>
 	<title>PodMail</title>
@@ -8,8 +8,8 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 	<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
-	<link rel="stylesheet" href="/css/app.css?v=fad6b59">
-	<link rel="stylesheet" href="/css/supports.css?v=fad6b59">
+	<link rel="stylesheet" href="/css/app.css?v=4463090">
+	<link rel="stylesheet" href="/css/supports.css?v=4463090">
 	<style id="current_folder">
 		.folder-1.showhide {
 			display: block;
@@ -46,7 +46,7 @@
 		</div>
 		<div id="podmail" class="d-flex flex-row d-none">
 			<div class="xs-hideit d-flex flex-column vh-100" id="leftpanel">
-				<div class="d-flex"><span><a id='podmailLink' href='/?v=fad6b59'><img id="sitelogo"
+				<div class="d-flex"><span><a id='podmailLink' href='/?v=4463090'><img id="sitelogo"
 								src="/img/podmail.png" title="PodMail"></a></span><span>
 						<h4>PodMail <small>β</small></h4>
 					</span>
@@ -86,9 +86,13 @@
 								<button class="btn dropdown-toggle pt-0 pb-0" type="button" data-bs-toggle="dropdown"
 									data-bs-offset="0, -1" aria-expanded="false">
 									<img id="charimg" src="/img/character.jpg"></button>
-								<ul class="dropdown-menu m-0 p-0">
-									<li class="dropdown-item"><span id="char_list" class="d-flex"></span></li>
-									<li><a id="btn_add_character" class="dropdown-item btn-bind text-end" href="#">Add
+								<ul id="maindropdownmenu" class="dropdown-menu m-0 p-0">
+									<li class="dropdown-item no-propagate" id="show_names">
+										<label for="show_names_checkbox" class="dropdown-item-text">
+											<input type="checkbox" id="show_names_checkbox"> Show Character Names </label>
+									</li>
+									<li class="dropdown-item w-100"><span id="char_list" class="d-flex  justify-content-end"></span></li>
+									<li id="li_add_character"><a id="btn_add_character" class="dropdown-item btn-bind text-end" href="#">Add
 											Character</a></li>
 									<li><a id="btn_logout" class="dropdown-item btn-bind text-end" href="#">Logout</a>
 									</li>
@@ -257,9 +261,9 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.7/purify.min.js"
 		integrity="sha512-78KH17QLT5e55GJqP76vutp1D2iAoy06WcYBXB6iBCsmO6wWzx0Qdg8EDpm8mKXv68BcvHOyeeP4wxAL0twJGQ=="
 		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script defer="" src="/js/SimpleESI.js?v=fad6b59"></script>
-	<script defer="" src="/js/esi.js?v=fad6b59"></script>
-	<script defer="" src="/js/app.js?v=fad6b59"></script>
+	<script defer="" src="/js/SimpleESI.js?v=4463090"></script>
+	<script defer="" src="/js/esi.js?v=4463090"></script>
+	<script defer="" src="/js/app.js?v=4463090"></script>
 </body>
 
 </html>

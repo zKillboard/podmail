@@ -1,4 +1,4 @@
-const githubhash = "fad6b59";
+const githubhash = "4463090";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -66,17 +66,48 @@ async function main() {
 	initQuill();
 	startNetworkCalls();
 
+	document.querySelectorAll('.no-propagate').forEach(el => {
+		el.addEventListener('click', e => e.stopPropagation());
+	});
+	var checkbox = document.getElementById('show_names_checkbox');
+	checkbox.addEventListener('change', toggleCharsNamesDisplay);
+
 	let logged_in_characters = esi.lsGet('logged_in_characters', true) || {};
 	if (!(esi.whoami.character_id in logged_in_characters)) {
 		logged_in_characters[esi.whoami.character_id] = esi.whoami.name;
 		esi.lsSet('logged_in_characters', logged_in_characters, true);	
 	}
-	console.log('Logged in characters:', logged_in_characters);
-	for (const [char_id, char_name] of Object.entries(logged_in_characters)) {
-		let img = createEl('img', null, null, 'btn character-img m-0 p-0 me-2', { src: `https://images.evetech.net/characters/${char_id}/portrait?size=32`, alt: char_name, title: char_name, character_id: char_id }, {click: switchCharacter});	
-		img.style.order = getStrOrder(char_name)
-		document.getElementById('char_list').appendChild(img);
+	// Take the list and sorts the characters alphabetically then create the dropdown entries
+	const sorted_characters = Object.entries(logged_in_characters).sort((a, b) => a[1].localeCompare(b[1]));
+	if (sorted_characters.length <= 1) {
+		document.getElementById('char_list').remove();
+		document.getElementById('show_names').remove();
+	} else {
+		for (const [char_id, char_name] of sorted_characters) {
+			if (char_name == esi.whoami.name) continue; // skip current character
+			let li = createEl('li', null, null, 'dropdown-item p-0 m-0 text-end selectable-character', { character_id: char_id });
+			let a = createEl('a', null, null, 'btn text-start text-end p-2 d-inline-flex align-items-end w-100', { href: '#', character_id: char_id }, { click: switchCharacter });
+			let span_char_name = createEl('span', char_name, null, 'flex-grow-1 text-end');
+			let img = createEl('img', null, null, 'btn character-img m-0 p-0 ms-2', { src: `https://images.evetech.net/characters/${char_id}/portrait?size=32`, alt: char_name, title: char_name, character_id: char_id }, { click: switchCharacter });
+			li.style.order = getStrOrder(char_name);
+			li.appendChild(a);
+			a.appendChild(span_char_name);
+			a.appendChild(img);
+			document.getElementById('maindropdownmenu').insertBefore(li, document.getElementById('li_add_character'));
+
+			img = createEl('img', null, null, 'btn character-img m-0 p-0 ms-2', { src: `https://images.evetech.net/characters/${char_id}/portrait?size=32`, alt: char_name, title: char_name, character_id: char_id }, { click: switchCharacter });
+			img.style.order = getStrOrder(char_name)
+			document.getElementById('char_list').appendChild(img);
+		}
+		
+		checkbox.checked = esi.lsGet('show_character_names', false) === true;
 	}
+}
+
+async function toggleCharsNamesDisplay() {
+	var checkbox = document.getElementById('show_names_checkbox');
+	console.log(checkbox.checked);
+	esi.lsSet('show_character_names', checkbox.checked, false);
 }
 
 async function initQuill() {
@@ -186,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=fad6b59');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=4463090');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -261,7 +292,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=fad6b59');
+	let res = await fetch('/README.md?v=4463090');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
