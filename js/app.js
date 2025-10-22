@@ -1374,6 +1374,6 @@ function purify(html) {
 function switchCharacter() {
 	const charId = this.getAttribute('character_id');
 	if (esi.changeCharacter(charId)) {
-		window.location = '/';
+		window.location = '/folder/1';
 	}
 }
