@@ -1,4 +1,4 @@
-const githubhash = "4463090";
+const githubhash = "7b0077b";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=4463090');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=7b0077b');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -292,7 +292,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=4463090');
+	let res = await fetch('/README.md?v=7b0077b');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -1374,6 +1374,6 @@ function purify(html) {
 function switchCharacter() {
 	const charId = this.getAttribute('character_id');
 	if (esi.changeCharacter(charId)) {
-		window.location = '/';
+		window.location = '/folder/1';
 	}
 }
