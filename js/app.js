@@ -100,7 +100,7 @@ async function main() {
 			document.getElementById('char_list').appendChild(img);
 		}
 		
-		checkbox.checked = esi.lsGet('show_character_names', false) === true;
+		checkbox.checked = esi.lsGet('show_character_names', true) === true;
 	}
 }
 
