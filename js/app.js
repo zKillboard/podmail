@@ -107,7 +107,7 @@ async function main() {
 async function toggleCharsNamesDisplay() {
 	var checkbox = document.getElementById('show_names_checkbox');
 	console.log(checkbox.checked);
-	esi.lsSet('show_character_names', checkbox.checked, false);
+	esi.lsSet('show_character_names', checkbox.checked, true);
 }
 
 async function initQuill() {
