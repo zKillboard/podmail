@@ -1,4 +1,4 @@
-const githubhash = "7b0077b";
+const githubhash = "dc4ce0d";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -100,7 +100,7 @@ async function main() {
 			document.getElementById('char_list').appendChild(img);
 		}
 		
-		checkbox.checked = esi.lsGet('show_character_names', false) === true;
+		checkbox.checked = esi.lsGet('show_character_names', true) === true;
 	}
 }
 
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=7b0077b');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=dc4ce0d');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -292,7 +292,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=7b0077b');
+	let res = await fetch('/README.md?v=dc4ce0d');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
