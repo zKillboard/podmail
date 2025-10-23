@@ -1,4 +1,4 @@
-const githubhash = "dc4ce0d";
+const githubhash = "109cfdd";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -107,7 +107,7 @@ async function main() {
 async function toggleCharsNamesDisplay() {
 	var checkbox = document.getElementById('show_names_checkbox');
 	console.log(checkbox.checked);
-	esi.lsSet('show_character_names', checkbox.checked, false);
+	esi.lsSet('show_character_names', checkbox.checked, true);
 }
 
 async function initQuill() {
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=dc4ce0d');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=109cfdd');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -292,7 +292,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=dc4ce0d');
+	let res = await fetch('/README.md?v=109cfdd');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
