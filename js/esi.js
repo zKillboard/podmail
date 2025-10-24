@@ -1,5 +1,7 @@
 let esi;
 
+const APP_NAME = 'PodMail';
+
 (() => {
 	try {
 		const localhost = window.location.hostname === 'localhost';
@@ -14,6 +16,7 @@ let esi;
 			'/auth.html';
 
 		esi = new SimpleESI({
+			appName: APP_NAME,
 			clientID: localhost ? ssoLocalClientId : ssoPublicClientId,
 			callbackUrl,
 			scopes: [
