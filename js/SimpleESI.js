@@ -40,6 +40,10 @@
 
 class SimpleESI {
 	constructor(options = {}) {
+		if (!options.appName) {
+			throw 'Option "appName" is required!';
+		}
+
 		this.options = options;
 		this.ssoClientId = this.getOption('clientID');
 		this.callbackUrl = this.getOption('callbackUrl');
@@ -130,7 +134,6 @@ class SimpleESI {
 
 		this.whoami = this.parseJwtPayload(json.access_token);
 		this.whoami.character_id = this.whoami.sub.replace('CHARACTER:EVE:', '');
-		this.userAgent = `PodMail (Character: ${this.whoami.name} / ${this.whoami.character_id})`;
 
 		localStorage.setItem('whoami', JSON.stringify(this.whoami));
 		localStorage.setItem(`whoami-${this.whoami.character_id}`, JSON.stringify(this.whoami));
@@ -181,8 +184,8 @@ class SimpleESI {
 	async doRequest(url, method = 'GET', headers = null, body = null) {
 		if (headers == null) headers = {};
 		headers['User-Agent'] = this.whoami
-			? `PodMail (Character: ${this.whoami.name} / ${this.whoami.character_id})`
-			: 'PodMail (auth in progress)';
+			? `${this.options.appName} (Character: ${this.whoami.name} / ${this.whoami.character_id})`
+			: `${this.options.appName} (auth in progress)`;
 
 		let params = {
 			method: method,
@@ -311,7 +314,7 @@ class SimpleESI {
 			if (!this.whoami || !this.whoami.character_id) {
 				throw 'Not authenticated!';
 			}
-		} 
+		}
 		const who = global ? 'global' : this.whoami.character_id;
 		return `simpleesi-${who}-${key}`;
 	}
