@@ -1,4 +1,4 @@
-## PodMail β
+## PodMail
 
 Podmail is a web application for accessing and sending in-game EVE Online EVEmails directly from your browser. Your EVEmail data is stored locally in your browser, meaning server admins cannot spy on your messages.
 
