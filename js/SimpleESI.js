@@ -202,6 +202,16 @@ class SimpleESI {
 			this.esiInFlightHandler(this.inflight);
 			res = await fetch(url, params);
 			if (res.status >= 500) this.esiIssueHandler(res);
+
+			const remain = Number(getHeader(res, 'x-ratelimit-remaining') || 999999);
+			if (remain <= 50) {
+				const delay = 6 - Math.floor(remain / 10);
+				// we're going to slow down for the next call(s)
+				const rateLimitRateMs = (delay * 1000) + parseRateLimit(getHeader(res, 'x-ratelimit-limit'));					
+				this.logger(`Rate limit nearly exceeded, waiting ${rateLimitRateMs}ms`);
+				await new Promise(resolve => setTimeout(resolve, rateLimitRateMs));
+			}
+
 			return res;
 		} catch (e) {
 			this.errorlogger(e);
@@ -318,4 +328,84 @@ class SimpleESI {
 		const who = global ? 'global' : this.whoami.character_id;
 		return `simpleesi-${who}-${key}`;
 	}
+}
+
+/**
+ * Rate limit cache
+ * @type {Object.<string, number>}
+ */
+const rateLimitCache = {};
+
+/**
+ * Converts a rate limit string (e.g., "600/15m") to milliseconds per call
+ * @param {string} rateLimit - Rate limit string in format "calls/time" where time can be s, m, h, d
+ * @returns {number} Milliseconds to wait between calls
+ * @example
+ * parseRateLimit("600/15m") // returns 1500 (wait 1.5s between calls)
+ * parseRateLimit("10000/30m") // returns 180 (wait 180ms between calls)
+ */
+function parseRateLimit(rateLimit) {
+	if (rateLimitCache[rateLimit]) {
+		return rateLimitCache[rateLimit];
+	}
+
+	const match = rateLimit.match(/^(\d+)\/(\d+)([smhd])$/);
+	if (!match) {
+		throw new Error(`Invalid rate limit format: ${rateLimit}`);
+	}
+
+	const [, calls, time, unit] = match;
+	const numCalls = Math.max(1, parseInt(calls, 10));
+	const timeValue = Math.max(1, parseInt(time, 10));
+
+	// Convert time to milliseconds
+	const unitMultipliers = {
+		's': 1000,           // seconds
+		'm': 60 * 1000,      // minutes
+		'h': 60 * 60 * 1000, // hours
+		'd': 24 * 60 * 60 * 1000 // days
+	};
+
+	const totalMs = timeValue * unitMultipliers[unit];
+	const msPerCall = Math.max(1, Math.ceil(totalMs / numCalls));
+
+	rateLimitCache[rateLimit] = msPerCall;
+	return msPerCall;
+}
+
+function getHeader(res, header) {
+	// If we've already parsed/normalized/cache headers, reuse them
+	if (!res._esiHeaderCache) {
+		const normalized = {};
+
+		// Build normalized header map
+		for (const [k, v] of res.headers) {
+			const key = k.toLowerCase().trim();
+			const value = String(v ?? "").trim();
+
+			if (!normalized[key]) normalized[key] = [];
+			normalized[key].push(value);
+		}
+
+		// Define helper getter inside the cached object
+		res._esiHeaderCache = {
+			normalized,
+
+			getBest(partial) {
+				const key = Object.keys(normalized)
+					.find(k => k.includes(partial));
+
+				if (!key) return null;
+
+				const values = normalized[key]
+					.map(v => v.trim())
+					.filter(v => v !== "" && v !== "null" && v !== "undefined");
+
+				return values.length ? values[0] : null;
+			}
+		};
+	}
+
+	// Use the cached helper to get a header
+	return res._esiHeaderCache.getBest(header);
 }
