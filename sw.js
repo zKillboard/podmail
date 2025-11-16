@@ -1,56 +1,109 @@
-const CACHE_NAME = 'PodMail-v--hash--';
+const CACHE_NAME = 'PodMail-vf22af98';
 const urlsToCache = [
 	'/',
-	'/?v=--hash--',
-	'/index.html?v=--hash--',
-	'/css/app.css?v=--hash--',
-	'/css/supports.css?v=--hash--',
-	'/js/app.js?v=--hash--',
-	'/js/esi.js?v=--hash--',
-	'/js/SimpleESI.js?v=--hash--',
-	'/js/sw.js?v=--hash--',
-	'/favicon.ico?v=--hash--',
-	'/README.md?v=--hash--'
+	'/?v=f22af98',
+	'/index.html?v=f22af98',
+	'/css/app.css?v=f22af98',
+	'/css/supports.css?v=f22af98',
+	'/js/app.js?v=f22af98',
+	'/js/esi.js?v=f22af98',
+	'/js/SimpleESI.js?v=f22af98',
+	'/favicon.ico?v=f22af98',
+	'/README.md?v=f22af98'
 ];
 
-// Install: cache all core files
+// Install: cache all core files and activate immediately
 self.addEventListener('install', event => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
 	);
+	self.skipWaiting(); // Activate new service worker immediately
 });
 
-// Fetch: network first, fallback to cache
+// Fetch: cache first for instant performance, update in background
 self.addEventListener('fetch', event => {
+	// Only handle same-origin GET requests
+	if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) {
+		return;
+	}
+
+	// Navigation requests: network-first with cache fallback
+	if (event.request.mode === 'navigate') {
+		event.respondWith(
+			fetch(event.request)
+				.then(networkResponse => {
+					if (networkResponse && networkResponse.ok) {
+						const responseToCache = networkResponse.clone();
+						caches.open(CACHE_NAME).then(cache => {
+							cache.put(event.request, responseToCache).catch(err => {
+								console.warn('Failed to cache navigation:', err);
+							});
+						});
+					}
+					return networkResponse;
+				})
+				.catch(() => {
+					return caches.match('/index.html?v=f22af98')
+						.then(cached => cached || new Response('Offline', { status: 503 }));
+				})
+		);
+		return;
+	}
+
+	// Static assets: cache-first with background update (stale-while-revalidate)
 	event.respondWith(
-		fetch(event.request)
-			.then(networkResponse => {
-				if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
-					caches.open(CACHE_NAME).then(cache => {
-						cache.put(event.request, networkResponse.clone());
-					});
-				}
-				return networkResponse.clone();
-			})
-			.catch(() => {
-				return caches.match(event.request).then(cached => {
-					// If it's in cache, return it
-					if (cached) return cached;
+		caches.match(event.request).then(cached => {
+			// Start network fetch in background
+			const fetchPromise = fetch(event.request)
+				.then(networkResponse => {
+					if (networkResponse && networkResponse.ok) {
+						const responseToCache = networkResponse.clone();
+						caches.open(CACHE_NAME).then(cache => {
+							cache.put(event.request, responseToCache).catch(err => {
+								console.warn('Failed to cache asset:', err);
+							});
+						});
+					}
+					return networkResponse;
+				})
+				.catch(() => null);
 
-					// If it's a navigation request, serve index.html for SPA fallback
-					return caches.match('/index.html?v=--hash--');
-				});
-			})
-	);
-});
-
-// Activate: remove old caches
-self.addEventListener('activate', event => {
-	event.waitUntil(
-		caches.keys().then(cacheNames => {
-			return Promise.all(
-				cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
-			);
+			// Return cached version immediately if available
+			// Otherwise wait for network
+			return cached || fetchPromise || new Response('Offline', { status: 503 });
 		})
 	);
+});
+
+// Activate: remove old caches and take control immediately
+self.addEventListener('activate', event => {
+	const currentVersion = 'f22af98';
+	
+	event.waitUntil(
+		Promise.all([
+			// Remove old cache versions
+			caches.keys().then(cacheNames => {
+				return Promise.all(
+					cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+				);
+			}),
+			// Clean up cached entries not matching current version
+			caches.open(CACHE_NAME).then(cache => {
+				return cache.keys().then(requests => {
+					return Promise.all(
+						requests.map(request => {
+							const url = new URL(request.url);
+							const versionParam = url.searchParams.get('v');
+							
+							// Delete if it has a version param that doesn't match current version
+							if (versionParam && versionParam !== currentVersion) {
+								return cache.delete(request);
+							}
+						})
+					);
+				});
+			})
+		])
+	);
+	self.clients.claim(); // Take control of all pages immediately
 });
