@@ -228,6 +228,7 @@ async function startNetworkCalls(level = 0) {
 }
 
 async function versionCheck() {
+	return; // disabling for now
 	try {
 		if (window.location.hostname == 'localhost') return;
 
