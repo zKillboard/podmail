@@ -9,7 +9,8 @@ const urlsToCache = [
 	'/js/esi.js?v=--hash--',
 	'/js/SimpleESI.js?v=--hash--',
 	'/favicon.ico?v=--hash--',
-	'/README.md?v=--hash--'
+	'/README.md?v=--hash--',
+	'/img/github.svg?v=--hash--'
 ];
 
 // Install: cache all core files and activate immediately
