@@ -41,7 +41,7 @@
 class SimpleESI {
 	constructor(options = {}) {
 		if (!options.appName) {
-			throw 'Option "appName" is required!';
+			throw new Error('Option "appName" is required!');
 		}
 
 		this.options = options;
@@ -58,14 +58,14 @@ class SimpleESI {
 		this.ssoAuthUrl = 'https://login.eveonline.com/v2/oauth/authorize/';
 		this.ssoTokenUrl = 'https://login.eveonline.com/v2/oauth/token';
 
-		const compatability_date = '2020-01-01';
+		const compatibility_date = '2020-01-01';
 
 		this.mimetypeForm = {
 			'Content-Type': 'application/x-www-form-urlencoded'
 		};
 		this.mimetypeJson = {
 			Accept: 'application/json',
-			'X-Compatibility-Date': compatability_date,
+			'X-Compatibility-Date': compatibility_date,
 			'Content-Type': 'application/json'
 		};
 
@@ -85,15 +85,31 @@ class SimpleESI {
 	}
 
 	getOption(name, defaultValue = undefined) {
-		if (typeof defaultValue == 'undefined' && typeof this.options[name] == 'undefined') throw `Required option ${name} is not defined!`;
+		if (typeof defaultValue === 'undefined' && typeof this.options[name] === 'undefined') {
+			throw new Error(`Required option ${name} is not defined!`);
+		}
 		return this.options[name] ?? defaultValue;
 	}
 
 	initWhoami() {
-		if (localStorage.getItem('loggedout') === 'true') return null;
+		if (localStorage.getItem('loggedout') === 'true') {
+			this.whoami = null;
+			return;
+		}
 
 		let whoamiinit = localStorage.getItem('whoami');
-		this.whoami = whoamiinit == null ? null : JSON.parse(whoamiinit);
+		if (whoamiinit === null) {
+			this.whoami = null;
+			return;
+		}
+
+		try {
+			this.whoami = JSON.parse(whoamiinit);
+		} catch (err) {
+			this.errorlogger('Failed to parse whoami from localStorage:', err);
+			this.whoami = null;
+			localStorage.removeItem('whoami');
+		}
 	}
 
 	async domLoaded() {
@@ -107,70 +123,106 @@ class SimpleESI {
 		}
 	}
 
-	authLogout(desctructive = true) {
-		if (desctructive) localStorage.clear();
-		else localStorage.setItem('loggedout', 'true');
+	authLogout(destructive = true) {
+		if (destructive) {
+			// Only clear SimpleESI-related keys to avoid affecting other apps
+			const keysToRemove = [];
+			for (let i = 0; i < localStorage.length; i++) {
+				const key = localStorage.key(i);
+				if (key && (key.startsWith('simpleesi-') || key === 'whoami' || key.startsWith('whoami-') || 
+				           key === 'loggedout' || key === 'state' || key === 'code_verifier' || key === 'code_challenge')) {
+					keysToRemove.push(key);
+				}
+			}
+			keysToRemove.forEach(key => localStorage.removeItem(key));
+		} else {
+			localStorage.setItem('loggedout', 'true');
+		}
 
 		window.location = '/';
 		return false;
 	}
 
 	async authCallback() {
-		const params = Object.fromEntries(new URLSearchParams(window.location.search));
-		if (decodeURIComponent(params.state) !== localStorage.getItem('state')) {
-			// Something went very wrong, try again
+		try {
+			const params = Object.fromEntries(new URLSearchParams(window.location.search));
+			if (decodeURIComponent(params.state) !== localStorage.getItem('state')) {
+				// Something went very wrong, try again
+				return this.authBegin();
+			}
+
+			const body = {
+				grant_type: 'authorization_code',
+				code: params.code,
+				client_id: this.ssoClientId,
+				code_verifier: localStorage.getItem('code_verifier')
+			};
+
+			let res = await this.doRequest(this.ssoTokenUrl, 'POST', this.mimetypeForm, body);
+			
+			if (!res || !res.ok) {
+				this.errorlogger('OAuth token exchange failed:', res?.status);
+				return this.authBegin();
+			}
+			
+			let json = await res.json();
+
+			if (!json.access_token) {
+				this.errorlogger('No access token in OAuth response');
+				return this.authBegin();
+			}
+
+			this.whoami = this.parseJwtPayload(json.access_token);
+			this.whoami.character_id = this.whoami.sub.replace('CHARACTER:EVE:', '');
+
+			localStorage.setItem('whoami', JSON.stringify(this.whoami));
+			localStorage.setItem(`whoami-${this.whoami.character_id}`, JSON.stringify(this.whoami));
+			this.lsSet('whoami', this.whoami);
+			this.lsSet('authed_json', json);
+			localStorage.removeItem('loggedout');
+
+			window.location = '/';
+		} catch (err) {
+			this.errorlogger('Authentication callback error:', err);
 			return this.authBegin();
 		}
-
-		const body = {
-			grant_type: 'authorization_code',
-			code: params.code,
-			client_id: this.ssoClientId,
-			code_verifier: localStorage.getItem('code_verifier')
-		};
-
-		let res = await this.doRequest(this.ssoTokenUrl, 'POST', this.mimetypeForm, body);
-		let json = await res.json();
-
-		this.whoami = this.parseJwtPayload(json.access_token);
-		this.whoami.character_id = this.whoami.sub.replace('CHARACTER:EVE:', '');
-
-		localStorage.setItem('whoami', JSON.stringify(this.whoami));
-		localStorage.setItem(`whoami-${this.whoami.character_id}`, JSON.stringify(this.whoami));
-		this.lsSet('whoami', this.whoami);
-		this.lsSet('authed_json', json);
-		localStorage.removeItem('loggedout')
-
-		window.location = '/';
 	}
 
 	changeCharacter(character_id) {
 		// No change
-		if (this.whoami.character_id == character_id) return false;
+		if (!this.whoami) {
+			throw new Error('Cannot change character: not authenticated');
+		}
+		
+		if (this.whoami.character_id === character_id) return false;
 
 		const raw_whoami = localStorage.getItem(`whoami-${character_id}`);
 		if (!raw_whoami) {
-			throw `${character_id} is not an authenticated character!`;
+			throw new Error(`${character_id} is not an authenticated character!`);
 		}
 
-		const next_whoami = JSON.parse(raw_whoami);
-		if (!next_whoami) {
-			throw `${character_id} is not an authenticated character!`;
+		try {
+			const next_whoami = JSON.parse(raw_whoami);
+			this.whoami = next_whoami;
+			localStorage.setItem('whoami', raw_whoami);
+			this.initWhoami();
+			return true;
+		} catch (err) {
+			this.errorlogger('Failed to parse stored character data:', err);
+			throw new Error(`Invalid character data for ${character_id}`);
 		}
-
-		this.whoami = next_whoami;
-		localStorage.setItem('whoami', raw_whoami);
-		this.initWhoami();
-		return true;
 	}
 
 	async doJsonAuthRequest(url, method = 'GET', headers = null, body = null) {
 		let res = await this.doAuthRequest(url, method, headers, body);
+		if (!res || !res.ok) {
+			throw new Error(`Request failed with status ${res?.status}`);
+		}
 		return await res.json();
 	}
 
 	async doAuthRequest(url, method = 'GET', headers = null, body = null) {
-		if (headers == null) headers = {};
+		if (headers === null) headers = {};
 		headers.Authorization = await this.getAccessToken();
 		headers.Accept = 'application/json';
 		return await this.doRequest(url, method, headers, body);
@@ -178,11 +230,14 @@ class SimpleESI {
 
 	async doJsonRequest(url, method = 'GET', headers = null, body = null) {
 		let res = await this.doRequest(url, method, headers, body);
+		if (!res || !res.ok) {
+			throw new Error(`Request failed with status ${res?.status}`);
+		}
 		return await res.json();
 	}
 
 	async doRequest(url, method = 'GET', headers = null, body = null) {
-		if (headers == null) headers = {};
+		if (headers === null) headers = {};
 		headers['User-Agent'] = this.whoami
 			? `${this.options.appName} (Character: ${this.whoami.name} / ${this.whoami.character_id})`
 			: `${this.options.appName} (auth in progress)`;
@@ -191,7 +246,7 @@ class SimpleESI {
 			method: method,
 			headers: headers
 		};
-		if (body != null) {
+		if (body !== null) {
 			if (typeof body === 'object') params.body = new URLSearchParams(body).toString();
 			else params.body = body;
 		}
@@ -203,19 +258,31 @@ class SimpleESI {
 			res = await fetch(url, params);
 			if (res.status >= 500) this.esiIssueHandler(res);
 
-			const remain = Number(getHeader(res, 'x-ratelimit-remaining') || 999999);
-			if (remain <= 50) {
-				const delay = 6 - Math.floor(remain / 10);
-				// we're going to slow down for the next call(s)
-				const rateLimitRateMs = (delay * 1000) + parseRateLimit(getHeader(res, 'x-ratelimit-limit'));					
-				this.logger(`Rate limit nearly exceeded, waiting ${rateLimitRateMs}ms`);
-				await new Promise(resolve => setTimeout(resolve, rateLimitRateMs));
+			// Rate limit handling with error protection
+			try {
+				const remain = Number(getHeader(res, 'x-ratelimit-remaining') || 999999);
+				if (remain <= 50) {
+					const rateLimitHeader = getHeader(res, 'x-ratelimit-limit');
+					if (rateLimitHeader) {
+						// Exponential backoff: more aggressive as we approach limit
+						const delay = 6 - Math.floor(remain / 10);
+						const baseDelay = parseRateLimit(rateLimitHeader);
+						const rateLimitRateMs = (delay * 1000) + baseDelay;
+						this.logger(`Rate limit nearly exceeded (${remain} remaining), waiting ${rateLimitRateMs}ms`);
+						await new Promise(resolve => setTimeout(resolve, rateLimitRateMs));
+					}
+				}
+			} catch (err) {
+				this.errorlogger('Rate limit parsing error:', err);
 			}
 
 			return res;
 		} catch (e) {
 			this.errorlogger(e);
-			this.esiIssueHandler(e, res);
+			// Pass undefined explicitly if res was never set
+			this.esiIssueHandler(e, res || null);
+			// Re-throw to let caller handle the error
+			throw e;
 		} finally {
 			this.inflight--;
 			this.esiInFlightHandler(this.inflight);
@@ -252,11 +319,13 @@ class SimpleESI {
 			code_challenge_method: 'S256',
 			state: localStorage.getItem('state')
 		}).toString();
-		return window.location = `${this.ssoAuthUrl}?${params}`;
+		window.location = `${this.ssoAuthUrl}?${params}`;
 	}
 
 	createRandomString(length) {
-		if (length == null || length < 0) throw `Invalid length value ${length}`;
+		if (length === null || length === undefined || length < 0) {
+			throw new Error(`Invalid length value ${length}`);
+		}
 		let result = [];
 		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		const charactersLength = characters.length;
@@ -267,19 +336,32 @@ class SimpleESI {
 	}
 
 	parseJwtPayload(accessToken) {
-		const base64Url = accessToken.split('.')[1];
-		const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-		const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
-		const json = atob(padded);
-		return JSON.parse(json);
+		if (!accessToken || typeof accessToken !== 'string') {
+			throw new Error('Invalid access token');
+		}
+		
+		const parts = accessToken.split('.');
+		if (parts.length !== 3) {
+			throw new Error('Invalid JWT format');
+		}
+		
+		try {
+			const base64Url = parts[1];
+			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+			const json = atob(padded);
+			return JSON.parse(json);
+		} catch (err) {
+			throw new Error(`Failed to parse JWT payload: ${err.message}`);
+		}
 	}
 
 	async getAccessToken() {
-		if (this.lsGet('access_token') == 'undefined') this.lsDel('access_token');
+		if (this.lsGet('access_token') === 'undefined') this.lsDel('access_token');
 		let access_token_expires = parseInt(this.lsGet('access_token_expires') || '0');
-		if (access_token_expires < Date.now() || this.lsGet('access_token') == null) {
+		if (access_token_expires < Date.now() || this.lsGet('access_token') === null) {
 			let authed_json = this.lsGet('authed_json');
-			if (authed_json == null) return this.authLogout();
+			if (authed_json === null) return this.authLogout();
 			const body = {
 				grant_type: 'refresh_token',
 				refresh_token: authed_json.refresh_token,
@@ -287,7 +369,18 @@ class SimpleESI {
 			};
 			this.logger('Fetching new access token!');
 			let res = await this.doRequest(this.ssoTokenUrl, 'POST', this.mimetypeForm, body);
+			
+			if (!res || !res.ok) {
+				this.errorlogger('Token refresh failed:', res?.status);
+				return this.authLogout();
+			}
+			
 			let json = await res.json();
+
+			if (!json.access_token || !json.expires_in) {
+				this.errorlogger('Invalid token refresh response');
+				return this.authLogout();
+			}
 
 			this.lsSet('access_token', json.access_token);
 			this.lsSet('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
@@ -296,8 +389,24 @@ class SimpleESI {
 	}
 
 	clearAccessToken() {
+		// Clear any pending token refresh timeout
 		clearTimeout(this.clearAccessTokenId);
-		this.access_token = null;
+		// Remove cached access token from localStorage
+		try {
+			this.lsDel('access_token');
+			this.lsDel('access_token_expires');
+		} catch (err) {
+			// If not authenticated, clear directly from localStorage
+			const keys = ['access_token', 'access_token_expires'];
+			keys.forEach(key => {
+				for (let i = 0; i < localStorage.length; i++) {
+					const storageKey = localStorage.key(i);
+					if (storageKey && storageKey.includes(key)) {
+						localStorage.removeItem(storageKey);
+					}
+				}
+			});
+		}
 	}
 
 	lsGet(key, global = false) {
@@ -322,7 +431,7 @@ class SimpleESI {
 	createKey(key, global) {
 		if (global === false) {
 			if (!this.whoami || !this.whoami.character_id) {
-				throw 'Not authenticated!';
+				throw new Error('Not authenticated!');
 			}
 		}
 		const who = global ? 'global' : this.whoami.character_id;
@@ -367,6 +476,7 @@ function parseRateLimit(rateLimit) {
 	};
 
 	const totalMs = timeValue * unitMultipliers[unit];
+	// Use Math.ceil to ensure we wait slightly longer rather than shorter (safer for rate limits)
 	const msPerCall = Math.max(1, Math.ceil(totalMs / numCalls));
 
 	rateLimitCache[rateLimit] = msPerCall;
@@ -392,8 +502,20 @@ function getHeader(res, header) {
 			normalized,
 
 			getBest(partial) {
+				// Normalize the search term
+				const search = partial.toLowerCase().trim();
+				
+				// Try exact match first
+				if (normalized[search] && normalized[search].length) {
+					const values = normalized[search]
+						.map(v => v.trim())
+						.filter(v => v !== "" && v !== "null" && v !== "undefined");
+					if (values.length) return values[0];
+				}
+				
+				// Fall back to substring match
 				const key = Object.keys(normalized)
-					.find(k => k.includes(partial));
+					.find(k => k.includes(search));
 
 				if (!key) return null;
 
