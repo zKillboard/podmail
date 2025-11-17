@@ -1,15 +1,15 @@
-const CACHE_NAME = 'PodMail-vd64a9e3';
+const CACHE_NAME = 'PodMail-v12e3c32';
 const urlsToCache = [
 	'/',
-	'/?v=d64a9e3',
-	'/index.html?v=d64a9e3',
-	'/css/app.css?v=d64a9e3',
-	'/css/supports.css?v=d64a9e3',
-	'/js/app.js?v=d64a9e3',
-	'/js/esi.js?v=d64a9e3',
-	'/js/SimpleESI.js?v=d64a9e3',
-	'/favicon.ico?v=d64a9e3',
-	'/README.md?v=d64a9e3'
+	'/?v=12e3c32',
+	'/index.html?v=12e3c32',
+	'/css/app.css?v=12e3c32',
+	'/css/supports.css?v=12e3c32',
+	'/js/app.js?v=12e3c32',
+	'/js/esi.js?v=12e3c32',
+	'/js/SimpleESI.js?v=12e3c32',
+	'/favicon.ico?v=12e3c32',
+	'/README.md?v=12e3c32'
 ];
 
 // Install: cache all core files and activate immediately
@@ -43,7 +43,7 @@ self.addEventListener('fetch', event => {
 					return networkResponse;
 				})
 				.catch(() => {
-					return caches.match('/index.html?v=d64a9e3')
+					return caches.match('/index.html?v=12e3c32')
 						.then(cached => cached || new Response('Offline', { status: 503 }));
 				})
 		);
@@ -77,7 +77,7 @@ self.addEventListener('fetch', event => {
 
 // Activate: remove old caches and take control immediately
 self.addEventListener('activate', event => {
-	const currentVersion = 'd64a9e3';
+	const currentVersion = '12e3c32';
 	
 	event.waitUntil(
 		Promise.all([

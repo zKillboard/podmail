@@ -1,4 +1,4 @@
-const githubhash = "d64a9e3";
+const githubhash = "12e3c32";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=d64a9e3');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=12e3c32');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -293,7 +293,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=d64a9e3');
+	let res = await fetch('/README.md?v=12e3c32');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -555,7 +555,7 @@ async function showNotification(title, body, mail) {
 }
 
 async function fetchUnfetchedMails() {
-	let delay = 2000;
+	let delay = 250;
 	try {
 		if (all_highest_mail_id == -1) return; // headers aren't finished loading yet after page load
 
