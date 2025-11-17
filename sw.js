@@ -1,15 +1,30 @@
-const CACHE_NAME = 'PodMail-v19dab87';
+const CACHE_NAME = 'PodMail-vc109490';
+const NETWORK_TIMEOUT = 3000; // 3 seconds before falling back to cache
+
 const urlsToCache = [
 	'/',
-	'/?v=19dab87',
-	'/index.html?v=19dab87',
-	'/css/app.css?v=19dab87',
-	'/css/supports.css?v=19dab87',
-	'/js/app.js?v=19dab87',
-	'/js/esi.js?v=19dab87',
-	'/js/SimpleESI.js?v=19dab87',
-	'/favicon.ico?v=19dab87',
-	'/README.md?v=19dab87'
+	'/?v=c109490',
+	'/index.html?v=c109490',
+	'/404.html?v=c109490',
+	'/auth.html?v=c109490',
+	'/css/app.css?v=c109490',
+	'/css/supports.css?v=c109490',
+	'/js/app.js?v=c109490',
+	'/js/esi.js?v=c109490',
+	'/js/SimpleESI.js?v=c109490',
+	'/favicon.ico?v=c109490',
+	'/README.md?v=c109490',
+	'/img/github.svg?v=c109490',
+	'/img/podmail.png?v=c109490',
+	'/img/ssologin.png?v=c109490',
+	'/img/character.jpg?v=c109490',
+	// CDN resources for offline functionality
+	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css',
+	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js',
+	'https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css',
+	'https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js',
+	'https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js',
+	'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js'
 ];
 
 // Install: cache all core files and activate immediately
@@ -22,30 +37,58 @@ self.addEventListener('install', event => {
 
 // Fetch: cache first for instant performance, update in background
 self.addEventListener('fetch', event => {
-	// Only handle same-origin GET requests
-	if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) {
+	// Skip non-GET requests
+	if (event.request.method !== 'GET') {
 		return;
 	}
 
-	// Navigation requests: network-first with cache fallback
+	// CDN requests: cache-first (CDN resources rarely change)
+	const isCDN = event.request.url.startsWith('https://cdn.jsdelivr.net');
+	if (isCDN) {
+		event.respondWith(
+			caches.match(event.request).then(cached => {
+				return cached || fetch(event.request, { mode: 'cors' })
+					.then(response => {
+						if (response && response.ok) {
+							const responseToCache = response.clone();
+							caches.open(CACHE_NAME).then(cache => {
+								cache.put(event.request, responseToCache).catch(err => {
+									console.warn('Failed to cache CDN resource:', err);
+								});
+							});
+						}
+						return response;
+					})
+					.catch(() => new Response('CDN resource unavailable', { status: 503 }));
+			})
+		);
+		return;
+	}
+
+	// Navigation requests: network-first with timeout and cache fallback
 	if (event.request.mode === 'navigate') {
 		event.respondWith(
-			fetch(event.request)
-				.then(networkResponse => {
-					if (networkResponse && networkResponse.ok) {
-						const responseToCache = networkResponse.clone();
-						caches.open(CACHE_NAME).then(cache => {
-							cache.put(event.request, responseToCache).catch(err => {
-								console.warn('Failed to cache navigation:', err);
+			Promise.race([
+				fetch(event.request)
+					.then(networkResponse => {
+						if (networkResponse && networkResponse.ok) {
+							const responseToCache = networkResponse.clone();
+							caches.open(CACHE_NAME).then(cache => {
+								cache.put(event.request, responseToCache).catch(err => {
+									console.warn('Failed to cache navigation:', err);
+								});
 							});
-						});
-					}
-					return networkResponse;
-				})
-				.catch(() => {
-					return caches.match('/index.html?v=19dab87')
-						.then(cached => cached || new Response('Offline', { status: 503 }));
-				})
+						}
+						return networkResponse;
+					}),
+				new Promise((_, reject) => 
+					setTimeout(() => reject(new Error('Network timeout')), NETWORK_TIMEOUT)
+				)
+			])
+			.catch(() => {
+				return caches.match('/index.html?v=c109490')
+					.then(cached => cached || new Response('Offline', { status: 503 }));
+			})
 		);
 		return;
 	}
@@ -53,23 +96,27 @@ self.addEventListener('fetch', event => {
 	// Static assets: cache-first with background update (stale-while-revalidate)
 	event.respondWith(
 		caches.match(event.request).then(cached => {
-			// Start network fetch in background
-			const fetchPromise = fetch(event.request)
-				.then(networkResponse => {
-					if (networkResponse && networkResponse.ok) {
-						const responseToCache = networkResponse.clone();
-						caches.open(CACHE_NAME).then(cache => {
-							cache.put(event.request, responseToCache).catch(err => {
-								console.warn('Failed to cache asset:', err);
+			// Start network fetch in background with timeout
+			const fetchPromise = Promise.race([
+				fetch(event.request)
+					.then(networkResponse => {
+						if (networkResponse && networkResponse.ok) {
+							const responseToCache = networkResponse.clone();
+							caches.open(CACHE_NAME).then(cache => {
+								cache.put(event.request, responseToCache).catch(err => {
+									console.warn('Failed to cache asset:', err);
+								});
 							});
-						});
-					}
-					return networkResponse;
-				})
-				.catch(() => null);
+						}
+						return networkResponse;
+					}),
+				new Promise((_, reject) => 
+					setTimeout(() => reject(new Error('Network timeout')), NETWORK_TIMEOUT)
+				)
+			]).catch(() => null);
 
 			// Return cached version immediately if available
-			// Otherwise wait for network
+			// Otherwise wait for network (with timeout)
 			return cached || fetchPromise || new Response('Offline', { status: 503 });
 		})
 	);
@@ -77,7 +124,7 @@ self.addEventListener('fetch', event => {
 
 // Activate: remove old caches and take control immediately
 self.addEventListener('activate', event => {
-	const currentVersion = '19dab87';
+	const currentVersion = 'c109490';
 	
 	event.waitUntil(
 		Promise.all([
