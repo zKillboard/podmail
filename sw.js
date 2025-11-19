@@ -1,23 +1,23 @@
-const CACHE_NAME = 'PodMail-v239d36d';
+const CACHE_NAME = 'PodMail-vfa6a888';
 const NETWORK_TIMEOUT = 3000; // 3 seconds before falling back to cache
 
 const urlsToCache = [
 	'/',
-	'/?v=239d36d',
-	'/index.html?v=239d36d',
-	'/404.html?v=239d36d',
-	'/auth.html?v=239d36d',
-	'/css/app.css?v=239d36d',
-	'/css/supports.css?v=239d36d',
-	'/js/app.js?v=239d36d',
-	'/js/esi.js?v=239d36d',
-	'/js/SimpleESI.js?v=239d36d',
-	'/favicon.ico?v=239d36d',
-	'/README.md?v=239d36d',
-	'/img/github.svg?v=239d36d',
-	'/img/podmail.png?v=239d36d',
-	'/img/ssologin.png?v=239d36d',
-	'/img/character.jpg?v=239d36d',
+	'/?v=fa6a888',
+	'/index.html?v=fa6a888',
+	'/404.html?v=fa6a888',
+	'/auth.html?v=fa6a888',
+	'/css/app.css?v=fa6a888',
+	'/css/supports.css?v=fa6a888',
+	'/js/app.js?v=fa6a888',
+	'/js/esi.js?v=fa6a888',
+	'/js/SimpleESI.js?v=fa6a888',
+	'/favicon.ico?v=fa6a888',
+	'/README.md?v=fa6a888',
+	'/img/github.svg?v=fa6a888',
+	'/img/podmail.png?v=fa6a888',
+	'/img/ssologin.png?v=fa6a888',
+	'/img/character.jpg?v=fa6a888',
 	// CDN resources for offline functionality
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css',
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js',
@@ -89,7 +89,7 @@ self.addEventListener('fetch', event => {
 				)
 			])
 			.catch(() => {
-				return caches.match('/index.html?v=239d36d')
+				return caches.match('/index.html?v=fa6a888')
 					.then(cached => cached || new Response('Offline', { status: 503 }));
 			})
 		);
@@ -127,7 +127,7 @@ self.addEventListener('fetch', event => {
 
 // Activate: remove old caches and take control immediately
 self.addEventListener('activate', event => {
-	const currentVersion = '239d36d';
+	const currentVersion = 'fa6a888';
 	
 	event.waitUntil(
 		Promise.all([

@@ -1,4 +1,4 @@
-const githubhash = "239d36d";
+const githubhash = "fa6a888";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=239d36d');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=fa6a888');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -293,7 +293,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=239d36d');
+	let res = await fetch('/README.md?v=fa6a888');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -681,7 +681,10 @@ async function btn_multi_markReadStatus(e) {
 	let checked = Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`));
 	console.log(checked);
 	for (const el of checked) {
-		await pm_updateReadStatus(await getMail(el.getAttribute('mail_id')), this.dataset.read != "true");
+		let mail = await getMail(el.getAttribute('mail_id'));
+		if (mail) {
+			await pm_updateReadStatus(mail, this.dataset.read != "true");
+		}
 	}
 	checkMulti();
 	updateUnreadCounts();
@@ -777,8 +780,15 @@ async function getMail(mail_id, user_requested = true) {
 
 	try {
 		console.log('Fetching mail', mail_id);
-		mail = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`);
+		res = await esi.doAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/${mail_id}`);
+		if (res.ok) {
+			mail = await res.json();
+		} else {
+			if (user_requested) showToast('error fetching that evemail... :(');
+			return null;
+		}
 	} catch (e) {
+		console.log(e);
 		if (user_requested) showToast('error fetching that evemail... :(');
 	}
 	mail.mail_id = mail_id;
@@ -1200,8 +1210,11 @@ async function btn_send(e) {
 async function fetchNewMail(new_mail_id) {
 	try {
 		if (new_mail_id > 0) {
-			await addMailHeader(await getMail(new_mail_id, false));
-			updateUnreadCounts();
+			let mail = await getMail(new_mail_id, false)
+			if (mail) {
+				await addMailHeader(mail);
+				updateUnreadCounts();
+			}
 		}
 	} catch (e) {
 		console.error(e);
@@ -1209,7 +1222,9 @@ async function fetchNewMail(new_mail_id) {
 }
 
 async function btn_markReadStatus(e) {
-	return await pm_updateReadStatus(await getMail(current_mail_id), this.dataset.read != "true");
+	let mail = await getMail(current_mail_id);
+	if (mail == null) return;
+	return await pm_updateReadStatus(mail, this.dataset.read != "true");
 }
 
 async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
