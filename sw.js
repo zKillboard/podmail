@@ -1,23 +1,23 @@
-const CACHE_NAME = 'PodMail-vc109490';
+const CACHE_NAME = 'PodMail-v239d36d';
 const NETWORK_TIMEOUT = 3000; // 3 seconds before falling back to cache
 
 const urlsToCache = [
 	'/',
-	'/?v=c109490',
-	'/index.html?v=c109490',
-	'/404.html?v=c109490',
-	'/auth.html?v=c109490',
-	'/css/app.css?v=c109490',
-	'/css/supports.css?v=c109490',
-	'/js/app.js?v=c109490',
-	'/js/esi.js?v=c109490',
-	'/js/SimpleESI.js?v=c109490',
-	'/favicon.ico?v=c109490',
-	'/README.md?v=c109490',
-	'/img/github.svg?v=c109490',
-	'/img/podmail.png?v=c109490',
-	'/img/ssologin.png?v=c109490',
-	'/img/character.jpg?v=c109490',
+	'/?v=239d36d',
+	'/index.html?v=239d36d',
+	'/404.html?v=239d36d',
+	'/auth.html?v=239d36d',
+	'/css/app.css?v=239d36d',
+	'/css/supports.css?v=239d36d',
+	'/js/app.js?v=239d36d',
+	'/js/esi.js?v=239d36d',
+	'/js/SimpleESI.js?v=239d36d',
+	'/favicon.ico?v=239d36d',
+	'/README.md?v=239d36d',
+	'/img/github.svg?v=239d36d',
+	'/img/podmail.png?v=239d36d',
+	'/img/ssologin.png?v=239d36d',
+	'/img/character.jpg?v=239d36d',
 	// CDN resources for offline functionality
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css',
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js',
@@ -47,7 +47,10 @@ self.addEventListener('fetch', event => {
 	if (isCDN) {
 		event.respondWith(
 			caches.match(event.request).then(cached => {
-				return cached || fetch(event.request, { mode: 'cors' })
+				return cached || fetch(event.request, { 
+					mode: 'cors',
+					credentials: 'omit'  // Don't send credentials to CDN
+				})
 					.then(response => {
 						if (response && response.ok) {
 							const responseToCache = response.clone();
@@ -86,7 +89,7 @@ self.addEventListener('fetch', event => {
 				)
 			])
 			.catch(() => {
-				return caches.match('/index.html?v=c109490')
+				return caches.match('/index.html?v=239d36d')
 					.then(cached => cached || new Response('Offline', { status: 503 }));
 			})
 		);
@@ -124,7 +127,7 @@ self.addEventListener('fetch', event => {
 
 // Activate: remove old caches and take control immediately
 self.addEventListener('activate', event => {
-	const currentVersion = 'c109490';
+	const currentVersion = '239d36d';
 	
 	event.waitUntil(
 		Promise.all([
