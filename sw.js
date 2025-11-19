@@ -47,7 +47,10 @@ self.addEventListener('fetch', event => {
 	if (isCDN) {
 		event.respondWith(
 			caches.match(event.request).then(cached => {
-				return cached || fetch(event.request, { mode: 'cors' })
+				return cached || fetch(event.request, { 
+					mode: 'cors',
+					credentials: 'omit'  // Don't send credentials to CDN
+				})
 					.then(response => {
 						if (response && response.ok) {
 							const responseToCache = response.clone();
