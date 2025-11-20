@@ -555,7 +555,7 @@ async function showNotification(title, body, mail) {
 }
 
 async function fetchUnfetchedMails() {
-	let delay = 250;
+	let delay = 5000; // go nice and slow to avoid rate limits
 	try {
 		if (all_highest_mail_id == -1) return; // headers aren't finished loading yet after page load
 
