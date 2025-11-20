@@ -1,23 +1,26 @@
-const CACHE_NAME = 'PodMail-v94afb39';
+// Toggle offline mode: true = cache enabled, false = no caching and removes all caches
+const OFFLINE_MODE_ENABLED = false;
+
+const CACHE_NAME = 'PodMail-v56552da';
 const NETWORK_TIMEOUT = 3000; // 3 seconds before falling back to cache
 
 const urlsToCache = [
 	'/',
-	'/?v=94afb39',
-	'/index.html?v=94afb39',
-	'/404.html?v=94afb39',
-	'/auth.html?v=94afb39',
-	'/css/app.css?v=94afb39',
-	'/css/supports.css?v=94afb39',
-	'/js/app.js?v=94afb39',
-	'/js/esi.js?v=94afb39',
-	'/js/SimpleESI.js?v=94afb39',
-	'/favicon.ico?v=94afb39',
-	'/README.md?v=94afb39',
-	'/img/github.svg?v=94afb39',
-	'/img/podmail.png?v=94afb39',
-	'/img/ssologin.png?v=94afb39',
-	'/img/character.jpg?v=94afb39',
+	'/?v=56552da',
+	'/index.html?v=56552da',
+	'/404.html?v=56552da',
+	'/auth.html?v=56552da',
+	'/css/app.css?v=56552da',
+	'/css/supports.css?v=56552da',
+	'/js/app.js?v=56552da',
+	'/js/esi.js?v=56552da',
+	'/js/SimpleESI.js?v=56552da',
+	'/favicon.ico?v=56552da',
+	'/README.md?v=56552da',
+	'/img/github.svg?v=56552da',
+	'/img/podmail.png?v=56552da',
+	'/img/ssologin.png?v=56552da',
+	'/img/character.jpg?v=56552da',
 	// CDN resources for offline functionality
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css',
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js',
@@ -29,14 +32,21 @@ const urlsToCache = [
 
 // Install: cache all core files and activate immediately
 self.addEventListener('install', event => {
-	event.waitUntil(
-		caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-	);
+	if (OFFLINE_MODE_ENABLED) {
+		event.waitUntil(
+			caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+		);
+	}
 	self.skipWaiting(); // Activate new service worker immediately
 });
 
 // Fetch: cache first for instant performance, update in background
 self.addEventListener('fetch', event => {
+	// If offline mode disabled, pass through to network
+	if (!OFFLINE_MODE_ENABLED) {
+		return;
+	}
+
 	// Skip non-GET requests
 	if (event.request.method !== 'GET') {
 		return;
@@ -89,7 +99,7 @@ self.addEventListener('fetch', event => {
 				)
 			])
 			.catch(() => {
-				return caches.match('/index.html?v=94afb39')
+				return caches.match('/index.html?v=56552da')
 					.then(cached => cached || new Response('Offline', { status: 503 }));
 			})
 		);
@@ -127,33 +137,44 @@ self.addEventListener('fetch', event => {
 
 // Activate: remove old caches and take control immediately
 self.addEventListener('activate', event => {
-	const currentVersion = '94afb39';
-	
-	event.waitUntil(
-		Promise.all([
-			// Remove old cache versions
+	if (!OFFLINE_MODE_ENABLED) {
+		// Delete all caches when offline mode is disabled
+		event.waitUntil(
 			caches.keys().then(cacheNames => {
 				return Promise.all(
-					cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+					cacheNames.map(cacheName => caches.delete(cacheName))
 				);
-			}),
-			// Clean up cached entries not matching current version
-			caches.open(CACHE_NAME).then(cache => {
-				return cache.keys().then(requests => {
-					return Promise.all(
-						requests.map(request => {
-							const url = new URL(request.url);
-							const versionParam = url.searchParams.get('v');
-							
-							// Delete if it has a version param that doesn't match current version
-							if (versionParam && versionParam !== currentVersion) {
-								return cache.delete(request);
-							}
-						})
-					);
-				});
 			})
-		])
-	);
+		);
+	} else {
+		// Remove old cache versions when offline mode is enabled
+		const currentVersion = '56552da';
+		event.waitUntil(
+			Promise.all([
+				// Remove old cache versions
+				caches.keys().then(cacheNames => {
+					return Promise.all(
+						cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+					);
+				}),
+				// Clean up cached entries not matching current version
+				caches.open(CACHE_NAME).then(cache => {
+					return cache.keys().then(requests => {
+						return Promise.all(
+							requests.map(request => {
+								const url = new URL(request.url);
+								const versionParam = url.searchParams.get('v');
+								
+								// Delete if it has a version param that doesn't match current version
+								if (versionParam && versionParam !== currentVersion) {
+									return cache.delete(request);
+								}
+							})
+						);
+					});
+				})
+			])
+		);
+	}
 	self.clients.claim(); // Take control of all pages immediately
 });

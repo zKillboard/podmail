@@ -39,6 +39,12 @@
 */
 
 class SimpleESI {
+	_bucket_values = {};
+
+	getBucketValues() {
+		return this._bucket_values;
+	}
+
 	constructor(options = {}) {
 		if (!options.appName) {
 			throw new Error('Option "appName" is required!');
@@ -242,6 +248,18 @@ class SimpleESI {
 			? `${this.options.appName} (Character: ${this.whoami.name} / ${this.whoami.character_id})`
 			: `${this.options.appName} (auth in progress)`;
 
+		// Add conditional request headers for caching optimization
+		const cacheKey = `esi-cache-${url}`;
+		const cachedData = this.lsGet(cacheKey, true);
+		if (cachedData && method === 'GET') {
+			if (cachedData.etag) {
+				headers['If-None-Match'] = cachedData.etag;
+			}
+			if (cachedData.lastModified) {
+				headers['If-Modified-Since'] = cachedData.lastModified;
+			}
+		}
+
 		let params = {
 			method: method,
 			headers: headers
@@ -258,9 +276,53 @@ class SimpleESI {
 			res = await fetch(url, params);
 			if (res.status >= 500) this.esiIssueHandler(res);
 
+			// Cache ETag and Last-Modified headers for future conditional requests
+			if (method === 'GET' && res.ok) {
+				try {
+					const etag = getHeader(res, 'etag');
+					const lastModified = getHeader(res, 'last-modified');
+					if (etag || lastModified) {
+						this.lsSet(cacheKey, { etag, lastModified }, true);
+					}
+				} catch (err) {
+					// Ignore cache storage errors
+				}
+			}
+
+			// Handle 304 Not Modified - return cached data
+			if (res.status === 304 && cachedData && cachedData.data) {
+				// Create a synthetic response from cached data
+				res = new Response(JSON.stringify(cachedData.data), {
+					status: 200,
+					statusText: 'OK (Cached)',
+					headers: res.headers
+				});
+			} else if (method === 'GET' && res.ok) {
+				// Store response data for future 304 responses
+				try {
+					const clonedRes = res.clone();
+					const data = await clonedRes.json();
+					const etag = getHeader(res, 'etag');
+					const lastModified = getHeader(res, 'last-modified');
+					if (etag || lastModified) {
+						this.lsSet(cacheKey, { etag, lastModified, data }, true);
+					}
+				} catch (err) {
+					// Ignore if response is not JSON or storage fails
+				}
+			}
+
 			// Rate limit handling with error protection
 			try {
+				const bucket = getHeader(res, 'x-ratelimit-group');
 				const remain = Number(getHeader(res, 'x-ratelimit-remaining') || 999999);
+
+				if (bucket) {
+					if (this._bucket_values[this.whoami.character_id] === undefined) {
+						this._bucket_values[this.whoami.character_id] = {};
+					}
+					this._bucket_values[this.whoami.character_id][bucket] = { remain: remain, epoch: new Date().getTime() };
+				}
 				if (remain <= 50) {
 					const rateLimitHeader = getHeader(res, 'x-ratelimit-limit');
 					if (rateLimitHeader) {

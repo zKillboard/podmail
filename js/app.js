@@ -1,4 +1,4 @@
-const githubhash = "94afb39";
+const githubhash = "56552da";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=94afb39');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=56552da');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -293,7 +293,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=94afb39');
+	let res = await fetch('/README.md?v=56552da');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -478,9 +478,6 @@ async function fetchHeaders() {
 				mail_ids.delete(i);
 			}
 
-			if (mails.length > 0) {
-				//last_mail_id = mails[mails.length - 1].mail_id;
-			}
 			total_mails += mails.length;
 
 			updateUnreadCounts();
@@ -1227,8 +1224,8 @@ async function btn_markReadStatus(e) {
 	return await pm_updateReadStatus(mail, this.dataset.read != "true");
 }
 
-async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
-	if (no_prrompt == false && ! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
+async function btn_deleteMail(e, mail_id = null, no_prompt = false) {
+	if (no_prompt == false && ! await confirm('Are you sure you wwant to PERMANENTLY delete this evemail?')) return;
 
 	mail_id = mail_id ?? current_mail_id;
 
@@ -1241,6 +1238,17 @@ async function btn_deleteMail(e, mail_id = null, no_prrompt = false) {
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
 		esi.lsDel(`mail-${mail_id}`);
+
+		let mail_headers = esi.lsGet('mail_headers', true) || {};
+		delete mail_headers[mail_id];
+		esi.lsSet('mail_headers', mail_headers, true);
+
+		let mail_headers_partial = esi.lsGet('mail_headers_partial', true) || {};
+		delete mail_headers_partial[mail_id];
+		esi.lsSet('mail_headers_partial', mail_headers_partial, true);
+
+		updateUnreadCounts();
+
 		if (mail_id == current_mail_id) btn_backToFolder();
 	}
 	else alert('Error Code: ' + res.status);
