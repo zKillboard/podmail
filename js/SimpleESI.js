@@ -268,7 +268,7 @@ class SimpleESI {
 						const delay = 6 - Math.floor(remain / 10);
 						const baseDelay = parseRateLimit(rateLimitHeader);
 						const rateLimitRateMs = (delay * 1000) + baseDelay;
-						this.logger(`Rate limit nearly exceeded (${remain} remaining), waiting ${rateLimitRateMs}ms`);
+						this.logger(`Rate limit nearly exceeded (${remain} remaining), waiting ${rateLimitRateMs}ms`, method, url);
 						await new Promise(resolve => setTimeout(resolve, rateLimitRateMs));
 					}
 				}

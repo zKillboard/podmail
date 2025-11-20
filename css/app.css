@@ -518,3 +518,7 @@ textarea::placeholder,
 #maindropdownmenu:has(#show_names_checkbox:not(:checked)) .selectable-character {
 	display: none !important;
 }
+
+.external-link {
+	text-decoration: none;
+}
