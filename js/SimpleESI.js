@@ -246,7 +246,7 @@ class SimpleESI {
 		if (headers === null) headers = {};
 		headers['User-Agent'] = this.whoami
 			? `${this.options.appName} (Character: ${this.whoami.name} / ${this.whoami.character_id})`
-			: `${this.options.appName} (auth in progress)`;
+			: `${this.options.appName} (auth not established or in progress)`;
 
 		// Add conditional request headers for caching optimization
 		const cacheKey = `esi-cache-${url}`;

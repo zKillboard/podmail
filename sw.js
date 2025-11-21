@@ -1,26 +1,26 @@
 // Toggle offline mode: true = cache enabled, false = no caching and removes all caches
 const OFFLINE_MODE_ENABLED = false;
 
-const CACHE_NAME = 'PodMail-v56552da';
+const CACHE_NAME = 'PodMail-v50820e2';
 const NETWORK_TIMEOUT = 3000; // 3 seconds before falling back to cache
 
 const urlsToCache = [
 	'/',
-	'/?v=56552da',
-	'/index.html?v=56552da',
-	'/404.html?v=56552da',
-	'/auth.html?v=56552da',
-	'/css/app.css?v=56552da',
-	'/css/supports.css?v=56552da',
-	'/js/app.js?v=56552da',
-	'/js/esi.js?v=56552da',
-	'/js/SimpleESI.js?v=56552da',
-	'/favicon.ico?v=56552da',
-	'/README.md?v=56552da',
-	'/img/github.svg?v=56552da',
-	'/img/podmail.png?v=56552da',
-	'/img/ssologin.png?v=56552da',
-	'/img/character.jpg?v=56552da',
+	'/?v=50820e2',
+	'/index.html?v=50820e2',
+	'/404.html?v=50820e2',
+	'/auth.html?v=50820e2',
+	'/css/app.css?v=50820e2',
+	'/css/supports.css?v=50820e2',
+	'/js/app.js?v=50820e2',
+	'/js/esi.js?v=50820e2',
+	'/js/SimpleESI.js?v=50820e2',
+	'/favicon.ico?v=50820e2',
+	'/README.md?v=50820e2',
+	'/img/github.svg?v=50820e2',
+	'/img/podmail.png?v=50820e2',
+	'/img/ssologin.png?v=50820e2',
+	'/img/character.jpg?v=50820e2',
 	// CDN resources for offline functionality
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css',
 	'https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js',
@@ -99,7 +99,7 @@ self.addEventListener('fetch', event => {
 				)
 			])
 			.catch(() => {
-				return caches.match('/index.html?v=56552da')
+				return caches.match('/index.html?v=50820e2')
 					.then(cached => cached || new Response('Offline', { status: 503 }));
 			})
 		);
@@ -148,7 +148,7 @@ self.addEventListener('activate', event => {
 		);
 	} else {
 		// Remove old cache versions when offline mode is enabled
-		const currentVersion = '56552da';
+		const currentVersion = '50820e2';
 		event.waitUntil(
 			Promise.all([
 				// Remove old cache versions

@@ -1,4 +1,4 @@
-const githubhash = "56552da";
+const githubhash = "50820e2";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -217,7 +217,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=56552da');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=50820e2');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -293,7 +293,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=56552da');
+	let res = await fetch('/README.md?v=50820e2');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -560,7 +560,7 @@ async function fetchUnfetchedMails() {
 		if (span == null) return; // nothing to fetch!
 
 		let mail_id = span.getAttribute('mail_id');
-		let mail = esi.lsGet(`mail-${mail_id}`);
+		let mail = esi.lsGet(`mail-${mail_id}`, false);
 		if (mail != null && mail.subject) {
 			delay = 1;
 		} else {
@@ -769,7 +769,7 @@ async function showMail(e, mail, forceShow = false) {
 }
 
 async function getMail(mail_id, user_requested = true) {
-	mail = esi.lsGet(`mail-${mail_id}`);
+	mail = esi.lsGet(`mail-${mail_id}`, false);
 	if (mail != null && typeof mail == 'object') {
 		mail.mail_id = mail_id;
 		return mail;
