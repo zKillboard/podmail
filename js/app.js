@@ -560,7 +560,7 @@ async function fetchUnfetchedMails() {
 		if (span == null) return; // nothing to fetch!
 
 		let mail_id = span.getAttribute('mail_id');
-		let mail = esi.lsGet(`mail-${mail_id}`);
+		let mail = esi.lsGet(`mail-${mail_id}`, false);
 		if (mail != null && mail.subject) {
 			delay = 1;
 		} else {
@@ -769,7 +769,7 @@ async function showMail(e, mail, forceShow = false) {
 }
 
 async function getMail(mail_id, user_requested = true) {
-	mail = esi.lsGet(`mail-${mail_id}`);
+	mail = esi.lsGet(`mail-${mail_id}`, false);
 	if (mail != null && typeof mail == 'object') {
 		mail.mail_id = mail_id;
 		return mail;
