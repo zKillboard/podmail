@@ -368,7 +368,7 @@ async function addFolder(label, mailing_list = false, save = true) {
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp'; 
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
-		if (save) await esi.lsSet(`name-${id}`, label.name, true);
+		if (save) await esi.lsSet(`name-${id}`, label.name, false);
 		if (mailing_list) console.log(label);
 
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
