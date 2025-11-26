@@ -1,4 +1,4 @@
-const githubhash = "eed3374";
+const githubhash = "fcb7e2d";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -213,7 +213,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=eed3374');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=fcb7e2d');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -289,7 +289,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=eed3374');
+	let res = await fetch('/README.md?v=fcb7e2d');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -555,6 +555,8 @@ async function fetchUnfetchedMails() {
 		if (span == null) return; // nothing to fetch!
 
 		let mail_id = span.getAttribute('mail_id');
+		if (mail_id < (Number(all_highest_mail_id) - 25000000)) return; // too old, skip it for now
+
 		let mail = await esi.lsGet(`mail-${mail_id}`, false);
 		if (mail != null && mail.subject) {
 			delay = 1;
