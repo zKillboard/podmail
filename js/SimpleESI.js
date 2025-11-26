@@ -78,6 +78,9 @@ class SimpleESI {
 		this.inflight = 0;
 		this.clearAccessTokenId = -1;
 
+		// Replace localStorage with async KeyValues store
+		this.store = new KeyValues('simpleesi-db', 'simpleesi-store', 5 * 60 * 1000);
+
 		// user info and cache
 		this.whoami = null;
 		this.initWhoami();
@@ -183,8 +186,8 @@ class SimpleESI {
 
 			localStorage.setItem('whoami', JSON.stringify(this.whoami));
 			localStorage.setItem(`whoami-${this.whoami.character_id}`, JSON.stringify(this.whoami));
-			this.lsSet('whoami', this.whoami);
-			this.lsSet('authed_json', json);
+			await this.lsSet('whoami', this.whoami);
+			await this.lsSet('authed_json', json);
 			localStorage.removeItem('loggedout');
 
 			window.location = '/';
@@ -250,7 +253,7 @@ class SimpleESI {
 
 		// Add conditional request headers for caching optimization
 		const cacheKey = `esi-cache-${url}`;
-		const cachedData = this.lsGet(cacheKey, true);
+		const cachedData = await this.lsGet(cacheKey, true);
 		if (cachedData && method === 'GET') {
 			if (cachedData.etag) {
 				headers['If-None-Match'] = cachedData.etag;
@@ -282,7 +285,7 @@ class SimpleESI {
 					const etag = getHeader(res, 'etag');
 					const lastModified = getHeader(res, 'last-modified');
 					if (etag || lastModified) {
-						this.lsSet(cacheKey, { etag, lastModified }, true);
+						await this.lsSet(cacheKey, { etag, lastModified }, true);
 					}
 				} catch (err) {
 					// Ignore cache storage errors
@@ -305,7 +308,7 @@ class SimpleESI {
 					const etag = getHeader(res, 'etag');
 					const lastModified = getHeader(res, 'last-modified');
 					if (etag || lastModified) {
-						this.lsSet(cacheKey, { etag, lastModified, data }, true);
+						await this.lsSet(cacheKey, { etag, lastModified, data }, true);
 					}
 				} catch (err) {
 					// Ignore if response is not JSON or storage fails
@@ -419,10 +422,10 @@ class SimpleESI {
 	}
 
 	async getAccessToken() {
-		if (this.lsGet('access_token') === 'undefined') this.lsDel('access_token');
-		let access_token_expires = parseInt(this.lsGet('access_token_expires') || '0');
-		if (access_token_expires < Date.now() || this.lsGet('access_token') === null) {
-			let authed_json = this.lsGet('authed_json');
+		if (await this.lsGet('access_token') === 'undefined') await await this.lsDel('access_token');
+		let access_token_expires = parseInt(await this.lsGet('access_token_expires') || '0');
+		if (access_token_expires < Date.now() || await this.lsGet('access_token') === null) {
+			let authed_json = await this.lsGet('authed_json');
 			if (authed_json === null) return this.authLogout();
 			const body = {
 				grant_type: 'refresh_token',
@@ -430,6 +433,7 @@ class SimpleESI {
 				client_id: this.ssoClientId
 			};
 			this.logger('Fetching new access token!');
+			console.log(body);
 			let res = await this.doRequest(this.ssoTokenUrl, 'POST', this.mimetypeForm, body);
 			
 			if (!res || !res.ok) {
@@ -444,19 +448,19 @@ class SimpleESI {
 				return this.authLogout();
 			}
 
-			this.lsSet('access_token', json.access_token);
-			this.lsSet('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
+			await this.lsSet('access_token', json.access_token);
+			await this.lsSet('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
 		}
-		return this.lsGet('access_token');
+		return await this.lsGet('access_token');
 	}
 
-	clearAccessToken() {
+	async clearAccessToken() {
 		// Clear any pending token refresh timeout
 		clearTimeout(this.clearAccessTokenId);
 		// Remove cached access token from localStorage
 		try {
-			this.lsDel('access_token');
-			this.lsDel('access_token_expires');
+			await this.lsDel('access_token');
+			await this.lsDel('access_token_expires');
 		} catch (err) {
 			// If not authenticated, clear directly from localStorage
 			const keys = ['access_token', 'access_token_expires'];
@@ -471,23 +475,26 @@ class SimpleESI {
 		}
 	}
 
-	lsGet(key, global = false) {
-		let sesiKey = this.createKey(key, global);
+	async lsGet(key, global = false) {
+		const sesiKey = this.createKey(key, global);
+		const val = await this.store.get(sesiKey);
+		if (!val) return null;
 		try {
-			return JSON.parse(localStorage.getItem(sesiKey));
-		} catch (e) {
+			return JSON.parse(val);
+		} catch (err) {
+			await this.store.delete(sesiKey);
 			return null;
 		}
 	}
 
-	lsSet(key, value, global = false) {
-		let sesiKey = this.createKey(key, global);
-		return localStorage.setItem(sesiKey, JSON.stringify(value));
+	async lsSet(key, value, global = false, ttl = null) {
+		const sesiKey = this.createKey(key, global);
+		return await this.store.set(sesiKey, JSON.stringify(value), ttl);
 	}
 
-	lsDel(key, global = false) {
-		let sesiKey = this.createKey(key, global);
-		return localStorage.removeItem(sesiKey);
+	async lsDel(key, global = false) {
+		const sesiKey = this.createKey(key, global);
+		return await this.store.delete(sesiKey);
 	}
 
 	createKey(key, global) {
