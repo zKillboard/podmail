@@ -36,7 +36,7 @@ async function main() {
 
 	// esi.whoami is defined and handled in SimpleESI.js
 	if (esi.whoami == null) {
-		loadReadme('readme');
+		await loadReadme('readme');
 		return document.getElementById('about').classList.remove('d-none');
 	}
 	document.getElementById('podmail').classList.remove('d-none');
@@ -48,9 +48,9 @@ async function main() {
 	setTimeout(updateTime, 0);
 	setTimeout(updateTqStatus, 0);
 
-	addFolder({ label_id: 0, 'name': 'All' });
-	initFolders();
-	initHeaders();
+	await addFolder({ label_id: 0, 'name': 'All' });
+	await initFolders();
+	await initHeaders();
 
 	window.addEventListener('popstate', updateRoute);
 	window.addEventListener('pageshow', (event) => { if (event.persisted) window.location = '/' }); // prevent back button cache issues
@@ -63,8 +63,8 @@ async function main() {
 	document.getElementsByName('compose_recipients')[0].addEventListener('input', updateComposeRecipients);
 	document.getElementById('mail_headers_checkbox').addEventListener('change', mail_headers_checkbox_changed);
 
-	initQuill();
-	startNetworkCalls();
+	await initQuill();
+	await startNetworkCalls();
 
 	document.querySelectorAll('.no-propagate').forEach(el => {
 		el.addEventListener('click', e => e.stopPropagation());
@@ -72,10 +72,10 @@ async function main() {
 	var checkbox = document.getElementById('show_names_checkbox');
 	checkbox.addEventListener('change', toggleCharsNamesDisplay);
 
-	let logged_in_characters = esi.lsGet('logged_in_characters', true) || {};
+	let logged_in_characters = await esi.lsGet('logged_in_characters', true) || {};
 	if (!(esi.whoami.character_id in logged_in_characters)) {
 		logged_in_characters[esi.whoami.character_id] = esi.whoami.name;
-		esi.lsSet('logged_in_characters', logged_in_characters, true);	
+		await esi.lsSet('logged_in_characters', logged_in_characters, true);	
 	}
 	// Take the list and sorts the characters alphabetically then create the dropdown entries
 	const sorted_characters = Object.entries(logged_in_characters).sort((a, b) => a[1].localeCompare(b[1]));
@@ -100,14 +100,14 @@ async function main() {
 			document.getElementById('char_list').appendChild(img);
 		}
 		
-		checkbox.checked = esi.lsGet('show_character_names', true) === true;
+		checkbox.checked = await esi.lsGet('show_character_names', true) === true;
 	}
 }
 
 async function toggleCharsNamesDisplay() {
 	var checkbox = document.getElementById('show_names_checkbox');
 	console.log(checkbox.checked);
-	esi.lsSet('show_character_names', checkbox.checked, true);
+	await esi.lsSet('show_character_names', checkbox.checked, true);
 }
 
 async function initQuill() {
@@ -332,11 +332,11 @@ async function doAffiliation() {
 	}
 }
 
-function initFolders() {
+async function initFolders() {
 	console.log('Loading stored folders');
-	let lastLabels = esi.lsGet('labels');
+	let lastLabels = await esi.lsGet('labels', false);
 	for (const [id, label] of (Object.entries(lastLabels || {}))) {
-		addFolder(label.esi, label.esi.mailing_list_id > 0);
+		await addFolder(label.esi, label.esi.mailing_list_id > 0);
 	}
 }
 
@@ -347,12 +347,12 @@ async function fetchFolders() {
 		console.log('Fetching folders...');
 
 		const cur_labels = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/labels`);
-		for (const label of cur_labels.labels) addFolder(label, false);
+		for (const label of cur_labels.labels) await addFolder(label, false);
 
 		const subs = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail/lists`);
-		for (const sub of subs) addFolder(sub, true);
+		for (const sub of subs) await addFolder(sub, true);
 
-		esi.lsSet('labels', labels);
+		await esi.lsSet('labels', labels, false);
 	} catch (e) {
 		console.log(e);
 		showToast('Error fetching your labels and mailing list subscriptions... :(')
@@ -361,14 +361,14 @@ async function fetchFolders() {
 	}
 }
 
-function addFolder(label, mailing_list = false, save = true) {
+async function addFolder(label, mailing_list = false, save = true) {
 	let id = (mailing_list ? label.mailing_list_id : label.label_id);
 	let id_str = `folder_${id}`;
 	let el = document.getElementById(id_str);
 	if (el == null) {
 		if (label.name == '[Corp]') label.name = 'Corp'; 
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
-		if (save) esi.lsSet(`name-${id}`, label.name);
+		if (save) await esi.lsSet(`name-${id}`, label.name, true);
 		if (mailing_list) console.log(label);
 
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
@@ -436,10 +436,10 @@ function btn_backToFolder(replaceState = false) {
 	showFolder(null, current_folder, false);
 }
 
-function initHeaders() {
+async function initHeaders() {
 	console.log('Loading stored mail haeaders');
-	addAllMailsFromHeader(esi.lsGet('mail_headers') || {});
-	addAllMailsFromHeader(esi.lsGet('mail_headers_partial') || {});
+	await addAllMailsFromHeader(await esi.lsGet('mail_headers') || {});
+	await addAllMailsFromHeader(await esi.lsGet('mail_headers_partial') || {});
 }
 
 let all_highest_mail_id = -1;
@@ -471,7 +471,7 @@ async function fetchHeaders() {
 			let last_mail_param = (last_mail_id == Number.MAX_SAFE_INTEGER) ? '' : `?last_mail_id=${last_mail_id}`;
 			mails = await esi.doJsonAuthRequest(`https://esi.evetech.net/characters/${esi.whoami.character_id}/mail${last_mail_param}`, 'GET', esi.mimetype_json);
 
-			let ids = addAllMailsFromHeader(mails, mail_headers_stored);
+			let ids = await addAllMailsFromHeader(mails, mail_headers_stored);
 			for (const i of ids) {
 				highest_mail_id = Math.max(highest_mail_id, i);
 				last_mail_id = Math.min(last_mail_id, i);
@@ -486,7 +486,7 @@ async function fetchHeaders() {
 		setTimeout(loadNames, 1);
 
 		if (full_iteration) {
-			esi.lsSet('mail_headers', mail_headers_stored);
+			await esi.lsSet('mail_headers', mail_headers_stored, false);
 
 			if (mail_ids.size) {
 				// Cleanup removed mails
@@ -497,7 +497,7 @@ async function fetchHeaders() {
 				console.log('Removed', mail_ids.size, 'mails');
 			}
 		} else {
-			esi.lsSet('mail_headers_partial', mail_headers_stored);
+			await esi.lsSet('mail_headers_partial', mail_headers_stored, false);
 		}
 		all_highest_mail_id = Math.max(highest_mail_id, all_highest_mail_id);
 	} catch (e) {
@@ -509,7 +509,7 @@ async function fetchHeaders() {
 	}
 }
 
-function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
+async function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
 	let mail_ids = new Set();
 
 	if (headers == null) return mail_ids;
@@ -518,7 +518,7 @@ function addAllMailsFromHeader(headers, mail_headers_stored = {}) {
 	}
 
 	for (const mail of headers) {
-		addMail(mail);
+		await addMail(mail);
 		mail_ids.add(`${mail.mail_id}`);
 		mail_headers_stored[mail.mail_id] = mail;
 		if (all_highest_mail_id != -1 && mail.mail_id > all_highest_mail_id && mail.is_read != true) {
@@ -560,7 +560,7 @@ async function fetchUnfetchedMails() {
 		if (span == null) return; // nothing to fetch!
 
 		let mail_id = span.getAttribute('mail_id');
-		let mail = esi.lsGet(`mail-${mail_id}`, false);
+		let mail = await esi.lsGet(`mail-${mail_id}`, false);
 		if (mail != null && mail.subject) {
 			delay = 1;
 		} else {
@@ -572,10 +572,10 @@ async function fetchUnfetchedMails() {
 	}
 }
 
-function addMail(mail) {
+async function addMail(mail) {
 	if (!mail.labels) return;
 
-	addMailHeader(mail);
+	await addMailHeader(mail);
 }
 
 async function addMailHeader(mail) {
@@ -590,10 +590,10 @@ async function addMailHeader(mail) {
 		for (let recip of mail.recipients) {
 			if (recip.recipient_type == 'mailing_list') {
 				classes.push(`folder-${recip.recipient_id}`);
-				addFolder({ mailing_list_id: recip.recipient_id, 'name': `ML ${recip.recipient_id}` }, true, false);
+				await addFolder({ mailing_list_id: recip.recipient_id, 'name': `ML ${recip.recipient_id}` }, true, false);
 			} else {
 				// preload the names with this bass ackwards method that continues to use the DOM as a db
-				if (esi.lsGet(`name-${recip.recipient_id}`, true) == null) {
+				if (await esi.lsGet(`name-${recip.recipient_id}`, true) == null) {
 					let span = document.getElementById(`preload-${recip.recipient_id}`);
 					if (span == null) {
 						span = createEl('span', '', `preload-${recip.recipient_id}`, 'd-none preload load_name', { from_id: recip.recipient_id });
@@ -611,7 +611,7 @@ async function addMailHeader(mail) {
 		chkspan.appendChild(chk);
 		el.appendChild(chkspan);
 
-		el.appendChild(createEl('span', esi.lsGet(`name-${mail.from}`, true), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
+		el.appendChild(createEl('span', await esi.lsGet(`name-${mail.from}`, true), null, `from load_name from-${mail.from}`, { from_id: mail.from }));
 		el.appendChild(createEl('span', mail.subject, null, 'subject flex-fill'));
 		el.appendChild(createEl('span', mail.timestamp.replace('T', ' ').replace(':00Z', ''), null, 'timestamp text-end'));
 
@@ -730,7 +730,7 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_subject').textContent = mail.subject;
 		document.getElementById('mail_about_timestamp').textContent = mail.timestamp.replace('T', ' ').replace(':00Z', '')
 
-		let span = createEl('span', esi.lsGet(`name-${mail.from}`, true) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
+		let span = createEl('span', await esi.lsGet(`name-${mail.from}`, true) || '???', `recip_id_${mail.from}`, `load_name left-img from-${mail.from}`, { from_id: mail.from });
 		applyLeftImage(span, 'character', mail.from);
 		document.getElementById('mail_about_from').textContent = '';
 		document.getElementById('mail_about_from').appendChild(span);
@@ -738,9 +738,9 @@ async function showMail(e, mail, forceShow = false) {
 		document.getElementById('mail_about_recipients').textContent = '';
 
 		for (let recip of mail.recipients) {
-			span = createEl('span', esi.lsGet(`name-${recip.recipient_id}`, true) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
+			span = createEl('span', await esi.lsGet(`name-${recip.recipient_id}`, true) || '', null, `left-img recipient from-${recip.recipient_id}`, { from_id: recip.recipient_id });
 			if (recip.recipient_type == 'mailing_list') {
-				span.innerText = esi.lsGet(`name-${recip.recipient_id}`, false) || 'Unknown Mailing List';
+				span.innerText = await esi.lsGet(`name-${recip.recipient_id}`, false) || 'Unknown Mailing List';
 			}
 			else span.classList.add('load_name');
 
@@ -753,7 +753,7 @@ async function showMail(e, mail, forceShow = false) {
 			.forEach(a => { a.target = '_blank'; a.rel ||= 'noopener'; });
 
 		mail.mail_id = mail_id;
-		pm_updateReadStatus(mail);
+		await pm_updateReadStatus(mail);
 		setTimeout(loadNames, 10);
 
 		pushState(`/mail/${mail_id}`);
@@ -769,7 +769,7 @@ async function showMail(e, mail, forceShow = false) {
 }
 
 async function getMail(mail_id, user_requested = true) {
-	mail = esi.lsGet(`mail-${mail_id}`, false);
+	mail = await esi.lsGet(`mail-${mail_id}`, false);
 	if (mail != null && typeof mail == 'object') {
 		mail.mail_id = mail_id;
 		return mail;
@@ -789,7 +789,7 @@ async function getMail(mail_id, user_requested = true) {
 		if (user_requested) showToast('error fetching that evemail... :(');
 	}
 	mail.mail_id = mail_id;
-	if (mail.subject) esi.lsSet(`mail-${mail_id}`, mail);
+	if (mail.subject) await esi.lsSet(`mail-${mail_id}`, mail, false);
 	return mail;
 }
 
@@ -815,7 +815,7 @@ async function pm_updateReadStatus(mail, read = true) {
 
 		mail.read = read;
 		document.getElementById('btn_markReadStatus').dataset.read = read;
-		esi.lsSet(`mail-${mail.mail_id}`, mail);
+		await esi.lsSet(`mail-${mail.mail_id}`, mail, false);
 	}
 }
 
@@ -879,8 +879,8 @@ async function loadNames() {
 		for (const el of els) {
 			let from_id = parseInt(el.getAttribute('from_id'));
 
-			let saved_name = esi.lsGet(`name-${from_id}`, true);
-			if (!saved_name)  saved_name = esi.lsGet(`name-${from_id}`, false); // Could be a folder/ml name?			
+			let saved_name = await esi.lsGet(`name-${from_id}`, true);
+			if (!saved_name)  saved_name = await esi.lsGet(`name-${from_id}`, false); // Could be a folder/ml name?			
 			
 			if (saved_name && saved_name.substring(0, 10) != 'Unknown ID') {
 				el.textContent = saved_name;
@@ -899,7 +899,7 @@ async function fetchNames(fetch_names) {
 		if (fetch_names.length > 0) {
 			console.log('Fetching', fetch_names.length, 'names', fetch_names);
 			let names = await esi.doJsonRequest('https://esi.evetech.net/universe/names', 'POST', esi.mimetype_json, JSON.stringify(fetch_names))
-			for (const name_record of names) applyNameToId(name_record);
+			for (const name_record of names) await applyNameToId(name_record);
 		}
 	} catch (e) {
 		console.log(e, fetch_names);
@@ -919,7 +919,7 @@ async function fetchNames(fetch_names) {
 			} catch (e) {
 				name = 'Unknown ID ' + fetch_names[0];
 			}
-			applyNameToId({
+			await applyNameToId({
 				"category": "character", "id": fetch_names[0], "name": name
 			});
 		}
@@ -939,7 +939,7 @@ async function fetchIDFromName(the_name) {
 	}
 }
 
-function applyNameToId(name_record) {
+async function applyNameToId(name_record) {
 	let id = name_record.id;
 	let from_els = document.getElementsByClassName(`from-${id}`);
 	for (const from_el of from_els) {
@@ -947,7 +947,7 @@ function applyNameToId(name_record) {
 		from_el.classList.remove('load_name');
 		if (from_el.classList.contains('left-img')) from_el.style.order = getStrOrder(name_record.name);
 	}
-	esi.lsSet(`name-${id}`, name_record.name, true);
+	await esi.lsSet(`name-${id}`, name_record.name, true);
 }
 
 function createEl(tag, innerHTML, id = '', classes = [], attributes = {}, events = {}) {
@@ -1040,13 +1040,13 @@ function btn_forward(e) {
 	btn_compose('Fwd: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, []);
 }
 
-function btn_replyAll(e, all_recips = true) {
-	let recipients = [{ type: 'character', info: { id: current_mail.from, name: esi.lsGet(`name-${current_mail.from}`, true) || 'Unknown Name' } }];
+async function btn_replyAll(e, all_recips = true) {
+	let recipients = [{ type: 'character', info: { id: current_mail.from, name: await esi.lsGet(`name-${current_mail.from}`, true) || 'Unknown Name' } }];
 
 	if (all_recips) {
 		for (const recip of current_mail.recipients) {
 			if (recip.recipient_id != esi.whoami.character_id) { // don't include ourselves
-				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: esi.lsGet(`name-${recip.recipient_id}`, true) || 'Unknown Name' } });
+				recipients.push({ type: recip.recipient_type, info: { id: recip.recipient_id, name: await esi.lsGet(`name-${recip.recipient_id}`, true) || 'Unknown Name' } });
 			}
 		}
 	}
@@ -1194,7 +1194,7 @@ async function btn_send(e) {
 			quill.clipboard.dangerouslyPasteHTML('');
 			showToast('EveMail has been sent...');
 
-			fetchNewMail(parseInt(await res.text() || '0'));
+			await fetchNewMail(parseInt(await res.text() || '0'));
 			return btn_backToFolder();
 		}
 		console.log(res);
@@ -1237,15 +1237,15 @@ async function btn_deleteMail(e, mail_id = null, no_prompt = false) {
 		let mail_header = document.getElementById(`mail_header_${mail_id}`)
 		if (mail_header) mail_header.remove(); // for that rare instance it gets removed elsewhere while the user deletes
 
-		esi.lsDel(`mail-${mail_id}`);
+		await esi.lsDel(`mail-${mail_id}`, false);
 
-		let mail_headers = esi.lsGet('mail_headers', true) || {};
+		let mail_headers = await esi.lsGet('mail_headers', true) || {};
 		delete mail_headers[mail_id];
-		esi.lsSet('mail_headers', mail_headers, true);
+		await esi.lsSet('mail_headers', mail_headers, false);
 
-		let mail_headers_partial = esi.lsGet('mail_headers_partial', true) || {};
+		let mail_headers_partial = await esi.lsGet('mail_headers_partial', true) || {};
 		delete mail_headers_partial[mail_id];
-		esi.lsSet('mail_headers_partial', mail_headers_partial, true);
+		await esi.lsSet('mail_headers_partial', mail_headers_partial, false);
 
 		updateUnreadCounts();
 

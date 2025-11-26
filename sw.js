@@ -17,6 +17,7 @@ const APP_SHELL = [
 	'/js/app.js?v=--hash--',
 	'/js/esi.js?v=--hash--',
 	'/js/SimpleESI.js?v=--hash--',
+	'/js/KeyValues.js?v=--hash--',
 	'/favicon.ico?v=--hash--',
 	'/README.md?v=--hash--',
 	'/img/github.svg?v=--hash--',
