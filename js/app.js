@@ -433,8 +433,8 @@ function btn_backToFolder(replaceState = false) {
 
 async function initHeaders() {
 	console.log('Loading stored mail haeaders');
-	await addAllMailsFromHeader(await esi.lsGet('mail_headers') || {});
-	await addAllMailsFromHeader(await esi.lsGet('mail_headers_partial') || {});
+	await addAllMailsFromHeader(await esi.lsGet('mail_headers') || {}, false);
+	await addAllMailsFromHeader(await esi.lsGet('mail_headers_partial') || {}, false);
 }
 
 let all_highest_mail_id = -1;
@@ -1232,11 +1232,11 @@ async function btn_deleteMail(e, mail_id = null, no_prompt = false) {
 
 		await esi.lsDel(`mail-${mail_id}`, false);
 
-		let mail_headers = await esi.lsGet('mail_headers', true) || {};
+		let mail_headers = await esi.lsGet('mail_headers', false) || {};
 		delete mail_headers[mail_id];
 		await esi.lsSet('mail_headers', mail_headers, false);
 
-		let mail_headers_partial = await esi.lsGet('mail_headers_partial', true) || {};
+		let mail_headers_partial = await esi.lsGet('mail_headers_partial', false) || {};
 		delete mail_headers_partial[mail_id];
 		await esi.lsSet('mail_headers_partial', mail_headers_partial, false);
 
