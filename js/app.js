@@ -555,7 +555,7 @@ async function fetchUnfetchedMails() {
 		if (span == null) return; // nothing to fetch!
 
 		let mail_id = span.getAttribute('mail_id');
-		if (mail_id < (Number(all_highest_mail_id) - 25000000)) return; // too old, skip it for now
+		if (mail_id < (Number(all_highest_mail_id) - 1000000)) return; // too old, skip it for now
 
 		let mail = await esi.lsGet(`mail-${mail_id}`, false);
 		if (mail != null && mail.subject) {
