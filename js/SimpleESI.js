@@ -433,7 +433,6 @@ class SimpleESI {
 				client_id: this.ssoClientId
 			};
 			this.logger('Fetching new access token!');
-			console.log(body);
 			let res = await this.doRequest(this.ssoTokenUrl, 'POST', this.mimetypeForm, body);
 			
 			if (!res || !res.ok) {
