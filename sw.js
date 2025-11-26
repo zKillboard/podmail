@@ -3,27 +3,27 @@
 // ------------------------------------------------------------
 const OFFLINE_MODE_ENABLED = false;
 
-const CACHE_VERSION = '870bb7e';
+const CACHE_VERSION = 'eed3374';
 const CACHE_NAME = `PodMail-${CACHE_VERSION}`;
 
 const APP_SHELL = [
 	'/',
-	'/?v=870bb7e',
-	'/index.html?v=870bb7e',
-	'/404.html?v=870bb7e',
-	'/auth.html?v=870bb7e',
-	'/css/app.css?v=870bb7e',
-	'/css/supports.css?v=870bb7e',
-	'/js/app.js?v=870bb7e',
-	'/js/esi.js?v=870bb7e',
-	'/js/SimpleESI.js?v=870bb7e',
-	'/js/KeyValues.js?v=870bb7e',
-	'/favicon.ico?v=870bb7e',
-	'/README.md?v=870bb7e',
-	'/img/github.svg?v=870bb7e',
-	'/img/podmail.png?v=870bb7e',
-	'/img/ssologin.png?v=870bb7e',
-	'/img/character.jpg?v=870bb7e',
+	'/?v=eed3374',
+	'/index.html?v=eed3374',
+	'/404.html?v=eed3374',
+	'/auth.html?v=eed3374',
+	'/css/app.css?v=eed3374',
+	'/css/supports.css?v=eed3374',
+	'/js/app.js?v=eed3374',
+	'/js/esi.js?v=eed3374',
+	'/js/SimpleESI.js?v=eed3374',
+	'/js/KeyValues.js?v=eed3374',
+	'/favicon.ico?v=eed3374',
+	'/README.md?v=eed3374',
+	'/img/github.svg?v=eed3374',
+	'/img/podmail.png?v=eed3374',
+	'/img/ssologin.png?v=eed3374',
+	'/img/character.jpg?v=eed3374',
 ];
 
 // CDN includes only when offline mode is ON

@@ -1,4 +1,4 @@
-const githubhash = "870bb7e";
+const githubhash = "eed3374";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
@@ -213,7 +213,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=870bb7e');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=eed3374');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -289,7 +289,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=870bb7e');
+	let res = await fetch('/README.md?v=eed3374');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -433,8 +433,8 @@ function btn_backToFolder(replaceState = false) {
 
 async function initHeaders() {
 	console.log('Loading stored mail haeaders');
-	await addAllMailsFromHeader(await esi.lsGet('mail_headers') || {});
-	await addAllMailsFromHeader(await esi.lsGet('mail_headers_partial') || {});
+	await addAllMailsFromHeader(await esi.lsGet('mail_headers') || {}, false);
+	await addAllMailsFromHeader(await esi.lsGet('mail_headers_partial') || {}, false);
 }
 
 let all_highest_mail_id = -1;
@@ -1232,11 +1232,11 @@ async function btn_deleteMail(e, mail_id = null, no_prompt = false) {
 
 		await esi.lsDel(`mail-${mail_id}`, false);
 
-		let mail_headers = await esi.lsGet('mail_headers', true) || {};
+		let mail_headers = await esi.lsGet('mail_headers', false) || {};
 		delete mail_headers[mail_id];
 		await esi.lsSet('mail_headers', mail_headers, false);
 
-		let mail_headers_partial = await esi.lsGet('mail_headers_partial', true) || {};
+		let mail_headers_partial = await esi.lsGet('mail_headers_partial', false) || {};
 		delete mail_headers_partial[mail_id];
 		await esi.lsSet('mail_headers_partial', mail_headers_partial, false);
 
