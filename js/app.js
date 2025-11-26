@@ -106,7 +106,6 @@ async function main() {
 
 async function toggleCharsNamesDisplay() {
 	var checkbox = document.getElementById('show_names_checkbox');
-	console.log(checkbox.checked);
 	await esi.lsSet('show_character_names', checkbox.checked, true);
 }
 
@@ -135,10 +134,7 @@ async function initQuill() {
 				(_, r, g, b) => `rgb(${r},${g},${b})`
 			);
 
-
-			console.log(raw.replace(/\n/g, '|\n'));
 			raw = raw.replace(/\n/g, '<br/>');
-			console.log(raw);
 			quill.clipboard.dangerouslyPasteHTML(raw);
 		});
 
@@ -369,7 +365,6 @@ async function addFolder(label, mailing_list = false, save = true) {
 		if (label.name == '[Corp]') label.name = 'Corp'; 
 		else if (label.name == '[Alliance]') label.name = 'Alliance';
 		if (save) await esi.lsSet(`name-${id}`, label.name, false);
-		if (mailing_list) console.log(label);
 
 		let el_name = createEl('span', label.name, `folder-${id}-name`, 'folder-name');
 		let el_count = createEl('span', '', `folder-${id}-unread`, 'unread_count');
@@ -676,7 +671,6 @@ function mail_headers_checkbox_changed(e) {
 
 async function btn_multi_markReadStatus(e) {
 	let checked = Array.from(document.querySelectorAll(`.folder-${current_folder}.showhide input[type='checkbox']:checked`));
-	console.log(checked);
 	for (const el of checked) {
 		let mail = await getMail(el.getAttribute('mail_id'));
 		if (mail) {
@@ -1050,7 +1044,6 @@ async function btn_replyAll(e, all_recips = true) {
 			}
 		}
 	}
-	//console.log(recipients);
 
 	btn_compose('Re: ' + current_mail.subject, "\n\n=====\n\n" + current_mail.body, recipients);
 }
@@ -1356,7 +1349,6 @@ function panel_view(el_id, visible) {
 }
 
 function btn_viewRight() {
-	//console.log('showing rightpanel')
 	panel_view('leftpanel', false);
 	panel_view('rightpanel', true);
 }
@@ -1365,7 +1357,6 @@ function btn_viewLeft() {
 	// if we're viewing an evemail, just go back to the folder
 	if (!document.getElementById('mail_container_full').classList.contains('d-none')) return btn_backToFolder();
 
-	//console.log('showing leftpanel')
 	panel_view('leftpanel', true);
 	panel_view('rightpanel', false);
 }
