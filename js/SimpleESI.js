@@ -128,22 +128,15 @@ class SimpleESI {
 			case this.getOption('authURL', '/auth.html'):
 				return this.authCallback();
 			case this.getOption('logoutURL', '/logout.html'):
-				return this.authLogout();
+				return await this.authLogout();
 		}
 	}
 
-	authLogout(destructive = true) {
+	async authLogout(destructive = true) {
 		if (destructive) {
-			// Only clear SimpleESI-related keys to avoid affecting other apps
-			const keysToRemove = [];
-			for (let i = 0; i < localStorage.length; i++) {
-				const key = localStorage.key(i);
-				if (key && (key.startsWith('simpleesi-') || key === 'whoami' || key.startsWith('whoami-') || 
-				           key === 'loggedout' || key === 'state' || key === 'code_verifier' || key === 'code_challenge')) {
-					keysToRemove.push(key);
-				}
-			}
-			keysToRemove.forEach(key => localStorage.removeItem(key));
+			localStorage.clear();
+			await this.store.destroyDB();
+
 		} else {
 			localStorage.setItem('loggedout', 'true');
 		}
@@ -206,6 +199,7 @@ class SimpleESI {
 		if (this.whoami.character_id === character_id) return false;
 
 		const raw_whoami = localStorage.getItem(`whoami-${character_id}`);
+		console.log(character_id, raw_whoami);
 		if (!raw_whoami) {
 			throw new Error(`${character_id} is not an authenticated character!`);
 		}
