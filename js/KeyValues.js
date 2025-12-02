@@ -135,6 +135,10 @@ class KeyValues {
 		if (this.disabled) return [];
 		return keys(this.store);
 	}
+
+	async destroyDB() {
+		indexedDB.deleteDatabase(this.dbName);
+	}
 }
 
 // Expose KeyValues to global scope for non-module scripts
