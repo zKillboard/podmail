@@ -76,7 +76,6 @@ class SimpleESI {
 		};
 
 		this.inflight = 0;
-		this.clearAccessTokenId = -1;
 
 		// Replace localStorage with async KeyValues store
 		this.store = new KeyValues('simpleesi-db', 'simpleesi-store', 5 * 60 * 1000);
@@ -135,6 +134,7 @@ class SimpleESI {
 	async authLogout(destructive = true) {
 		if (destructive) {
 			localStorage.clear();
+			await this.lsSet('logged_in_characters', null, true);
 			await this.store.destroyDB();
 
 		} else {
@@ -190,6 +190,11 @@ class SimpleESI {
 		}
 	}
 
+	/**
+	 * The character that auth calls are made for by default
+	 * @param {Number} character_id 
+	 * @returns 
+	 */
 	changeCharacter(character_id) {
 		// No change
 		if (!this.whoami) {
@@ -199,7 +204,6 @@ class SimpleESI {
 		if (this.whoami.character_id === character_id) return false;
 
 		const raw_whoami = localStorage.getItem(`whoami-${character_id}`);
-		console.log(character_id, raw_whoami);
 		if (!raw_whoami) {
 			throw new Error(`${character_id} is not an authenticated character!`);
 		}
@@ -216,17 +220,17 @@ class SimpleESI {
 		}
 	}
 
-	async doJsonAuthRequest(url, method = 'GET', headers = null, body = null) {
-		let res = await this.doAuthRequest(url, method, headers, body);
+	async doJsonAuthRequest(url, method = 'GET', headers = null, body = null, character_id = this.whoami?.character_id) {
+		let res = await this.doAuthRequest(url, method, headers, body, character_id);
 		if (!res || !res.ok) {
 			throw new Error(`Request failed with status ${res?.status}`);
 		}
 		return await res.json();
 	}
 
-	async doAuthRequest(url, method = 'GET', headers = null, body = null) {
+	async doAuthRequest(url, method = 'GET', headers = null, body = null, character_id = this.whoami?.character_id) {
 		if (headers === null) headers = {};
-		headers.Authorization = await this.getAccessToken();
+		headers.Authorization = await this.getAccessToken(character_id);
 		headers.Accept = 'application/json';
 		return await this.doRequest(url, method, headers, body);
 	}
@@ -415,10 +419,10 @@ class SimpleESI {
 		}
 	}
 
-	async getAccessToken() {
-		if (await this.lsGet('access_token') === 'undefined') await await this.lsDel('access_token');
-		let access_token_expires = parseInt(await this.lsGet('access_token_expires') || '0');
-		if (access_token_expires < Date.now() || await this.lsGet('access_token') === null) {
+	async getAccessToken(character_id = this.whoami.character_id) {
+		if (await this.lsGet('access_token', character_id) === 'undefined') await this.lsDel('access_token', character_id);
+		let access_token_expires = parseInt(await this.lsGet('access_token_expires', character_id) || '0');
+		if (access_token_expires < Date.now() || await this.lsGet('access_token', character_id) === null) {
 			let authed_json = await this.lsGet('authed_json');
 			if (authed_json === null) return this.authLogout();
 			const body = {
@@ -441,33 +445,18 @@ class SimpleESI {
 				return this.authLogout();
 			}
 
-			await this.lsSet('access_token', json.access_token);
-			await this.lsSet('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)));
+			await this.lsSet('access_token', json.access_token, character_id);
+			await this.lsSet('access_token_expires', Date.now() + (1000 * (json.expires_in - 2)), character_id);
 		}
-		return await this.lsGet('access_token');
+		return await this.lsGet('access_token', character_id);
 	}
 
-	async clearAccessToken() {
-		// Clear any pending token refresh timeout
-		clearTimeout(this.clearAccessTokenId);
-		// Remove cached access token from localStorage
-		try {
-			await this.lsDel('access_token');
-			await this.lsDel('access_token_expires');
-		} catch (err) {
-			// If not authenticated, clear directly from localStorage
-			const keys = ['access_token', 'access_token_expires'];
-			keys.forEach(key => {
-				for (let i = 0; i < localStorage.length; i++) {
-					const storageKey = localStorage.key(i);
-					if (storageKey && storageKey.includes(key)) {
-						localStorage.removeItem(storageKey);
-					}
-				}
-			});
-		}
-	}
-
+	/**
+	 * 
+	 * @param {String} key 
+	 * @param {*} global 
+	 * @returns 
+	 */
 	async lsGet(key, global = false) {
 		const sesiKey = this.createKey(key, global);
 		const val = await this.store.get(sesiKey);
@@ -495,8 +484,10 @@ class SimpleESI {
 			if (!this.whoami || !this.whoami.character_id) {
 				throw new Error('Not authenticated!');
 			}
+			global = this.whoami.character_id;
 		}
-		const who = global ? 'global' : this.whoami.character_id;
+		// If global is true, use 'global' as identifier, if global is a Number/String, use that as character_id
+		const who = (global === true) ? 'global' : global;
 		return `simpleesi-${who}-${key}`;
 	}
 }
