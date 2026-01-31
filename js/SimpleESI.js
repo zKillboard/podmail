@@ -136,9 +136,10 @@ class SimpleESI {
 			localStorage.clear();
 			await this.lsSet('logged_in_characters', null, true);
 			await this.store.destroyDB();
-
+			alert('You have been logged out. All cached data has been cleared.');
 		} else {
 			localStorage.setItem('loggedout', 'true');
+			alert('You have been logged out.');
 		}
 
 		window.location = '/';
