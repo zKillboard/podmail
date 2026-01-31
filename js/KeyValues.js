@@ -137,7 +137,7 @@ class KeyValues {
 	}
 
 	async destroyDB() {
-		indexedDB.deleteDatabase(this.dbName);
+		await indexedDB.deleteDatabase(this.dbName);
 	}
 }
 
