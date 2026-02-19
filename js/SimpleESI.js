@@ -249,6 +249,7 @@ class SimpleESI {
 		headers['User-Agent'] = this.whoami
 			? `${this.options.appName} (Character: ${this.whoami.name} / ${this.whoami.character_id})`
 			: `${this.options.appName} (auth not established or in progress)`;
+		headers['X-User-Agent'] = headers['User-Agent']; // Because Chrome wants to be special and override....
 
 		// Add conditional request headers for caching optimization
 		const cacheKey = `esi-cache-${url}`;
