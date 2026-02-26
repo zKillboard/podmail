@@ -840,30 +840,33 @@ const REPLACE_WITH = ' onClick=\'showToast("An in game link without proper mappi
 // need to add showinfo for ships, stations, etc, basically any showinfo
 function adjustLinks(html) {
 	html = html
-		.replace(/href="killReport:/g, 'target=\'_blank\' href="https://zkillboard.com/kill/')
-		.replace(/href="showinfo:4\/\//g, 'href="https://zkillboard.com/constellation/')
-		.replace(/href="showinfo:3\/\//g, 'href="https://zkillboard.com/region/')
-		.replace(/href="showinfo:5\/\//g, 'href="https://zkillboard.com/system/')
-		.replace(/href="showinfo:47466\/\//g, 'href="https://zkillboard.com/item/')
-		.replace(/href="showinfo:2\/\//g, 'href="https://evewho.com/corporation/')
-		.replace(/href="showinfo:16159\/\//g, 'href="https://evewho.com/alliance/')
-		.replace(/href="showinfo:30\/\//g, 'href="https://evewho.com/faction/')
+		.replace(/href="killReport:(\d+):[^"]+"/g, 'target=\'_blank\' href="https://zkillboard.com/kill/$1/"')
+		.replace(/href="showinfo:4\/\/(\d+)[^"]*"/g, 'href="https://zkillboard.com/constellation/$1/"')
+		.replace(/href="showinfo:3\/\/(\d+)[^"]*"/g, 'href="https://zkillboard.com/region/$1/"') 
+		.replace(/href="showinfo:5\/\/(\d+)[^"]*"/g, 'href="https://zkillboard.com/system/$1/"')
+		.replace(/href="showinfo:47466\/\/(\d+)[^"]*"/g, 'href="https://zkillboard.com/item/$1/"')
+		.replace(/href="showinfo:2\/\/(\d+)[^"]*"/g, 'href="https://evewho.com/corporation/$1"')
+		.replace(/href="showinfo:16159\/\/(\d+)[^"]*"/g, 'href="https://evewho.com/alliance/$1"')
+		.replace(/href="showinfo:30\/\/(\d+)[^"]*"/g, 'href="https://evewho.com/faction/$1"')
 
 	for (const id of STATION_TYPE_IDS) {
-		const regex = new RegExp(`href="showinfo:${id}\\/\\/`, 'g');
-		html = html.replace(regex, 'href="https://zkillboard.com/location/');
+		const regex = new RegExp(`href="showinfo:${id}\\/\\/(\\d+)[^"]*"`, 'g');
+		html = html.replace(regex, 'href="https://zkillboard.com/location/$1/"');
 	}
 
 	for (const id of CHARACTER_TYPE_IDS) {
-		const regex = new RegExp(`href="showinfo:${id}\\/\\/`, 'g');
-		html = html.replace(regex, 'href="https://evewho.com/character/');
+		const regex = new RegExp(`href="showinfo:${id}\\/\\/(\\d+)[^"]*"`, 'g');
+		html = html.replace(regex, 'href="https://evewho.com/character/$1"');
 	}
 
 	html = html
 		.replace(/href="opportunity:/g, REPLACE_WITH)
 		.replace(/href="localsvc:/g, REPLACE_WITH)
 		.replace(/href="helpPointer:/g, REPLACE_WITH)
-		.replace(/href="showinfo:/g, REPLACE_WITH)
+		.replace(/href="showInfo:(\d+)[^"]*"/gi, 'href="https://zkillboard.com/item/$1/"')
+		.replace(/href="showinfo:/gi, REPLACE_WITH)
+	
+	console.log(html)
 
 	return html;
 }
