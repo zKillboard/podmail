@@ -237,8 +237,12 @@
 								<div id="compose_body_textarea" name="compose_body" type="text"
 									class="overflow-auto w-100 zEditor" placeholder="content here" class="form-control">
 								</div>
+								<textarea id="compose_body_html" class="overflow-auto w-100 d-none" spellcheck="false"
+									placeholder="Raw HTML"></textarea>
 							</div>
 							<div id="compose_final_options" class="mb-2 d-flex">
+								<button type="button" id="btn_toggleHtml" class="btn btn-bind btn-secondary"
+									aria-pressed="false" title="Toggle raw HTML view">HTML</button>
 								<div class="m-auto"></div>
 								<button type="button" id="btn_reset" class="btn btn-bind btn-warning">Reset</button>
 								<button type="button" id="btn_send" class="btn btn-bind btn-primary">Send</button>

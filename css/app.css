@@ -291,7 +291,8 @@ hr.vertical-hr {
 	margin-right: 0.5em;
 }
 
-#compose_body_textarea {
+#compose_body_textarea,
+#compose_body_html {
 	margin: 0px;
 	height: calc(100% - 4em);
 }
@@ -317,11 +318,19 @@ hr.vertical-hr {
 input,
 textarea,
 #compose_body_textarea,
-#compose_body_textarea:focus {
+#compose_body_html,
+#compose_body_textarea:focus,
+#compose_body_html:focus {
 	background-color: black;
 	color: #ffffff;
 	border: 1px solid #444;
 	padding: 0.25em;
+}
+
+#compose_body_html {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+	resize: none;
+	white-space: pre-wrap;
 }
 
 [contenteditable]:focus,
