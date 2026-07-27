@@ -1,8 +1,9 @@
-const githubhash = "f0bea49";
+const githubhash = "14ade35";
 
 document.addEventListener('DOMContentLoaded', doBtnBinds);
 document.addEventListener('DOMContentLoaded', main);
 let quill;
+let composeRawHtmlMode = false;
 
 const timeouts = {};
 function addTimeout(f, timeout) {
@@ -194,6 +195,53 @@ async function initQuill() {
 	}
 }
 
+function getComposeHtml() {
+	if (composeRawHtmlMode) return document.getElementById('compose_body_html').value;
+	return quill.root.innerHTML;
+}
+
+function setComposeHtml(html = '') {
+	quill.clipboard.dangerouslyPasteHTML(html);
+	document.getElementById('compose_body_html').value = quill.root.innerHTML;
+}
+
+function setComposeRawHtmlMode(rawMode) {
+	if (!quill || composeRawHtmlMode == rawMode) return;
+
+	const rawEl = document.getElementById('compose_body_html');
+	const quillContainer = document.querySelector('#compose_body .ql-container');
+	const toolbar = document.querySelector('#compose_body .ql-toolbar');
+	const toggleBtn = document.getElementById('btn_toggleHtml');
+
+	if (rawMode) {
+		rawEl.value = quill.root.innerHTML;
+		quillContainer?.classList.add('d-none');
+		toolbar?.classList.add('d-none');
+		rawEl.classList.remove('d-none');
+		toggleBtn.textContent = 'Edited';
+		toggleBtn.classList.replace('btn-secondary', 'btn-info');
+		toggleBtn.setAttribute('aria-pressed', 'true');
+		composeRawHtmlMode = true;
+		rawEl.focus();
+		return;
+	}
+
+	quill.clipboard.dangerouslyPasteHTML(rawEl.value);
+	rawEl.value = quill.root.innerHTML;
+	rawEl.classList.add('d-none');
+	quillContainer?.classList.remove('d-none');
+	toolbar?.classList.remove('d-none');
+	toggleBtn.textContent = 'HTML';
+	toggleBtn.classList.replace('btn-info', 'btn-secondary');
+	toggleBtn.setAttribute('aria-pressed', 'false');
+	composeRawHtmlMode = false;
+	quill.focus();
+}
+
+function btn_toggleHtml() {
+	setComposeRawHtmlMode(!composeRawHtmlMode);
+}
+
 async function startNetworkCalls(level = 0) {
 	try {
 		switch (level) {
@@ -213,7 +261,7 @@ async function startNetworkCalls(level = 0) {
 				await versionCheck();
 				break;
 			default:
-				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=f0bea49');
+				if (navigator.serviceWorker) await navigator.serviceWorker.register('/sw.js?v=14ade35');
 				return;
 		}
 		setTimeout(startNetworkCalls.bind(null, ++level, 1));
@@ -289,7 +337,7 @@ async function btn_logout_datacheck() {
 }
 
 async function loadReadme(id) {
-	let res = await fetch('/README.md?v=f0bea49');
+	let res = await fetch('/README.md?v=14ade35');
 	document.getElementById(id).innerHTML = purify(marked.parse(await res.text()));
 }
 
@@ -1055,6 +1103,7 @@ async function btn_replyAll(e, all_recips = true) {
 
 function btn_compose(subject = '', body = '', recipients = []) {
 	if (!quill) return setTimeout(btn_compose.bind(null, subject, body, recipients), 10);
+	setComposeRawHtmlMode(false);
 
 	document.getElementById('btn_addAlli').disabled = (esi.whoami.alliance_id == 0);
 	document.getElementById('btn_group_ml').textContent = '';
@@ -1066,7 +1115,7 @@ function btn_compose(subject = '', body = '', recipients = []) {
 	}
 
 	if (subject.length > 0) document.getElementsByName('compose_subject')[0].value = subject;
-	quill.clipboard.dangerouslyPasteHTML(adjustTags(body));
+	setComposeHtml(adjustTags(body));
 
 	if (recipients.length > 0) {
 		document.getElementById('compose_recipients_calculated').textContent = '';
@@ -1144,7 +1193,8 @@ function removeSelf() {
 function btn_reset(e) {
 	document.getElementsByName('compose_subject')[0].value = '';
 	document.getElementById('compose_body_textarea').textContent = '';
-	quill.clipboard.dangerouslyPasteHTML('');
+	setComposeHtml('');
+	setComposeRawHtmlMode(false);
 }
 
 let sending_evemail = false;
@@ -1163,7 +1213,7 @@ async function btn_send(e) {
 		if (subject.length == 0) return alert('You have not added a subject.');
 		if (subject.length > 150) return alert('Subject must be 150 characters or less.');
 
-		let body = quill.root.innerHTML;
+		let body = getComposeHtml();
 		body = body.replace('&nbsp;', ' ').trim();
 		if (body.length == 0) return alert('You have not added any content.');
 		if (body.length > 8000) return alert('Content must be 8000 characters or less.');
@@ -1189,7 +1239,8 @@ async function btn_send(e) {
 			// success!
 			document.getElementById('compose_recipients_calculated').textContent = '';
 			document.getElementsByName('compose_subject')[0].value = '';
-			quill.clipboard.dangerouslyPasteHTML('');
+			setComposeHtml('');
+			setComposeRawHtmlMode(false);
 			showToast('EveMail has been sent...');
 
 			await fetchNewMail(parseInt(await res.text() || '0'));
